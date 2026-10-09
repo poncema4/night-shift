@@ -60,6 +60,7 @@ function Results.start()
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
 
+	local shownAt = -100 -- the phase attribute can arrive a moment after the result message
 	local awardEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Award") :: RemoteEvent
 	awardEvent.OnClientEvent:Connect(function(info: { xp: number, tips: number, levelUp: boolean })
 		earned.Text = `+{info.xp} XP   +{info.tips} tips{if info.levelUp then "   LEVEL UP!" else ""}`
@@ -84,7 +85,6 @@ function Results.start()
 		headline.TextColor3 = if crewWon then Color3.fromRGB(120, 230, 150) else Color3.fromRGB(255, 110, 120)
 		tasks.Text = `Tasks finished: {info.tasksDone} / {info.tasksTotal}`
 		you.Text = ""
-		earned.Text = ""
 		for i, p in info.players do
 			local row = Instance.new("Frame")
 			row.LayoutOrder = i
@@ -122,12 +122,14 @@ function Results.start()
 				you.Text = `You were {string.upper(p.role)}: {FATE_TEXT[p.fate] or p.fate}`
 			end
 		end
+		shownAt = os.clock()
 		gui.Enabled = true
 	end)
 
 	RunService.RenderStepped:Connect(function()
-		if gui.Enabled and ReplicatedStorage:GetAttribute("Phase") ~= "Dawn" then
+		if gui.Enabled and ReplicatedStorage:GetAttribute("Phase") ~= "Dawn" and os.clock() - shownAt > 3 then
 			gui.Enabled = false
+			earned.Text = "" -- ready for the next round
 		end
 	end)
 end

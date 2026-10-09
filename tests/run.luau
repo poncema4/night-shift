@@ -33,6 +33,7 @@ local specs = {
 	require("./specs/Startup"),
 	require("./specs/Night"),
 	require("./specs/Social"),
+	require("./specs/Client"),
 	require("./specs/Progress"),
 	require("./specs/ModelFit"),
 	require("./specs/Hotel"),

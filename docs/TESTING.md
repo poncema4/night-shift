@@ -7,6 +7,7 @@ Four layers, from fastest to slowest to get:
 3. **Fake Roblox world** (`tests/fake/Roblox.luau`, specs `Startup`, `Night`, `Social`): the REAL server scripts run against a small stand-in for Instance, Vector3, CFrame, services, a clock and a scheduler, with fake players that have characters and humanoids.
    - `Startup`: the whole hotel is built (thousands of parts, all props, all stations), `RoundService.start()` wires every service, and every remote the client scripts wait for really exists.
    - `Night`: a solo night: round loop, role, sprint and stamina, flashlight, a task, hiding, cameras, the bell and a meeting, a death, the dawn report, rewards, the next round.
+   - `Client`: the real CLIENT scripts (HUD, controls, meeting screen, results, locker, cameras, spectating, the Night Manager view) run in the same world, connected to the server by the same remotes: buttons reach the server, server messages reach the screens.
    - `Social`: four players: abilities and cooldowns, blackouts on the right floor, scares, hiding versus the Night Manager (passing by, then being hunted), two meetings (a tie, then a majority that ejects the saboteur), the crew wins.
 4. **Studio playtest** (`docs/PLAYTEST.md`): the only layer that checks how it LOOKS and FEELS.
 
@@ -18,6 +19,10 @@ It is a simplified model: no physics, no rendering, no real network, no real Hum
 - Hiding made you almost unbeatable (he never lingered next to a locker, so the search timer could not fill): now someone he was hunting who hides is searched for.
 - Two players in a Studio test ended the night instantly (one crew vs one saboteur); fewer than 3 players now runs as a sandbox.
 - Hiding did not freeze you until the next frame.
+
+- **The meeting screen would never have appeared**: the client closed it whenever the phase attribute was not "Meeting", but the server updated that attribute half a second after sending "meeting started". Same race on the dawn screen. The server now publishes first and the screens tolerate a late attribute.
+- **RUN and LIGHT pressed together dropped one**: a 50 ms minimum gap between intents; now a burst allowance.
+- **The "+XP" reward line was always blank**: the reward arrived before the result and the result handler cleared it; the result is sent first now.
 
 ## Adding to it
 Every new server feature gets a scenario in `Night` or `Social` (or a new spec) and a mutation check: break the rule, see the test fail, put it back.

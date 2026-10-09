@@ -226,8 +226,17 @@ end
 -- ===== the world =====
 
 function Fake.world()
-	local world =
-		{ log = {}, warnings = {}, delayed = {}, closers = {}, players = {}, tags = {}, now = 1000, sleepers = {} }
+	local world = {
+		log = {},
+		warnings = {},
+		delayed = {},
+		closers = {},
+		players = {},
+		tags = {},
+		now = 1000,
+		sleepers = {},
+		actions = {},
+	}
 	local depth = 0
 	local moduleCache = {}
 
@@ -313,6 +322,18 @@ function Fake.world()
 			props.Brightness = 1
 		elseif class == "ProximityPrompt" then
 			props.Enabled = true
+		elseif class == "ScreenGui" then
+			props.Enabled = true
+		elseif
+			class == "Frame"
+			or class == "TextLabel"
+			or class == "TextButton"
+			or class == "ImageLabel"
+			or class == "ScrollingFrame"
+		then
+			props.Visible = true
+			props.Active = false
+			props.Text = ""
 		elseif class == "Humanoid" then
 			props.Health = 100
 			props.MaxHealth = 100
@@ -424,14 +445,24 @@ function Fake.world()
 	function Methods.GetServerTimeNow(_)
 		return world.now
 	end
-	function Methods.FireClient(self, ...)
-		table.insert(world.log, { remote = data[self].props.Name, to = "client", args = { ... } })
+	-- Remotes deliver to the local fake client too, so server and client code talk to each other in one world.
+	function Methods.FireClient(self, player, ...)
+		table.insert(world.log, { remote = data[self].props.Name, to = "client", args = { player, ... } })
+		if world.localPlayer == player then
+			self.OnClientEvent:Fire(...)
+		end
 	end
 	function Methods.FireAllClients(self, ...)
 		table.insert(world.log, { remote = data[self].props.Name, to = "all", args = { ... } })
+		if world.localPlayer then
+			self.OnClientEvent:Fire(...)
+		end
 	end
 	function Methods.FireServer(self, ...)
 		table.insert(world.log, { remote = data[self].props.Name, to = "server", args = { ... } })
+		if world.localPlayer then
+			self.OnServerEvent:Fire(world.localPlayer, ...)
+		end
 	end
 
 	InstanceMT.__index = function(self, key)
@@ -509,6 +540,9 @@ function Fake.world()
 			s.GetPlayerFromCharacter = function()
 				return nil
 			end
+			s.GetUserThumbnailAsync = function()
+				return "rbxthumb://fake", true
+			end
 			s.GetPlayerByUserId = function(_, userId)
 				for _, player in world.players do
 					if player.UserId == userId then
@@ -517,6 +551,15 @@ function Fake.world()
 				end
 				return nil
 			end
+		elseif name == "ContextActionService" then
+			s.BindAction = function(_, actionName, fn)
+				world.actions[actionName] = fn
+			end
+			s.UnbindAction = function(_, actionName)
+				world.actions[actionName] = nil
+			end
+			s.SetTitle = function() end
+			s.SetPosition = function() end
 		elseif name == "RunService" then
 			s.IsStudio = function()
 				return true
@@ -731,9 +774,26 @@ function Fake.world()
 		local player = create("Player")
 		data[player].props.Name = name
 		data[player].props.UserId = userId
+		local gui = create("PlayerGui")
+		data[gui].props.Name = "PlayerGui"
+		reparent(gui, player)
 		table.insert(world.players, player)
 		service("Players").PlayerAdded:Fire(player)
 		return player
+	end
+
+	-- Makes `player` the one this fake client belongs to (Players.LocalPlayer) and gives it a camera.
+	function world.setLocal(player)
+		world.localPlayer = player
+		data[service("Players")].props.LocalPlayer = player
+		local camera = create("Camera")
+		data[camera].props.Name = "Camera"
+		data[workspaceInstance].props.CurrentCamera = camera
+	end
+
+	-- One rendered frame on the client.
+	function world.render(dt)
+		service("RunService").RenderStepped:Fire(dt or 1 / 60)
 	end
 
 	function world.humanoid(player)

@@ -23,6 +23,7 @@ type Entry = {
 	exit: CFrame?,
 	saved: { [Instance]: number },
 	lastIntent: number,
+	tokens: number,
 }
 
 export type HidingSpot = { model: Model, position: Vector3 }
@@ -30,7 +31,9 @@ export type HidingSpot = { model: Model, position: Vector3 }
 local StealthService = {}
 
 local HIDE_DISTANCE = 10
-local MIN_INTENT_GAP = 0.05 -- clients cannot flood the server with intents
+-- Clients cannot flood the server with intents: a short burst is fine (RUN and LIGHT pressed together), a stream is not.
+local INTENT_BURST = 8
+local INTENT_RATE = 20 -- allowed per second on average
 
 local entries: { [Player]: Entry } = {}
 local prompts: { [Model]: ProximityPrompt } = {}
@@ -51,6 +54,7 @@ local function entryOf(player: Player): Entry
 			exit = nil,
 			saved = {},
 			lastIntent = 0,
+			tokens = INTENT_BURST,
 		}
 		entries[player] = entry
 	end
@@ -219,10 +223,12 @@ end
 local function onIntent(player: Player, payload: unknown)
 	local now = os.clock()
 	local entry = entryOf(player)
-	if now - entry.lastIntent < MIN_INTENT_GAP then
+	entry.tokens = math.min(INTENT_BURST, entry.tokens + (now - entry.lastIntent) * INTENT_RATE)
+	entry.lastIntent = now
+	if entry.tokens < 1 then
 		return
 	end
-	entry.lastIntent = now
+	entry.tokens -= 1
 	if typeof(payload) ~= "table" then
 		return
 	end
