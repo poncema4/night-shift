@@ -1,0 +1,194 @@
+{
+ "badge": {
+  "material": "Metal",
+  "rgb": [
+   230,
+   186,
+   108
+  ]
+ },
+ "band": {
+  "material": "Metal",
+  "rgb": [
+   230,
+   186,
+   108
+  ]
+ },
+ "btn": {
+  "material": "Metal",
+  "rgb": [
+   230,
+   186,
+   108
+  ]
+ },
+ "cap": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   97,
+   34,
+   43
+  ]
+ },
+ "chest": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "finger": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   224,
+   220,
+   205
+  ]
+ },
+ "fore": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "hand": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   224,
+   220,
+   205
+  ]
+ },
+ "hem": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   97,
+   34,
+   43
+  ]
+ },
+ "hollow": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   18,
+   18,
+   21
+  ]
+ },
+ "leg": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "mask": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   224,
+   220,
+   205
+  ]
+ },
+ "mouth": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   18,
+   18,
+   21
+  ]
+ },
+ "neck": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "shoe": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   18,
+   18,
+   21
+  ]
+ },
+ "shoulders": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "skirt_high": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "skirt_low": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "skirt_mid": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "skull": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "spark": {
+  "material": "Neon",
+  "rgb": [
+   255,
+   90,
+   108
+  ]
+ },
+ "tail": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ },
+ "tie": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   97,
+   34,
+   43
+  ]
+ },
+ "upper": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   34,
+   31,
+   39
+  ]
+ }
+}
