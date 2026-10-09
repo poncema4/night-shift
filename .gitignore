@@ -46,3 +46,5 @@ desktop.ini
 .claude/
 node_modules/
 art/layout.json
+art/research/*.png
+!art/research/group_icon.png
