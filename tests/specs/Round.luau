@@ -68,4 +68,25 @@ return function(t)
 		Round.evaluate({ crewAlive = 4, saboteursAlive = 1, tasksDone = 0, tasksTotal = 0 }),
 		nil
 	)
+	-- Solo in Studio the lone player faces a phantom saboteur: that must not end the round at once.
+	t.equal(
+		"evaluate: sandbox solo round keeps going",
+		Round.evaluate({ crewAlive = 1, saboteursAlive = 1, tasksDone = 0, tasksTotal = 6, sandbox = true }),
+		nil
+	)
+	t.equal(
+		"evaluate: sandbox solo round ends when the player dies",
+		Round.evaluate({ crewAlive = 0, saboteursAlive = 1, tasksDone = 0, tasksTotal = 6, sandbox = true }),
+		"Saboteurs"
+	)
+	t.equal(
+		"evaluate: sandbox solo round is won by finishing the tasks",
+		Round.evaluate({ crewAlive = 1, saboteursAlive = 1, tasksDone = 6, tasksTotal = 6, sandbox = true }),
+		"Crew"
+	)
+	t.equal(
+		"evaluate: real 1v1 still ends at parity",
+		Round.evaluate({ crewAlive = 1, saboteursAlive = 1, tasksDone = 0, tasksTotal = 6 }),
+		"Saboteurs"
+	)
 end

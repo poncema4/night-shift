@@ -82,11 +82,18 @@ function RoundService.start()
 			end
 		end
 		-- Alone in Studio there is no real saboteur, so a phantom one stops the crew winning instantly.
-		if RunService:IsStudio() and #Players:GetPlayers() < 2 then
+		local sandbox = RunService:IsStudio() and #Players:GetPlayers() < 2
+		if sandbox then
 			saboteurs += 1
 		end
 		local done, total = TaskService.counts()
-		return { crewAlive = crew, saboteursAlive = saboteurs, tasksDone = done, tasksTotal = total }
+		return {
+			crewAlive = crew,
+			saboteursAlive = saboteurs,
+			tasksDone = done,
+			tasksTotal = total,
+			sandbox = sandbox,
+		}
 	end
 
 	local function publish()
