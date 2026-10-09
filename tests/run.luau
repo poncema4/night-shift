@@ -28,6 +28,7 @@ local specs = {
 	require("./specs/Roles"),
 	require("./specs/Round"),
 	require("./specs/Hotel"),
+	require("./specs/Dressing"),
 	require("./specs/Patrol"),
 	require("./specs/TaskBoard"),
 }

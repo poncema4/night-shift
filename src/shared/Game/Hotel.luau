@@ -59,23 +59,33 @@ function Hotel.room(name: string): Rect
 	error("unknown room " .. name)
 end
 
+-- Walls only ever touch, never overlap: overlapping same-material faces are coplanar and shimmer in Roblox.
 function Hotel.wallBoxes(): { Box }
 	local boxes: { Box } = {}
 	local c = Hotel.CORRIDOR
 	local w = Hotel.WALL
+	local half = w / 2
 	local north, south = 25, -25
 	table.insert(boxes, { x = 0, z = north, w = (c.x2 - c.x1) + w, d = w })
 	table.insert(boxes, { x = 0, z = south, w = (c.x2 - c.x1) + w, d = w })
-	table.insert(boxes, { x = c.x1, z = 0, w = w, d = north - south + w })
-	table.insert(boxes, { x = c.x2, z = 0, w = w, d = north - south + w })
+	local sideLength = (north - south) - w
+	table.insert(boxes, { x = c.x1, z = 0, w = w, d = sideLength })
+	table.insert(boxes, { x = c.x2, z = 0, w = w, d = sideLength })
 	for _, room in Hotel.rooms do
 		local cx, doorZ = Hotel.door(room)
-		local half = Hotel.DOOR / 2
-		local leftEnd, rightStart = cx - half, cx + half
-		table.insert(boxes, { x = (room.x1 + leftEnd) / 2, z = doorZ, w = leftEnd - room.x1, d = w })
-		table.insert(boxes, { x = (rightStart + room.x2) / 2, z = doorZ, w = room.x2 - rightStart, d = w })
+		local gap = Hotel.DOOR / 2
+		local leftStart, leftEnd = room.x1 + half, cx - gap
+		local rightStart, rightEnd = cx + gap, room.x2 - half
+		table.insert(boxes, { x = (leftStart + leftEnd) / 2, z = doorZ, w = leftEnd - leftStart, d = w })
+		table.insert(boxes, { x = (rightStart + rightEnd) / 2, z = doorZ, w = rightEnd - rightStart, d = w })
 		if room.x2 < c.x2 then
-			table.insert(boxes, { x = room.x2, z = (room.z1 + room.z2) / 2, w = w, d = room.z2 - room.z1 })
+			local z1, z2
+			if room.z1 >= c.z2 then
+				z1, z2 = room.z1 + half, north - half
+			else
+				z1, z2 = south + half, room.z2 - half
+			end
+			table.insert(boxes, { x = room.x2, z = (z1 + z2) / 2, w = w, d = z2 - z1 })
 		end
 	end
 	return boxes
