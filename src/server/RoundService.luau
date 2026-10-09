@@ -1,7 +1,7 @@
 --!strict
 -- Thin Roblox wrapper around the pure Round state machine.
--- The server owns phase, roles, deaths and the winner. Clients only receive what they may see:
--- their OWN role during the night, and every role once dawn arrives.
+-- The server owns phase, roles, deaths, meetings and the winner. Clients only receive what they may see:
+-- their OWN role (and fellow saboteurs) during the night, and every role once dawn arrives.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -9,7 +9,9 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Roles = require(ReplicatedStorage.Shared.Game.Roles)
 local Round = require(ReplicatedStorage.Shared.Game.Round)
+local AbilityService = require(script.Parent.AbilityService)
 local HotelBuilder = require(script.Parent.HotelBuilder)
+local MeetingService = require(script.Parent.MeetingService)
 local ScareDirector = require(script.Parent.ScareDirector)
 local StealthService = require(script.Parent.StealthService)
 local TaskService = require(script.Parent.TaskService)
@@ -42,12 +44,43 @@ function RoundService.start()
 	local roleAssigned = makeRemote(remotes, "RoleAssigned")
 	local roundResult = makeRemote(remotes, "RoundResult")
 
+	local function roleOf(userId: number): string?
+		return roles[userId]
+	end
+	local function isNight(): boolean
+		return round.phase == "Night"
+	end
+
+	local onChange: (Round.Event) -> ()
+	local meeting: { reason: string, caller: Player, victim: Player? }? = nil
+
 	local hotel = HotelBuilder.build()
 	StealthService.start(remotes, hotel.hiding)
 	ScareDirector.start(remotes)
-	TaskService.start(hotel.stations, function(userId)
-		return roles[userId]
-	end)
+	TaskService.start(hotel.stations, roleOf)
+	AbilityService.start(remotes, roleOf, isNight)
+	MeetingService.start(remotes, {
+		request = function(caller: Player, reason: string, victim: Player?): boolean
+			if round.phase ~= "Night" or not isAlive(caller) then
+				return false
+			end
+			local event = round:callMeeting()
+			if not event then
+				return false
+			end
+			meeting = { reason = reason, caller = caller, victim = victim }
+			onChange(event)
+			return true
+		end,
+		isNight = isNight,
+		isMeeting = function()
+			return round.phase == "Meeting"
+		end,
+		roleOf = roleOf,
+		shorten = function(seconds: number)
+			round:shortenMeeting(seconds)
+		end,
+	}, hotel.bell)
 
 	-- We place characters ourselves so people who die stay dead until the next round.
 	Players.CharacterAutoLoads = false
@@ -67,7 +100,7 @@ function RoundService.start()
 		end
 	end
 	Players.PlayerAdded:Connect(function(player)
-		if round.phase ~= "Night" then
+		if round.phase ~= "Night" and round.phase ~= "Meeting" then
 			load(player) -- latecomers during a night watch from the lobby until dawn
 		end
 	end)
@@ -106,35 +139,80 @@ function RoundService.start()
 		ReplicatedStorage:SetAttribute("RoundNumber", round.roundNumber)
 	end
 
-	local function onChange(event: Round.Event)
+	local function startNight()
+		local ids = {}
+		for _, player in Players:GetPlayers() do
+			table.insert(ids, player.UserId)
+		end
+		roles = Roles.assign(ids, math.random)
+		MeetingService.resetNight()
+		AbilityService.reset()
+		for _, player in Players:GetPlayers() do
+			local allies = {}
+			if roles[player.UserId] == "Saboteur" then
+				for _, other in Players:GetPlayers() do
+					if other ~= player and roles[other.UserId] == "Saboteur" then
+						table.insert(allies, other.Name)
+					end
+				end
+			end
+			print(`[Round] {player.Name} is {roles[player.UserId]}`)
+			roleAssigned:FireClient(player, roles[player.UserId], allies)
+		end
+		TaskService.setActive(true)
+		StealthService.setActive(true)
+		ScareDirector.setActive(true, settings.NightSeconds)
+		ThreatService.activate()
+	end
+
+	local function dawnReport(winner: string?)
+		local list = {}
+		for _, player in Players:GetPlayers() do
+			local role = roles[player.UserId]
+			if role then
+				local fate = if MeetingService.wasEjected(player.UserId)
+					then "ejected"
+					elseif isAlive(player) then "survived"
+					else "caught"
+				table.insert(list, { name = player.Name, role = role, fate = fate })
+			end
+		end
+		table.sort(list, function(a, b)
+			return a.name < b.name
+		end)
+		local done, total = TaskService.counts()
+		roundResult:FireAllClients({ winner = winner, players = list, tasksDone = done, tasksTotal = total })
+	end
+
+	onChange = function(event: Round.Event)
 		print(`[Round] {event.from} -> {event.to}{if event.winner then " (winner: " .. event.winner .. ")" else ""}`)
 		if event.to == "Intermission" then
 			loadEveryone()
 			TaskService.reset()
-		elseif event.to == "Night" then
-			local ids = {}
-			for _, player in Players:GetPlayers() do
-				table.insert(ids, player.UserId)
-			end
-			roles = Roles.assign(ids, math.random)
-			for _, player in Players:GetPlayers() do
-				print(`[Round] {player.Name} is {roles[player.UserId]}`)
-				roleAssigned:FireClient(player, roles[player.UserId])
-			end
+		elseif event.to == "Night" and event.from == "Meeting" then
+			-- the meeting is over: everyone goes back where they were and the hunt resumes
+			MeetingService.release()
 			TaskService.setActive(true)
 			StealthService.setActive(true)
-			ScareDirector.setActive(true, settings.NightSeconds)
-			ThreatService.activate()
+			ThreatService.resume()
+			ScareDirector.pause(false)
+		elseif event.to == "Night" then
+			startNight()
+		elseif event.to == "Meeting" then
+			TaskService.setActive(false)
+			StealthService.setActive(false)
+			ThreatService.pause()
+			ScareDirector.pause(true)
+			local info = meeting
+			if info then
+				MeetingService.begin(info.reason, info.caller, info.victim)
+			end
 		elseif event.to == "Dawn" then
 			TaskService.setActive(false)
 			StealthService.setActive(false)
 			ScareDirector.setActive(false, 0)
 			ThreatService.deactivate()
-			local reveal: { [string]: string } = {}
-			for _, player in Players:GetPlayers() do
-				reveal[player.Name] = roles[player.UserId] or "Crew"
-			end
-			roundResult:FireAllClients(event.winner, reveal)
+			dawnReport(event.winner)
 		elseif event.to == "Lobby" then
 			TaskService.setActive(false)
 			StealthService.setActive(false)
@@ -142,6 +220,7 @@ function RoundService.start()
 			ThreatService.deactivate()
 			loadEveryone()
 			TaskService.reset()
+			MeetingService.resetNight()
 			roles = {}
 		end
 	end
@@ -154,6 +233,9 @@ function RoundService.start()
 			local now = os.clock()
 			local dt = now - last
 			last = now
+			if round.phase == "Meeting" then
+				MeetingService.tick(round.timeLeft)
+			end
 			local current = if round.phase == "Night" then stats() else nil
 			local event = round:tick(dt, #Players:GetPlayers(), current)
 			if event then

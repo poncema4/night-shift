@@ -12,6 +12,7 @@ return table.freeze({
 		IntermissionSeconds = 20,
 		NightSeconds = 240,
 		DawnSeconds = 12,
+		MeetingSeconds = 50,
 	}),
 	Move = table.freeze({
 		Walk = 16,
@@ -34,5 +35,6 @@ return table.freeze({
 		IntermissionSeconds = 5,
 		NightSeconds = 300,
 		DawnSeconds = 8,
+		MeetingSeconds = 30,
 	}),
 })

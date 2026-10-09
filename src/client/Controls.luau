@@ -37,6 +37,20 @@ function Controls.start()
 	ContextActionService:SetTitle("NightShiftLight", "LIGHT")
 	ContextActionService:SetPosition("NightShiftLight", UDim2.fromScale(0.88, 0.38))
 
+	local ability = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Ability") :: RemoteEvent
+	ContextActionService:BindAction("NightShiftLure", function(_, state)
+		if state == Enum.UserInputState.Begin then
+			ability:FireServer("lure")
+		end
+		return Enum.ContextActionResult.Pass
+	end, false, Enum.KeyCode.Q)
+	ContextActionService:BindAction("NightShiftLights", function(_, state)
+		if state == Enum.UserInputState.Begin then
+			ability:FireServer("lights")
+		end
+		return Enum.ContextActionResult.Pass
+	end, false, Enum.KeyCode.R)
+
 	ContextActionService:BindAction("NightShiftLeave", function(_, state)
 		if state == Enum.UserInputState.Begin and player:GetAttribute("Hidden") == true then
 			send(nil, true)

@@ -19,6 +19,7 @@ export type Result = {
 	spawn: SpawnLocation,
 	stations: { [string]: Part },
 	hiding: { { model: Model, position: Vector3 } },
+	bell: BasePart?,
 }
 
 type Style = { Color3 | Enum.Material }
@@ -230,8 +231,12 @@ function HotelBuilder.build(): Result
 	props.Name = "Props"
 	props.Parent = folder
 	local hiding: { { model: Model, position: Vector3 } } = {}
+	local bell: BasePart? = nil
 	for _, item in Furnishing.items() do
 		local model = Props.make(props, item, Floors.y(item.level))
+		if item.kind == "desk" and not bell then
+			bell = model:FindFirstChild("Bell") :: BasePart? -- the reception bell: ring it to call a meeting
+		end
 		if Furnishing.hideable[item.kind] then
 			table.insert(hiding, { model = model, position = Vector3.new(item.x, Floors.y(item.level), item.z) })
 		end
@@ -266,7 +271,7 @@ function HotelBuilder.build(): Result
 
 	atmosphere()
 	reportStrays(folder)
-	return { spawn = spawn, stations = stations, hiding = hiding }
+	return { spawn = spawn, stations = stations, hiding = hiding, bell = bell }
 end
 
 return HotelBuilder
