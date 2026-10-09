@@ -43,6 +43,8 @@ local specs = {
 	require("./specs/Rage"),
 	require("./specs/Jail"),
 	require("./specs/Profile"),
+	require("./specs/Store"),
+	require("./specs/Purchases"),
 	require("./specs/Rounds"),
 	require("./specs/Progress"),
 	require("./specs/ModelFit"),

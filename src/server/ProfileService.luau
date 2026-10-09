@@ -195,6 +195,29 @@ function ProfileService.flashlightColor(player: Player): Color3
 end
 
 -- Reward a player for a night. Returns nothing; the client is told what they earned.
+-- The loaded profile (nil until it has loaded). Only the purchase code changes it directly.
+function ProfileService.profileOf(player: Player): Progress.Profile?
+	return profiles[player]
+end
+
+-- Call after changing the profile outside a night (a purchase): tells the client, re-dresses the player and SAVES NOW.
+-- Returns whether it is safe to say the purchase went through (saved, or there is no DataStore to save to in Studio).
+function ProfileService.commit(player: Player): boolean
+	if not profiles[player] then
+		return false
+	end
+	dirty[player] = true
+	send(player)
+	if player.Character then
+		dress(player, player.Character)
+	end
+	if not store then
+		return RunService:IsStudio()
+	end
+	save(player)
+	return dirty[player] == nil
+end
+
 function ProfileService.award(player: Player, report: Progress.Report)
 	local profile = profiles[player]
 	if not profile then

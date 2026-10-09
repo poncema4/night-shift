@@ -53,6 +53,7 @@ return function(t)
 		"PLAY, OPTIONS and INFO are there",
 		buttonText(menu, "PLAY") and buttonText(menu, "OPTIONS") and buttonText(menu, "INFO")
 	)
+	t.check("SHOP is there too", buttonText(menu, "SHOP") ~= nil)
 	t.check("the match HUD is not started in the lobby", me.PlayerGui:FindFirstChild("NightShiftHud") == nil)
 
 	-- play: quick play puts you in a party and the status follows the clock
@@ -69,6 +70,19 @@ return function(t)
 	buttonText(menu, "LEAVE PARTY").Activated:Fire()
 	step(1)
 	t.check("leaving clears the party status", labelContaining(menu, "Not in a party") ~= nil)
+
+	-- the shop: cosmetics only, ids not set yet so it says coming soon
+	buttonText(menu, "SHOP").Activated:Fire()
+	step(0.3)
+	t.check("the shop says it is cosmetics only", labelContaining(menu, "Cosmetics only") ~= nil)
+	t.check(
+		"the pass and the tips packs are listed",
+		labelContaining(menu, "Starlight Collection") ~= nil and labelContaining(menu, "Chest of Tips") ~= nil
+	)
+	t.check("unset ids read COMING SOON", buttonText(menu, "COMING SOON") ~= nil)
+	buttonText(menu, "COMING SOON").Activated:Fire()
+	step(0.5)
+	t.check("pressing it answers coming soon", labelContaining(menu, "Coming soon") ~= nil)
 
 	-- options
 	buttonText(menu, "OPTIONS").Activated:Fire()

@@ -8,6 +8,7 @@ local TeleportService = game:GetService("TeleportService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Options = require(script.Parent.Options)
 local PartyUi = require(script.Parent.PartyUi)
+local StoreUi = require(script.Parent.StoreUi)
 local Ui = require(script.Parent.Ui)
 
 local Menu = {}
@@ -75,6 +76,8 @@ function Menu.start()
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	local party = PartyUi.build(backdrop, remotes)
 	party.Visible = false
+	local shop = StoreUi.build(backdrop, remotes)
+	shop.Visible = false
 
 	local side = Ui.panel(backdrop, UDim2.fromScale(0.52, 0.18), UDim2.fromScale(0.44, 0.66))
 	side.Visible = false
@@ -89,6 +92,7 @@ function Menu.start()
 
 	local function show(which: string)
 		party.Visible = which == "play"
+		shop.Visible = which == "shop"
 		side.Visible = which == "options" or which == "info"
 		sideTitle.Text = if which == "options" then "OPTIONS" elseif which == "info" then "HOW IT WORKS" else ""
 		body.Text = if which == "info" then table.concat(INFO, "\n\n") else ""
@@ -144,13 +148,16 @@ function Menu.start()
 		show(which)
 		setOptionsVisible(which == "options")
 	end
-	Ui.button(main, "PLAY", UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.26), function()
+	Ui.button(main, "PLAY", UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.22), function()
 		open("play")
 	end, true)
-	Ui.button(main, "OPTIONS", UDim2.fromScale(0, 0.34), UDim2.fromScale(1, 0.2), function()
+	Ui.button(main, "OPTIONS", UDim2.fromScale(0, 0.28), UDim2.fromScale(1, 0.16), function()
 		open("options")
 	end)
-	Ui.button(main, "INFO", UDim2.fromScale(0, 0.62), UDim2.fromScale(1, 0.2), function()
+	Ui.button(main, "SHOP", UDim2.fromScale(0, 0.48), UDim2.fromScale(1, 0.16), function()
+		open("shop")
+	end)
+	Ui.button(main, "INFO", UDim2.fromScale(0, 0.68), UDim2.fromScale(1, 0.16), function()
 		open("info")
 	end)
 	open("play")

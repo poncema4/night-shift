@@ -28,6 +28,23 @@ return table.freeze({
 	-- Studio is not a real server: pick which job it plays ("Match" = the round, "Lobby" = the party screen).
 	Server = table.freeze({ StudioMode = "Match" }),
 	Brand = table.freeze({ GroupId = 749648777 }),
+	-- What can be bought with Robux. COSMETICS ONLY: nothing here changes speed, noise, vision or who wins. An id of 0 means
+	-- "not created yet": the shop shows COMING SOON until you paste the real id from Creator Hub (docs/MONETIZATION.md).
+	Monetization = table.freeze({
+		Passes = table.freeze({
+			starlight = table.freeze({
+				id = 0,
+				name = "Starlight Collection",
+				blurb = "Two exclusive flashlight colours and a halo. Looks only.",
+				robux = 299,
+			}),
+		}),
+		Products = table.freeze({
+			tips_small = table.freeze({ id = 0, name = "Pocket of Tips", tips = 250, robux = 49 }),
+			tips_medium = table.freeze({ id = 0, name = "Bag of Tips", tips = 700, robux = 125 }),
+			tips_large = table.freeze({ id = 0, name = "Chest of Tips", tips = 1600, robux = 249 }),
+		}),
+	}),
 	-- How the hotel looks. Tune these first if it is too dark or too bright (Studio playtest).
 	Look = table.freeze({
 		Ambient = { 4, 4, 8 },

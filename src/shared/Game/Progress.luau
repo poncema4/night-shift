@@ -16,6 +16,8 @@ export type Profile = {
 	tipsSpent: number, -- ...and spending only ever goes up here, so two saves merge without refunding purchases
 	owned: { [string]: boolean },
 	equipped: { [string]: string },
+	passes: { [string]: boolean }, -- game passes this player owns (see Store)
+	receipts: { [string]: boolean }, -- purchase ids already granted, so a replayed receipt never pays twice
 }
 
 -- What happened to one player in one night.
@@ -49,6 +51,8 @@ function Progress.new(): Profile
 		tipsSpent = 0,
 		owned = {},
 		equipped = {},
+		passes = {},
+		receipts = {},
 	}
 end
 
@@ -117,6 +121,14 @@ function Progress.merge(a: Profile, b: Profile): Profile
 	for id in b.owned do
 		out.owned[id] = true
 	end
+	for _, source in { a, b } do
+		for id in source.passes do
+			out.passes[id] = true
+		end
+		for id in source.receipts do
+			out.receipts[id] = true
+		end
+	end
 	for slot, id in a.equipped do
 		out.equipped[slot] = id
 	end
@@ -142,6 +154,15 @@ function Progress.repair(raw: any): Profile
 		for id, has in raw.owned do
 			if typeof(id) == "string" and has == true then
 				profile.owned[id] = true
+			end
+		end
+	end
+	for _, field in { "passes", "receipts" } do
+		if typeof(raw[field]) == "table" then
+			for id, has in raw[field] do
+				if typeof(id) == "string" and has == true then
+					(profile :: any)[field][id] = true
+				end
 			end
 		end
 	end

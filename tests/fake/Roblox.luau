@@ -302,6 +302,7 @@ function Fake.world()
 		CharacterAdded = true,
 		Changed = true,
 		Activated = true,
+		PromptGamePassPurchaseFinished = true,
 		Equipped = true,
 		Unequipped = true,
 		MouseEnter = true,
@@ -627,6 +628,18 @@ function Fake.world()
 			s.GetTagged = function(_, tag)
 				return world.tags[tag] or {}
 			end
+		elseif name == "MarketplaceService" then
+			s.prompts = {}
+			s.owned = {}
+			s.PromptGamePassPurchase = function(_, player, id)
+				table.insert(s.prompts, { kind = "pass", player = player, id = id })
+			end
+			s.PromptProductPurchase = function(_, player, id)
+				table.insert(s.prompts, { kind = "product", player = player, id = id })
+			end
+			s.UserOwnsGamePassAsync = function(_, userId, id)
+				return s.owned[userId .. ":" .. id] == true
+			end
 		elseif name == "TeleportService" then
 			s.SetTeleportGui = function(_, gui)
 				world.teleportGui = gui
@@ -705,8 +718,14 @@ function Fake.world()
 			end
 			return t or 0
 		end,
-		delay = function(t, f)
-			table.insert(world.sleepers, { fn = f, wake = world.now + t })
+		delay = function(t, f, ...)
+			local args = table.pack(...)
+			table.insert(world.sleepers, {
+				fn = function()
+					f(table.unpack(args, 1, args.n))
+				end,
+				wake = world.now + t,
+			})
 		end,
 	}
 	task.defer = task.spawn
