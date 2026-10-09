@@ -19,13 +19,18 @@ Players are staff on a night shift in one location. They split up to do tasks. S
 - Data saving: wrapped in pcall with retry, and a session lock. Never block a round on a failed save.
 - Monetisation later, cosmetics only. No pay-to-win.
 
-## Decided by default (owner said "your call", 2026-10-09; change any time)
-- Setting: an empty hotel at night.
-- 6-10 players per round (Studio test: 1).
-- Saboteurs: 1 for 2-8 players, 2 for 9-10.
-- Night ends when tasks are done (crew), crew <= saboteurs (saboteurs), or the timer runs out (saboteurs).
+## Decided (owner said "your call", 2026-10-09; change any time)
+- Setting: an empty three-floor hotel at night (basement, ground floor, upstairs), a monster that uses the stairs.
+- 6-10 players per round (Studio test: 1-2 plays as a sandbox).
+- Saboteurs: 1 for 2-8 players, 2 for 9-10; they know each other.
+- Night ends when all tasks are done (crew), crew <= saboteurs (saboteurs), or the timer runs out (saboteurs).
+- A saboteur is ejected by a vote after a body is reported or the lobby bell is rung (once per player per night).
+- Progression is cosmetic only (flashlight colours, hats, footstep dust); tips are earned by playing, never sold.
+
+## What the build adds on top of the first draft
+Stealth (sprint with stamina, a flashlight that draws him, hiding where he searches), a scare director that tightens toward dawn, security cameras for the crew, spectating, saboteur abilities (lure, lights out). See `docs/GAMEPLAY.md`. Everything above the engine rules is data plus tested pure rules.
 
 ## Still open (owner)
-- Setting (office? hospital? diner? hotel?).
-- Number of players per round (suggest 6-10).
-- Saboteur count and win conditions.
+- Round length and task count balance (needs real playtests: docs/PLAYTEST.md).
+- Real sound and the rigged Night Manager art (docs/IDEAS.md section F).
+- Monetisation details (cosmetic passes only, after the free loop is fun).
