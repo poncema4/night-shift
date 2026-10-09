@@ -339,12 +339,12 @@ makers.cell = function(model, at)
 	local lamp =
 		piece(model, "Lamp", Vector3.new(0.8, 0.5, 0.8), at(0, 9.6, 0), Color3.fromRGB(190, 24, 30), Enum.Material.Neon)
 	soft(lamp)
-	local glow = Instance.new("PointLight")
-	glow.Color = Color3.fromRGB(220, 40, 40)
-	glow.Range = 14
-	glow.Brightness = 0.6
-	glow.Shadows = false
-	glow.Parent = lamp
+	local redLight = Instance.new("PointLight")
+	redLight.Color = Color3.fromRGB(220, 40, 40)
+	redLight.Range = 14
+	redLight.Brightness = 0.6
+	redLight.Shadows = false
+	redLight.Parent = lamp
 end
 
 makers.sludge = function(model, at)
