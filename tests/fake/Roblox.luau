@@ -778,6 +778,16 @@ function Fake.world()
 		return player
 	end
 
+	-- A player leaves the server (the DataStore keeps what was saved).
+	function world.removePlayer(player)
+		service("Players").PlayerRemoving:Fire(player)
+		local at = table.find(world.players, player)
+		if at then
+			table.remove(world.players, at)
+		end
+		data[player].props.Character = nil
+	end
+
 	-- Makes `player` the one this fake client belongs to (Players.LocalPlayer) and gives it a camera.
 	function world.setLocal(player)
 		world.localPlayer = player

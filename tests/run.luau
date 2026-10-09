@@ -34,6 +34,7 @@ local specs = {
 	require("./specs/Night"),
 	require("./specs/Social"),
 	require("./specs/Client"),
+	require("./specs/Profile"),
 	require("./specs/Progress"),
 	require("./specs/ModelFit"),
 	require("./specs/Hotel"),

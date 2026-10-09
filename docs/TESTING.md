@@ -8,6 +8,7 @@ Four layers, from fastest to slowest to get:
    - `Startup`: the whole hotel is built (thousands of parts, all props, all stations), `RoundService.start()` wires every service, and every remote the client scripts wait for really exists.
    - `Night`: a solo night: round loop, role, sprint and stamina, flashlight, a task, hiding, cameras, the bell and a meeting, a death, the dawn report, rewards, the next round.
    - `Client`: the real CLIENT scripts (HUD, controls, meeting screen, results, locker, cameras, spectating, the Night Manager view) run in the same world, connected to the server by the same remotes: buttons reach the server, server messages reach the screens.
+   - `Profile`: six nights of tasks and deaths earn XP and tips, the Shop remote buys and equips (junk and level-locked items refused), the player leaves and rejoins and everything is still there (DataStore save and load with merge), and the flashlight colour applies.
    - `Social`: four players: abilities and cooldowns, blackouts on the right floor, scares, hiding versus the Night Manager (passing by, then being hunted), two meetings (a tie, then a majority that ejects the saboteur), the crew wins.
 4. **Studio playtest** (`docs/PLAYTEST.md`): the only layer that checks how it LOOKS and FEELS.
 
