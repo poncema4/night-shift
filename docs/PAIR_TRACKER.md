@@ -6,7 +6,7 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 
 **Tiers are community-reported, not an official GitHub page**: 1 (default), 10 (Bronze), 24 (Silver), 48 (Gold) co-authored commits on merged PRs. Whether the badge has advanced can only be seen on the profile at github.com/poncema4.
 
-**Verified count on `main`**: 20 commits carry the poncema4 co-author trailer; 19 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
+**Verified count on `main`**: 27 commits carry the poncema4 co-author trailer; 25 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
 
 ## Merged PRs
 
@@ -31,6 +31,12 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 | [#18](https://github.com/poncema4/night-shift/pull/18) | feat(social): meetings, voting, reports, bell, saboteur abilities, dawn screen | 2026-10-09 |
 | [#19](https://github.com/poncema4/night-shift/pull/19) | feat(progress): XP, levels, tips, cosmetics Locker, DataStore saving | 2026-10-09 |
 | [#20](https://github.com/poncema4/night-shift/pull/20) | feat(art): full Blender prop set, FBX export, model loader, art guide | 2026-10-09 |
+| [#21](https://github.com/poncema4/night-shift/pull/21) | feat(polish): station props, light culling, playtest checklist, handoff docs | 2026-10-09 |
+| [#22](https://github.com/poncema4/night-shift/pull/22) | feat(cameras): security monitor map and spectator camera | 2026-10-09 |
+| [#23](https://github.com/poncema4/night-shift/pull/23) | fix(review): hiding protects you, blackouts go dark and stay independent | 2026-10-09 |
+| [#24](https://github.com/poncema4/night-shift/pull/24) | test(sim): fake Roblox world runs the real server; fixes for blackouts, hiding, Studio sandbox | 2026-10-09 |
+| [#25](https://github.com/poncema4/night-shift/pull/25) | test(client): real client scripts run against the real server; fixes for 3 launch-breaking bugs | 2026-10-09 |
+| [#26](https://github.com/poncema4/night-shift/pull/26) | test(profile): six nights, a purchase, leave and rejoin | 2026-10-09 |
 
 One PR counts once however many commits it has; the count above is commits, which is what the tiers are described in.
 
