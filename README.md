@@ -1,6 +1,6 @@
-# Nexus Hollow
+# NIGHT SHIFT
 
-A Roblox game by **Nexus Hollow Studios** (group owner: Swag_Boy435 / V1RTU4L).
+A multiplayer survival-horror / social-deduction / life-sim Roblox game by **Nexus Hollow Studios** (group owner: Swag_Boy435 / V1RTU4L).
 
 The code lives here as plain Luau files. **Rojo** syncs them into Roblox Studio, **Lune** tests the game logic on any computer, and a GitHub Action can publish the game to Roblox.
 
