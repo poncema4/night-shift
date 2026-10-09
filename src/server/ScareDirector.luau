@@ -31,7 +31,12 @@ function ScareDirector.blackout(level: number, seconds: number)
 	local dims: { { part: BasePart, color: Color3, material: Enum.Material } } = {}
 	for _, lamp in CollectionService:GetTagged("Bulb") do
 		local light = lamp:FindFirstChildOfClass("PointLight")
-		if lamp:IsA("BasePart") and light and light.Enabled and Floors.levelAt(lamp.Position.Y) == level then
+		if
+			lamp:IsA("BasePart")
+			and light
+			and light.Enabled
+			and (lamp:GetAttribute("Level") or Floors.levelAt(lamp.Position.Y - 10)) == level
+		then
 			light.Enabled = false
 			table.insert(lights, light)
 			-- the glowing bulb itself goes dark too, otherwise a blackout still looks lit

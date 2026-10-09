@@ -6,6 +6,7 @@ local CollectionService = game:GetService("CollectionService")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local Furnishing = require(ReplicatedStorage.Shared.Game.Furnishing)
 local ModelFit = require(ReplicatedStorage.Shared.Game.ModelFit)
 local ModelStyles = require(ReplicatedStorage.Shared.Game.ModelStyles)
@@ -523,10 +524,21 @@ local function fromTemplate(parent: Instance, item: Furnishing.Item, floorY: num
 	return model
 end
 
+-- Lights inside a prop belong to the level the prop stands on (blackouts darken a whole level at a time).
+local function tagLevels(model: Model, floorY: number)
+	local level = Floors.levelAt(floorY)
+	for _, d in model:GetDescendants() do
+		if d:IsA("PointLight") and d.Parent then
+			d.Parent:SetAttribute("Level", level)
+		end
+	end
+end
+
 -- Builds one item standing on a floor at world height `floorY`.
 function Props.make(parent: Instance, item: Furnishing.Item, floorY: number): Model
 	local imported = fromTemplate(parent, item, floorY)
 	if imported then
+		tagLevels(imported, floorY)
 		return imported
 	end
 	local model = Instance.new("Model")
@@ -542,6 +554,7 @@ function Props.make(parent: Instance, item: Furnishing.Item, floorY: number): Mo
 		warn(`[Props] no model for {item.kind}`)
 	end
 	model.Parent = parent
+	tagLevels(model, floorY)
 	return model
 end
 

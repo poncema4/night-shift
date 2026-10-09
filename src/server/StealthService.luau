@@ -148,6 +148,7 @@ local function enter(player: Player, spot: Model, body: BasePart)
 	setVisible(player, entry, false)
 	root.CFrame = body.CFrame
 	root.Anchored = true
+	humanoid.WalkSpeed = 0 -- frozen at once, not on the next frame
 	entry.wantsLight = false
 	player:SetAttribute("Hidden", true)
 end

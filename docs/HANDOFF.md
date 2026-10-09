@@ -20,7 +20,7 @@
 193 automated checks plus a Roblox-API type-check. Systems are in `docs/GAMEPLAY.md`, the map in `docs/MAP.md`, art in `docs/ART.md`.
 
 ## What is NOT verified (be honest about it)
-Nothing since the first round loop has been run in Studio. The riskiest bits, in order: stairs feel and Humanoid step height; hiding (anchored, invisible character) and the meeting teleport ring; the vote UI on a phone; DataStore round trip; the imported-model path (FBX axes/scale); performance with ~3500 parts and ~16 active lights. `docs/PLAYTEST.md` is the checklist.
+Nothing since the first round loop has been run in **Studio** (it looks and feels unchecked), but the server logic is exercised end to end by a simulated world: see `docs/TESTING.md`. The riskiest bits, in order: stairs feel and Humanoid step height; hiding (anchored, invisible character) and the meeting teleport ring; the vote UI on a phone; DataStore round trip; the imported-model path (FBX axes/scale); performance with ~3500 parts and ~16 active lights. `docs/PLAYTEST.md` is the checklist.
 
 ## What Marco needs to do
 1. `git pull`, Rojo connect, run the checklist in `docs/PLAYTEST.md`, send screenshots and any red Output text.

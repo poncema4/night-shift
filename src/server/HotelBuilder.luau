@@ -130,6 +130,7 @@ local function bulb(parent: Instance, x: number, y: number, z: number, level: nu
 	light.Color = if level < 0 then Color3.fromRGB(190, 220, 170) else Color3.fromRGB(255, 205, 140)
 	light.Shadows = false
 	light.Parent = lamp
+	lamp:SetAttribute("Level", level)
 	CollectionService:AddTag(lamp, "Bulb")
 end
 
