@@ -14,6 +14,7 @@ local ScareDirector = {}
 local remote: RemoteEvent? = nil
 local connection: RBXScriptConnection? = nil
 local darkened: { PointLight } = {}
+local paused = false
 
 local function restoreLights()
 	for _, light in darkened do
@@ -24,7 +25,8 @@ local function restoreLights()
 	darkened = {}
 end
 
-local function blackout(level: number, seconds: number)
+-- Turns the lights on one level off for a while (also used by the saboteur's ability).
+function ScareDirector.blackout(level: number, seconds: number)
 	for _, lamp in CollectionService:GetTagged("Bulb") do
 		local light = lamp:FindFirstChildOfClass("PointLight")
 		if lamp:IsA("BasePart") and light and light.Enabled and Floors.levelAt(lamp.Position.Y) == level then
@@ -54,7 +56,13 @@ function ScareDirector.start(remotes: Folder)
 	remote = scare
 end
 
+-- During a meeting the schedule stands still.
+function ScareDirector.pause(on: boolean)
+	paused = on
+end
+
 function ScareDirector.setActive(on: boolean, nightSeconds: number)
+	paused = false
 	if connection then
 		connection:Disconnect()
 		connection = nil
@@ -65,12 +73,15 @@ function ScareDirector.setActive(on: boolean, nightSeconds: number)
 	end
 	local director = Scares.new(math.random, nightSeconds)
 	connection = RunService.Heartbeat:Connect(function(dt)
+		if paused then
+			return
+		end
 		local event = director:tick(dt)
 		if event and remote then
 			print(`[Scare] {event.kind}`)
 			remote:FireAllClients(event.kind, event.seconds)
 			if event.kind == "blackout" then
-				blackout(levelOfSomeone(), event.seconds)
+				ScareDirector.blackout(levelOfSomeone(), event.seconds)
 			end
 		end
 	end)

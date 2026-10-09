@@ -14,6 +14,8 @@ local StealthService = require(script.Parent.StealthService)
 local ThreatService = {}
 
 local connection: RBXScriptConnection? = nil
+local patrolState: Patrol.Patrol? = nil
+local lureTarget: { x: number, y: number, z: number, expires: number }? = nil
 
 -- The server only publishes where he is; every client draws and smooths its own copy (client/ThreatView).
 local state = Instance.new("Folder")
@@ -43,10 +45,8 @@ local function livingPlayers(): { { player: Player, humanoid: Humanoid, x: numbe
 	return list
 end
 
-function ThreatService.activate()
-	ThreatService.deactivate()
+local function run(patrol: Patrol.Patrol)
 	local settings = Config.Threat
-	local patrol = Patrol.new(Floors.graph(), settings.StartRoom, math.random)
 	local lastX, lastZ = patrol.x, patrol.z
 	local facing = Vector3.new(0, 0, -1)
 	local sincePublish = PUBLISH_INTERVAL
@@ -68,12 +68,16 @@ function ThreatService.activate()
 				nearest, nearestScore = entry, score
 			end
 		end
-		patrol:tick(
-			dt,
-			settings.PatrolSpeed,
-			settings.ChaseSpeed,
-			if nearest then { x = nearest.x, y = nearest.y, z = nearest.z } else nil
-		)
+		local target: Patrol.Target? = if nearest then { x = nearest.x, y = nearest.y, z = nearest.z } else nil
+		if not target and lureTarget then
+			-- a saboteur made a noise: he goes to investigate it (unless someone nearer is heard)
+			if os.clock() < lureTarget.expires then
+				target = { x = lureTarget.x, y = lureTarget.y, z = lureTarget.z }
+			else
+				lureTarget = nil
+			end
+		end
+		patrol:tick(dt, settings.PatrolSpeed, settings.ChaseSpeed, target)
 
 		local dx, dz = patrol.x - lastX, patrol.z - lastZ
 		if dx * dx + dz * dz > 1e-6 then
@@ -117,11 +121,42 @@ function ThreatService.activate()
 	end)
 end
 
+function ThreatService.activate()
+	ThreatService.deactivate()
+	local fresh = Patrol.new(Floors.graph(), Config.Threat.StartRoom, math.random)
+	patrolState = fresh
+	lureTarget = nil
+	run(fresh)
+end
+
+-- A meeting freezes him in place; resume() carries on from the same spot.
+function ThreatService.pause()
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
+	state:SetAttribute("Active", false)
+end
+
+function ThreatService.resume()
+	local current = patrolState
+	if current and not connection then
+		run(current)
+	end
+end
+
+-- The saboteur's noise: for `seconds` he heads for this spot if he hears nothing closer.
+function ThreatService.lure(position: Vector3, seconds: number)
+	lureTarget = { x = position.X, y = position.Y - 3, z = position.Z, expires = os.clock() + seconds }
+end
+
 function ThreatService.deactivate()
 	if connection then
 		connection:Disconnect()
 		connection = nil
 	end
+	patrolState = nil
+	lureTarget = nil
 	state:SetAttribute("Active", false)
 end
 

@@ -36,9 +36,7 @@ function Hud.start()
 	local tasks = label(gui, "Tasks", UDim2.fromScale(0.5, 0.1), UDim2.fromScale(0.25, 0.05))
 	local floorLabel = label(gui, "Floor", UDim2.fromScale(0.12, 0.02), UDim2.fromScale(0.17, 0.05))
 	local role = label(gui, "Role", UDim2.fromScale(0.5, 0.16), UDim2.fromScale(0.3, 0.06))
-	local result = label(gui, "Result", UDim2.fromScale(0.5, 0.3), UDim2.fromScale(0.6, 0.3))
 	role.Visible = false
-	result.Visible = false
 
 	-- stamina and battery bars (bottom left), and the screen you see while hiding
 	local function bar(name: string, y: number, color: Color3): Frame
@@ -171,33 +169,44 @@ function Hud.start()
 
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	leaveButton.Activated:Connect(function()
-		(remotes:WaitForChild("Intent") :: RemoteEvent):FireServer({ leave = true })
+		local intent = remotes:WaitForChild("Intent") :: RemoteEvent
+		intent:FireServer({ leave = true })
 	end)
 	local roleAssigned = remotes:WaitForChild("RoleAssigned") :: RemoteEvent
-	local roundResult = remotes:WaitForChild("RoundResult") :: RemoteEvent
 
-	roleAssigned.OnClientEvent:Connect(function(myRole: string)
+	local isSaboteur = false
+	local haveRole = false
+	roleAssigned.OnClientEvent:Connect(function(myRole: string, allies: { string }?)
 		if not guideSeen then
 			guide.Visible = true
 		end
-		role.Visible = true
-		role.Text = `You are: {string.upper(myRole)}`
+		isSaboteur = myRole == "Saboteur"
+		haveRole = true
+		local partner = if allies and #allies > 0 then `  (with {table.concat(allies, ", ")})` else ""
+		role.Text = `You are: {string.upper(myRole)}{partner}`
 		role.TextColor3 = if myRole == "Saboteur" then Color3.fromRGB(255, 80, 120) else Color3.fromRGB(90, 220, 255)
-		result.Visible = false
 	end)
 
-	roundResult.OnClientEvent:Connect(function(winner: string, reveal: { [string]: string })
-		local saboteurs = {}
-		for name, theirRole in reveal do
-			if theirRole == "Saboteur" then
-				table.insert(saboteurs, name)
-			end
-		end
-		table.sort(saboteurs)
-		result.Text = `DAWN\n{string.upper(winner)} WIN\nSaboteur: {table.concat(saboteurs, ", ")}`
-		result.Visible = true
-		role.Visible = false
-	end)
+	-- saboteur abilities: LURE sends him to where you stand, LIGHTS darkens your floor
+	local abilityRemote = remotes:WaitForChild("Ability") :: RemoteEvent
+	local abilityButtons: { { button: TextButton, attribute: string, name: string, kind: string } } = {}
+	for i, def in { { "lure", "LURE", "LureReadyAt" }, { "lights", "LIGHTS OUT", "LightsReadyAt" } } do
+		local button = Instance.new("TextButton")
+		button.AnchorPoint = Vector2.new(1, 1)
+		button.Position = UDim2.fromScale(0.98, 0.98 - (i - 1) * 0.075)
+		button.Size = UDim2.fromScale(0.16, 0.065)
+		button.BackgroundColor3 = Color3.fromRGB(70, 22, 36)
+		button.TextColor3 = Color3.fromRGB(255, 220, 226)
+		button.Font = Enum.Font.GothamBold
+		button.TextScaled = true
+		button.Visible = false
+		button.Parent = gui
+		local kind = def[1]
+		button.Activated:Connect(function()
+			abilityRemote:FireServer(kind)
+		end)
+		table.insert(abilityButtons, { button = button, attribute = def[3], name = def[2], kind = kind })
+	end
 
 	RunService.RenderStepped:Connect(function()
 		local phase = ReplicatedStorage:GetAttribute("Phase") or "Lobby"
@@ -215,11 +224,22 @@ function Hud.start()
 		staminaFill.Size = UDim2.fromScale(math.clamp((me:GetAttribute("Stamina") or 100) / 100, 0, 1), 1)
 		batteryFill.Size = UDim2.fromScale(math.clamp((me:GetAttribute("Battery") or 100) / 100, 0, 1), 1)
 		hiding.Visible = me:GetAttribute("Hidden") == true
-		tasks.Visible = phase == "Night"
+		for _, a in abilityButtons do
+			a.button.Visible = isSaboteur and phase == "Night"
+			local wait = math.max(0, math.ceil((me:GetAttribute(a.attribute) or 0) - workspace:GetServerTimeNow()))
+			a.button.Text = if wait > 0 then `{a.name} {wait}s` else a.name
+			a.button.Active = wait == 0
+			a.button.BackgroundTransparency = if wait > 0 then 0.6 else 0.1
+		end
+		if phase == "Lobby" or phase == "Intermission" then
+			haveRole = false -- a new round hands out new roles
+			isSaboteur = false
+		end
+		role.Visible = haveRole and (phase == "Night" or phase == "Meeting")
+		tasks.Visible = phase == "Night" or phase == "Meeting"
 		tasks.Text = `TASKS {done}/{total}`
 		if phase == "Lobby" then
 			status.Text = "Waiting for players..."
-			result.Visible = false
 		else
 			status.Text = `{string.upper(phase)}  {left}s`
 		end
