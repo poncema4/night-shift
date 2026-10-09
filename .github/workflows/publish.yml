@@ -41,13 +41,13 @@ jobs:
       - name: Build
         run: |
           mkdir -p build
-          rojo build -o build/NexusHollow.rbxl
+          rojo build -o build/NightShift.rbxl
       - name: Publish
         env:
           ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
         run: |
           rbxcloud experience publish \
-            --filename build/NexusHollow.rbxl \
+            --filename build/NightShift.rbxl \
             --place-id "${{ vars.ROBLOX_PLACE_ID }}" \
             --universe-id "${{ vars.ROBLOX_UNIVERSE_ID }}" \
             --version-type "${{ inputs.version_type }}" \
