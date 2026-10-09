@@ -4,8 +4,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.rokit/bin:$PATH"
 mkdir -p build
-selene src tests
-stylua --check src tests
+selene src tests tools
+stylua --check src tests tools
 lune run tests/run
 rojo build -o build/NightShift.rbxl
 echo "ALL CHECKS PASSED"

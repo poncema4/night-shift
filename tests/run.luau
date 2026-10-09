@@ -24,6 +24,7 @@ end
 
 local specs = {
 	require("./specs/MathUtil"),
+	require("./specs/LogBuffer"),
 }
 for _, spec in specs do
 	spec(t)
