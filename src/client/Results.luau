@@ -46,7 +46,9 @@ function Results.start()
 	end
 	local headline = label("Headline", UDim2.fromScale(0.04, 0.04), UDim2.fromScale(0.92, 0.14), Enum.Font.GothamBlack)
 	local tasks = label("Tasks", UDim2.fromScale(0.04, 0.19), UDim2.fromScale(0.92, 0.06), Enum.Font.GothamMedium)
-	local you = label("You", UDim2.fromScale(0.04, 0.26), UDim2.fromScale(0.92, 0.06), Enum.Font.GothamBold)
+	local you = label("You", UDim2.fromScale(0.04, 0.26), UDim2.fromScale(0.5, 0.06), Enum.Font.GothamBold)
+	local earned = label("Earned", UDim2.fromScale(0.5, 0.26), UDim2.fromScale(0.46, 0.06), Enum.Font.GothamBlack)
+	earned.TextColor3 = Color3.fromRGB(150, 235, 160)
 
 	local list = Instance.new("Frame")
 	list.BackgroundTransparency = 1
@@ -57,6 +59,11 @@ function Results.start()
 	layout.Padding = UDim.new(0, 4)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
+
+	local awardEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Award") :: RemoteEvent
+	awardEvent.OnClientEvent:Connect(function(info: { xp: number, tips: number, levelUp: boolean })
+		earned.Text = `+{info.xp} XP   +{info.tips} tips{if info.levelUp then "   LEVEL UP!" else ""}`
+	end)
 
 	roundResult.OnClientEvent:Connect(function(info: {
 		winner: string?,
@@ -77,6 +84,7 @@ function Results.start()
 		headline.TextColor3 = if crewWon then Color3.fromRGB(120, 230, 150) else Color3.fromRGB(255, 110, 120)
 		tasks.Text = `Tasks finished: {info.tasksDone} / {info.tasksTotal}`
 		you.Text = ""
+		earned.Text = ""
 		for i, p in info.players do
 			local row = Instance.new("Frame")
 			row.LayoutOrder = i

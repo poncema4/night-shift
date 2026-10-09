@@ -15,6 +15,7 @@ local stations: { [string]: Part } = {}
 local prompts: { [string]: ProximityPrompt } = {}
 local board = TaskBoard.new({})
 local active = false
+local finished: { [number]: number } = {}
 local roleOf: (number) -> string? = function(_userId: number)
 	return nil
 end
@@ -27,6 +28,11 @@ end
 
 function TaskService.counts(): (number, number)
 	return board:count()
+end
+
+-- How many tasks this player finished this round.
+function TaskService.completedBy(userId: number): number
+	return finished[userId] or 0
 end
 
 function TaskService.setActive(on: boolean)
@@ -42,6 +48,7 @@ function TaskService.reset()
 		table.insert(ids, task.id)
 	end
 	board = TaskBoard.new(ids)
+	finished = {}
 	for id, station in stations do
 		station.Color = PENDING
 		prompts[id].Enabled = active
@@ -66,6 +73,7 @@ local function onTriggered(id: string, player: Player)
 	local result = board:complete(role, id)
 	print(`[Task] {player.Name} ({role}) {id}: {result}`)
 	if result == "ok" then
+		finished[player.UserId] = (finished[player.UserId] or 0) + 1
 		stations[id].Color = DONE
 		prompts[id].Enabled = false
 		publish()
