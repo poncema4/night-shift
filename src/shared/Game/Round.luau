@@ -77,7 +77,7 @@ function Round.tick(self: Round, dt: number, playerCount: number, stats: Stats?)
 			return go(self, "Lobby", 0, nil)
 		end
 		self.timeLeft -= dt
-		local winner = if stats then Round.evaluate(stats) else nil
+		local winner: Winner? = if stats then Round.evaluate(stats) else nil
 		if winner then
 			return go(self, "Dawn", s.DawnSeconds, winner)
 		end

@@ -2,7 +2,7 @@
 -- Task stations. The server decides everything: who may work, what counts, and the progress shown to all.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Hotel = require(ReplicatedStorage.Shared.Game.Hotel)
+local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local TaskBoard = require(ReplicatedStorage.Shared.Game.TaskBoard)
 
 local WORK_DISTANCE = 14
@@ -38,7 +38,7 @@ end
 
 function TaskService.reset()
 	local ids = {}
-	for _, task in Hotel.tasks do
+	for _, task in Floors.tasks() do
 		table.insert(ids, task.id)
 	end
 	board = TaskBoard.new(ids)
@@ -75,7 +75,7 @@ end
 function TaskService.start(built: { [string]: Part }, getRole: (number) -> string?)
 	stations = built
 	roleOf = getRole
-	for _, task in Hotel.tasks do
+	for _, task in Floors.tasks() do
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.ActionText = task.name
 		prompt.ObjectText = "Night shift duty"

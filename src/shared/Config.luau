@@ -4,7 +4,7 @@
 return table.freeze({
 	GameName = "NIGHT SHIFT",
 	StudioName = "Nexus Hollow Studios",
-	Version = "0.3.0",
+	Version = "0.4.0",
 
 	Round = table.freeze({
 		MinPlayers = 6,
@@ -18,6 +18,9 @@ return table.freeze({
 		ChaseSpeed = 13,
 		HearRange = 35,
 		KillRadius = 4,
+		FloorHearFactor = 0.5, -- footsteps carry through a floor, but only half as far
+		FloorPenalty = 12, -- studs of 'distance' added per floor between him and a player when choosing who to hunt
+		KillHeight = 6, -- he can only catch someone within this height of him
 		StartRoom = "Pool Room",
 	}),
 	-- Used only inside Studio so one person can see the whole loop quickly.
@@ -25,7 +28,7 @@ return table.freeze({
 		MinPlayers = 1,
 		MaxPlayers = 10,
 		IntermissionSeconds = 5,
-		NightSeconds = 150,
+		NightSeconds = 300,
 		DawnSeconds = 8,
 	}),
 })

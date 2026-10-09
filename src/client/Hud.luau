@@ -5,6 +5,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Floors = require(ReplicatedStorage.Shared.Game.Floors)
+
 local Hud = {}
 
 local function label(parent: Instance, name: string, position: UDim2, size: UDim2): TextLabel
@@ -32,6 +34,7 @@ function Hud.start()
 
 	local status = label(gui, "Status", UDim2.fromScale(0.5, 0.02), UDim2.fromScale(0.4, 0.07))
 	local tasks = label(gui, "Tasks", UDim2.fromScale(0.5, 0.1), UDim2.fromScale(0.25, 0.05))
+	local floorLabel = label(gui, "Floor", UDim2.fromScale(0.12, 0.02), UDim2.fromScale(0.17, 0.05))
 	local role = label(gui, "Role", UDim2.fromScale(0.5, 0.16), UDim2.fromScale(0.3, 0.06))
 	local result = label(gui, "Result", UDim2.fromScale(0.5, 0.3), UDim2.fromScale(0.6, 0.3))
 	role.Visible = false
@@ -67,6 +70,12 @@ function Hud.start()
 		local left = math.max(0, math.ceil(endsAt - workspace:GetServerTimeNow()))
 		local done = ReplicatedStorage:GetAttribute("TasksDone") or 0
 		local total = ReplicatedStorage:GetAttribute("TasksTotal") or 0
+		local root = Players.LocalPlayer.Character
+			and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if root then
+			local level = Floors.levelAt(root.Position.Y - 3)
+			floorLabel.Text = if level > 0 then "FLOOR 2  UPSTAIRS" elseif level < 0 then "BASEMENT" else "GROUND FLOOR"
+		end
 		tasks.Visible = phase == "Night"
 		tasks.Text = `TASKS {done}/{total}`
 		if phase == "Lobby" then

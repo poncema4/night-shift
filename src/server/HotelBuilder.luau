@@ -1,18 +1,90 @@
 --!strict
--- Builds the hotel from the pure layout in Shared/Game/Hotel and Shared/Game/Dressing.
--- Blender meshes replace the part-built props once they are imported (see art/README.md).
+-- Builds the three-level hotel from the pure data in Shared/Game: Building (every solid box), Furnishing (props)
+-- and Floors (levels, stairs, tasks). The geometry is proven by tests (no overlaps, headroom, clear routes),
+-- so this file only turns boxes into Parts and styles them.
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Dressing = require(ReplicatedStorage.Shared.Game.Dressing)
+local Building = require(ReplicatedStorage.Shared.Game.Building)
+local Floors = require(ReplicatedStorage.Shared.Game.Floors)
+local Furnishing = require(ReplicatedStorage.Shared.Game.Furnishing)
 local Hotel = require(ReplicatedStorage.Shared.Game.Hotel)
 local Props = require(script.Parent.Props)
 
 local HotelBuilder = {}
 
 export type Result = { spawn: SpawnLocation, stations: { [string]: Part } }
+
+type Style = { Color3 | Enum.Material }
+
+local function style(color: Color3, material: Enum.Material): Style
+	return { color, material }
+end
+
+-- Walls and dressing per level: ground wallpaper, upstairs warmer, basement bare concrete.
+local WALL: { [number]: Style } = {
+	[0] = style(Color3.fromRGB(70, 52, 62), Enum.Material.SmoothPlastic),
+	[1] = style(Color3.fromRGB(82, 70, 58), Enum.Material.SmoothPlastic),
+	[-1] = style(Color3.fromRGB(62, 64, 68), Enum.Material.Concrete),
+}
+local TRIM: { [string]: Style } = {
+	skirting = style(Color3.fromRGB(34, 22, 16), Enum.Material.Wood),
+	wainscot = style(Color3.fromRGB(62, 38, 28), Enum.Material.WoodPlanks),
+	rail = style(Color3.fromRGB(150, 108, 58), Enum.Material.Wood),
+	cornice = style(Color3.fromRGB(170, 152, 120), Enum.Material.SmoothPlastic),
+	frame = style(Color3.fromRGB(120, 82, 46), Enum.Material.Wood),
+	tread = style(Color3.fromRGB(58, 38, 28), Enum.Material.Wood),
+	landing = style(Color3.fromRGB(58, 38, 28), Enum.Material.Wood),
+	guardrail = style(Color3.fromRGB(170, 124, 60), Enum.Material.Metal),
+	roof = style(Color3.fromRGB(34, 30, 38), Enum.Material.SmoothPlastic),
+}
+local FLOORS: { [string]: Style } = {
+	Lobby = style(Color3.fromRGB(78, 72, 74), Enum.Material.Marble),
+	Office = style(Color3.fromRGB(44, 62, 52), Enum.Material.Fabric),
+	Ballroom = style(Color3.fromRGB(96, 62, 40), Enum.Material.WoodPlanks),
+	["Pool Room"] = style(Color3.fromRGB(40, 92, 118), Enum.Material.Slate),
+	Kitchen = style(Color3.fromRGB(150, 150, 146), Enum.Material.Slate),
+	Pantry = style(Color3.fromRGB(110, 100, 86), Enum.Material.Slate),
+	["Boiler Room"] = style(Color3.fromRGB(62, 62, 66), Enum.Material.Concrete),
+	Laundry = style(Color3.fromRGB(98, 104, 112), Enum.Material.Slate),
+	Storage = style(Color3.fromRGB(72, 64, 56), Enum.Material.WoodPlanks),
+	Security = style(Color3.fromRGB(46, 52, 68), Enum.Material.Fabric),
+	Mezzanine = style(Color3.fromRGB(88, 82, 78), Enum.Material.Marble),
+	Library = style(Color3.fromRGB(70, 46, 30), Enum.Material.WoodPlanks),
+	["Grand Suite"] = style(Color3.fromRGB(76, 24, 36), Enum.Material.Fabric),
+	["Rooftop Spa"] = style(Color3.fromRGB(86, 120, 130), Enum.Material.Slate),
+	["Flooded Hall"] = style(Color3.fromRGB(34, 44, 46), Enum.Material.Concrete),
+	["Parking Garage"] = style(Color3.fromRGB(52, 52, 54), Enum.Material.Concrete),
+	["West stairs"] = style(Color3.fromRGB(60, 40, 30), Enum.Material.WoodPlanks),
+	["East stairs"] = style(Color3.fromRGB(60, 40, 30), Enum.Material.WoodPlanks),
+}
+local CORRIDOR: { [number]: Style } = {
+	[0] = style(Color3.fromRGB(104, 22, 36), Enum.Material.Fabric),
+	[1] = style(Color3.fromRGB(34, 74, 60), Enum.Material.Fabric),
+	[-1] = style(Color3.fromRGB(48, 48, 50), Enum.Material.Concrete),
+}
+local GUEST_ROOM = style(Color3.fromRGB(40, 58, 66), Enum.Material.Fabric)
+local CELLAR_ROOM = style(Color3.fromRGB(56, 56, 60), Enum.Material.Concrete)
+
+local function styleOf(s: Building.Slab): (Color3, Enum.Material)
+	local level = s.level or 0
+	local chosen: Style
+	if s.kind == "wall" or s.kind == "header" then
+		chosen = WALL[level]
+	elseif s.kind == "tile" then
+		local name = s.name or ""
+		if name == "Corridor" then
+			chosen = CORRIDOR[level]
+		else
+			chosen = FLOORS[name] or if level > 0 then GUEST_ROOM elseif level < 0 then CELLAR_ROOM else FLOORS.Pantry
+		end
+	else
+		chosen = TRIM[s.kind] or WALL[level]
+	end
+	return chosen[1] :: Color3, chosen[2] :: Enum.Material
+end
 
 local function block(
 	parent: Instance,
@@ -31,24 +103,25 @@ local function block(
 	part.Material = material
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
+	part.CanTouch = false
 	part.Parent = parent
 	return part
 end
 
-local function bulb(parent: Instance, x: number, z: number)
+local function bulb(parent: Instance, x: number, y: number, z: number, level: number)
 	local lamp = block(
 		parent,
 		"Bulb",
 		Vector3.new(3, 0.4, 3),
-		Vector3.new(x, Hotel.CEILING - 0.3, z),
+		Vector3.new(x, y + Hotel.CEILING - 0.3, z),
 		Color3.fromRGB(255, 214, 150),
 		Enum.Material.Neon
 	)
 	lamp.CanCollide = false
 	local light = Instance.new("PointLight")
 	light.Range = 30
-	light.Brightness = 1.1
-	light.Color = Color3.fromRGB(255, 205, 140)
+	light.Brightness = if level < 0 then 0.8 else 1.1
+	light.Color = if level < 0 then Color3.fromRGB(190, 220, 170) else Color3.fromRGB(255, 205, 140)
 	light.Shadows = false
 	light.Parent = lamp
 	CollectionService:AddTag(lamp, "Bulb")
@@ -118,179 +191,45 @@ function HotelBuilder.build(): Result
 	local folder = Instance.new("Folder")
 	folder.Name = "Hotel"
 	folder.Parent = workspace
-	local c = Hotel.CORRIDOR
-	local width, depth = c.x2 - c.x1 + Hotel.WALL, 50 + Hotel.WALL
 
-	local WALL_COLOR = Color3.fromRGB(70, 52, 62)
-	local TRIM_COLORS: { [string]: { Color3 } } = {
-		skirting = { Color3.fromRGB(34, 22, 16), Enum.Material.Wood :: any },
-		wainscot = { Color3.fromRGB(62, 38, 28), Enum.Material.WoodPlanks :: any },
-		rail = { Color3.fromRGB(150, 108, 58), Enum.Material.Wood :: any },
-		cornice = { Color3.fromRGB(170, 152, 120), Enum.Material.SmoothPlastic :: any },
-		frame = { Color3.fromRGB(120, 82, 46), Enum.Material.Wood :: any },
-		header = { WALL_COLOR, Enum.Material.SmoothPlastic :: any },
-	}
-	local FLOORS: { [string]: { Color3 } } = {
-		Lobby = { Color3.fromRGB(78, 72, 74), Enum.Material.Marble :: any },
-		Office = { Color3.fromRGB(44, 62, 52), Enum.Material.Fabric :: any },
-		Ballroom = { Color3.fromRGB(96, 62, 40), Enum.Material.WoodPlanks :: any },
-		["Pool Room"] = { Color3.fromRGB(40, 92, 118), Enum.Material.Slate :: any },
-		Kitchen = { Color3.fromRGB(150, 150, 146), Enum.Material.Slate :: any },
-		Pantry = { Color3.fromRGB(110, 100, 86), Enum.Material.Slate :: any },
-		["Boiler Room"] = { Color3.fromRGB(62, 62, 66), Enum.Material.Concrete :: any },
-		Laundry = { Color3.fromRGB(98, 104, 112), Enum.Material.Slate :: any },
-		Storage = { Color3.fromRGB(72, 64, 56), Enum.Material.WoodPlanks :: any },
-		Security = { Color3.fromRGB(46, 52, 68), Enum.Material.Fabric :: any },
-	}
-
-	-- Floor: one dark base slab under flush tiles. Tiles share edges but never overlap, so nothing z-fights.
-	block(
-		folder,
-		"Base",
-		Vector3.new(width, 1, depth),
-		Vector3.new(0, -1.5, 0),
-		Color3.fromRGB(20, 16, 16),
-		Enum.Material.Concrete
-	)
-	for _, room in Hotel.rooms do
-		local rx, rz = Hotel.centre(room)
-		local style = FLOORS[room.name]
-		block(
-			folder,
-			"Floor_" .. room.name,
-			Vector3.new(room.x2 - room.x1, 1, room.z2 - room.z1),
-			Vector3.new(rx, -0.5, rz),
-			style[1],
-			style[2] :: any
-		)
-	end
-	block(
-		folder,
-		"Floor_Corridor",
-		Vector3.new(c.x2 - c.x1, 1, c.z2 - c.z1),
-		Vector3.new(0, -0.5, 0),
-		Color3.fromRGB(104, 22, 36),
-		Enum.Material.Fabric
-	)
-	block(
-		folder,
-		"Runner",
-		Vector3.new(c.x2 - c.x1 - 4, 0.04, 4),
-		Vector3.new(0, 0.02, 0),
-		Color3.fromRGB(74, 14, 26),
-		Enum.Material.Fabric
-	)
-	for _, side in { -1, 1 } do
-		block(
-			folder,
-			"RunnerEdge",
-			Vector3.new(c.x2 - c.x1 - 4, 0.02, 0.25),
-			Vector3.new(0, 0.05, side * 1.9),
-			Color3.fromRGB(190, 150, 70),
-			Enum.Material.Fabric
-		)
+	-- every wall, floor slab, trim piece, stair, rail and roof: one pass over the tested list
+	local shell = Instance.new("Folder")
+	shell.Name = "Shell"
+	shell.Parent = folder
+	for _, s in Building.solids() do
+		local color, material = styleOf(s)
+		block(shell, s.kind, Vector3.new(s.w, s.h, s.d), Vector3.new(s.x, s.y + s.h / 2, s.z), color, material)
 	end
 
-	block(
-		folder,
-		"Ceiling",
-		Vector3.new(width, 1, depth),
-		Vector3.new(0, Hotel.CEILING + 0.5, 0),
-		Color3.fromRGB(34, 30, 38),
-		Enum.Material.SmoothPlastic
-	)
-	for _, box in Hotel.wallBoxes() do
-		block(
-			folder,
-			"Wall",
-			Vector3.new(box.w, Hotel.CEILING, box.d),
-			Vector3.new(box.x, Hotel.CEILING / 2, box.z),
-			WALL_COLOR,
-			Enum.Material.SmoothPlastic
-		)
-	end
-	local function slab(s: Dressing.Slab)
-		local style = TRIM_COLORS[s.kind]
-		block(
-			folder,
-			s.kind,
-			Vector3.new(s.w, s.h, s.d),
-			Vector3.new(s.x, s.y + s.h / 2, s.z),
-			style[1],
-			style[2] :: any
-		)
-	end
-	for _, list in { Dressing.headers(), Dressing.frames(), Dressing.trim() } do
-		for _, s in list do
-			slab(s)
+	-- ceiling lights: one per room, and along each corridor
+	local lights = Instance.new("Folder")
+	lights.Name = "Lights"
+	lights.Parent = folder
+	for _, level in Floors.levels do
+		local y = Floors.y(level)
+		for _, room in Floors.rooms(level) do
+			local x, z = Hotel.centre(room)
+			bulb(lights, x, y, z, level)
+		end
+		for x = -50, 50, 20 do
+			bulb(lights, x, y, 0, level)
 		end
 	end
-
-	for _, room in Hotel.rooms do
-		local x, z = Hotel.centre(room)
-		bulb(folder, x, z)
-	end
-	for x = -50, 50, 20 do
-		bulb(folder, x, 0)
+	for _, a in Floors.annexes do
+		local x = (a.x1 + a.x2) / 2
+		bulb(lights, x, 0, 0, 0)
+		bulb(lights, x, if a.side < 0 then Floors.y(1) else Floors.y(-1), 0, if a.side < 0 then 1 else -1)
 	end
 
-	-- props
+	-- furniture
+	local props = Instance.new("Folder")
+	props.Name = "Props"
+	props.Parent = folder
+	for _, item in Furnishing.items() do
+		Props.make(props, item, Floors.y(item.level))
+	end
+
 	local lx = Hotel.centre(Hotel.room("Lobby"))
-	Props.desk(folder, Vector3.new(lx, 0, -22))
-	Props.armchair(folder, Vector3.new(lx - 9, 0, -10), math.rad(20))
-	Props.armchair(folder, Vector3.new(lx + 9, 0, -10), math.rad(-20))
-	Props.chandelier(folder, lx, -15, Hotel.CEILING)
-	local px, pz = Hotel.centre(Hotel.room("Pool Room"))
-	pz = -13
-	local water = block(
-		folder,
-		"Pool",
-		Vector3.new(20, 0.1, 10),
-		Vector3.new(px, 0.05, pz),
-		Color3.fromRGB(52, 150, 200),
-		Enum.Material.SmoothPlastic
-	)
-	water.Transparency = 0.35
-	water.CanCollide = false
-	local coping = Color3.fromRGB(215, 210, 200)
-	for _, side in { -1, 1 } do
-		block(
-			folder,
-			"Coping",
-			Vector3.new(21.2, 0.25, 0.6),
-			Vector3.new(px, 0.125, pz + side * 5.3),
-			coping,
-			Enum.Material.Marble
-		)
-		block(
-			folder,
-			"Coping",
-			Vector3.new(0.6, 0.25, 10),
-			Vector3.new(px + side * 10.3, 0.125, pz),
-			coping,
-			Enum.Material.Marble
-		)
-	end
-	local bx, bz = Hotel.centre(Hotel.room("Ballroom"))
-	block(
-		folder,
-		"BallroomTable",
-		Vector3.new(13, 2.6, 5),
-		Vector3.new(bx, 1.3, bz + 2),
-		Color3.fromRGB(70, 42, 28),
-		Enum.Material.Wood
-	)
-	block(
-		folder,
-		"BallroomTableTop",
-		Vector3.new(14, 0.4, 6),
-		Vector3.new(bx, 2.8, bz + 2),
-		Color3.fromRGB(96, 60, 38),
-		Enum.Material.Wood
-	)
-	Props.chandelier(folder, bx - 8, bz + 2, Hotel.CEILING)
-	Props.chandelier(folder, bx + 8, bz + 2, Hotel.CEILING)
-
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "LobbySpawn"
 	spawn.Anchored = true
@@ -303,16 +242,17 @@ function HotelBuilder.build(): Result
 	spawn.Parent = folder
 
 	local stations: { [string]: Part } = {}
-	for _, task in Hotel.tasks do
+	for _, task in Floors.tasks() do
 		local station = block(
 			folder,
 			"Task_" .. task.id,
 			Vector3.new(4, 5, 2.5),
-			Vector3.new(task.x, 2.5, task.z),
+			Vector3.new(task.x, Floors.y(task.level) + 2.5, task.z),
 			Color3.fromRGB(230, 160, 40),
 			Enum.Material.Metal
 		)
 		station:SetAttribute("TaskName", task.name)
+		station:SetAttribute("Level", task.level)
 		stations[task.id] = station
 	end
 

@@ -1,10 +1,12 @@
 --!strict
--- Wall dressing as plain data: skirting, wainscot, chair rail, cornice, door frames and door headers.
--- Every piece is an axis-aligned box that touches the wall without overlapping it or any other piece,
--- so nothing shares a coplanar face (which is what makes surfaces flicker in Roblox).
+-- Wall dressing as plain data, per level: skirting, wainscot, chair rail, cornice, door frames and door
+-- headers. Every piece is an axis-aligned box that touches the wall without overlapping it or any other
+-- piece, so nothing shares a coplanar face (which is what makes surfaces flicker in Roblox).
+-- Heights are level-local (0 = the walking surface).
+local Floors = require("./Floors")
 local Hotel = require("./Hotel")
 
-export type Slab = { x: number, z: number, w: number, d: number, y: number, h: number, kind: string }
+export type Slab = Floors.Slab
 type Blocker = { x1: number, z1: number, x2: number, z2: number, y0: number, y1: number }
 
 local Dressing = {}
@@ -28,15 +30,14 @@ local function span(a0: number, a1: number, b0: number, b1: number): boolean
 end
 
 -- Boxes above each doorway so the opening is a normal-height door, not a 14 stud gap.
-function Dressing.headers(): { Slab }
+function Dressing.headers(level: number): { Slab }
 	local out: { Slab } = {}
-	for _, room in Hotel.rooms do
-		local cx, doorZ = Hotel.door(room)
+	for _, door in Floors.doors(level) do
 		table.insert(out, {
-			x = cx,
-			z = doorZ,
-			w = Hotel.DOOR,
-			d = Hotel.WALL,
+			x = door.x,
+			z = door.z,
+			w = if door.alongX then Hotel.DOOR else Hotel.WALL,
+			d = if door.alongX then Hotel.WALL else Hotel.DOOR,
 			y = Dressing.HEADER_Y,
 			h = Hotel.CEILING - Dressing.HEADER_Y,
 			kind = "header",
@@ -46,34 +47,27 @@ function Dressing.headers(): { Slab }
 end
 
 -- Door frames: two posts and a head piece on each face of every doorway.
-function Dressing.frames(): { Slab }
+function Dressing.frames(level: number): { Slab }
 	local out: { Slab } = {}
 	local fw, fd = Dressing.FRAME_WIDTH, Dressing.FRAME_DEPTH
 	local half = Hotel.DOOR / 2
-	for _, room in Hotel.rooms do
-		local cx, doorZ = Hotel.door(room)
+	for _, door in Floors.doors(level) do
 		for _, side in { 1, -1 } do
-			local zc = doorZ + side * (Hotel.WALL / 2 + fd / 2)
-			for _, dir in { -1, 1 } do
+			local off = side * (Hotel.WALL / 2 + fd / 2)
+			local function at(along: number, width: number, y: number, h: number)
 				table.insert(out, {
-					x = cx + dir * (half + fw / 2),
-					z = zc,
-					w = fw,
-					d = fd,
-					y = 0,
-					h = Dressing.HEADER_Y,
+					x = if door.alongX then door.x + along else door.x + off,
+					z = if door.alongX then door.z + off else door.z + along,
+					w = if door.alongX then width else fd,
+					d = if door.alongX then fd else width,
+					y = y,
+					h = h,
 					kind = "frame",
 				})
 			end
-			table.insert(out, {
-				x = cx,
-				z = zc,
-				w = Hotel.DOOR + fw * 2,
-				d = fd,
-				y = Dressing.HEADER_Y,
-				h = 0.6,
-				kind = "frame",
-			})
+			at(-(half + fw / 2), fw, 0, Dressing.HEADER_Y)
+			at(half + fw / 2, fw, 0, Dressing.HEADER_Y)
+			at(0, Hotel.DOOR + fw * 2, Dressing.HEADER_Y, 0.6)
 		end
 	end
 	return out
@@ -100,14 +94,9 @@ local function clip(a0: number, a1: number, cuts: { { number } }): { { number } 
 	return pieces
 end
 
-local function inside(x: number, z: number): boolean
-	local c = Hotel.CORRIDOR
-	return x > c.x1 and x < c.x2 and z > -25 and z < 25
-end
-
-local function frameBlockers(): { Blocker }
+local function frameBlockers(level: number): { Blocker }
 	local list: { Blocker } = {}
-	for _, f in Dressing.frames() do
+	for _, f in Dressing.frames(level) do
 		table.insert(list, {
 			x1 = f.x - f.w / 2,
 			z1 = f.z - f.d / 2,
@@ -121,10 +110,10 @@ local function frameBlockers(): { Blocker }
 end
 
 -- Layer strips along the inside face of every wall, cut so they stop at frames and perpendicular walls.
-function Dressing.trim(): { Slab }
+function Dressing.trim(level: number): { Slab }
 	local out: { Slab } = {}
-	local frameList = frameBlockers()
-	local boxes = Hotel.wallBoxes()
+	local frameList = frameBlockers(level)
+	local boxes = Floors.wallBoxes(level)
 	local reach = 0
 	for _, layer in Dressing.layers do
 		reach = math.max(reach, layer.depth)
@@ -132,13 +121,8 @@ function Dressing.trim(): { Slab }
 	for index, box in boxes do
 		local xLong = box.w >= box.d
 		local thickness = if xLong then box.d else box.w
-		local normals = if xLong then { { 0, 1 }, { 0, -1 } } else { { 1, 0 }, { -1, 0 } }
+		local normals: { { number } } = if xLong then { { 0, 1 }, { 0, -1 } } else { { 1, 0 }, { -1, 0 } }
 		for _, n in normals do
-			local probeX = box.x + n[1] * (thickness / 2 + 0.5)
-			local probeZ = box.z + n[2] * (thickness / 2 + 0.5)
-			if not inside(probeX, probeZ) then
-				continue
-			end
 			local sign = if xLong then n[2] else n[1]
 			local centreThin = if xLong then box.z else box.x
 			local long0 = if xLong then box.x - box.w / 2 else box.z - box.d / 2
@@ -180,9 +164,14 @@ function Dressing.trim(): { Slab }
 						continue
 					end
 					local mid = (piece[1] + piece[2]) / 2
+					local px = if xLong then mid else thinMid
+					local pz = if xLong then thinMid else mid
+					if not Floors.interior(level, px, pz) then
+						continue -- the outside face of an outer wall
+					end
 					table.insert(out, {
-						x = if xLong then mid else thinMid,
-						z = if xLong then thinMid else mid,
+						x = px,
+						z = pz,
 						w = if xLong then length else layer.depth,
 						d = if xLong then layer.depth else length,
 						y = layer.y,

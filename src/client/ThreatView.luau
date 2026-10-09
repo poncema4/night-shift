@@ -25,7 +25,8 @@ function ThreatView.start()
 			position = nil
 			return
 		end
-		local target = Vector3.new(state:GetAttribute("X") or 0, 0, state:GetAttribute("Z") or 0)
+		local target =
+			Vector3.new(state:GetAttribute("X") or 0, state:GetAttribute("Y") or 0, state:GetAttribute("Z") or 0)
 		local previous = position or target
 		local alpha = 1 - math.exp(-dt * 10)
 		local current = previous:Lerp(target, alpha)

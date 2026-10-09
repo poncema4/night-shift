@@ -5,7 +5,8 @@
 export type Rect = { name: string, x1: number, z1: number, x2: number, z2: number }
 export type Box = { x: number, z: number, w: number, d: number } -- centre + size
 export type TaskSpot = { id: string, name: string, room: string, x: number, z: number }
-export type Node = { id: string, x: number, z: number, links: { string } }
+-- y/level/kind are filled in by the graph builders (the ground floor is level 0, y = 0).
+export type Node = { id: string, x: number, z: number, y: number, level: number, kind: string, links: { string } }
 
 local Hotel = {}
 
@@ -111,7 +112,7 @@ function Hotel.graph(): { [string]: Node }
 	local seen: { [number]: boolean } = {}
 	for _, room in Hotel.rooms do
 		local x, z = Hotel.centre(room)
-		nodes[room.name] = { id = room.name, x = x, z = z, links = {} }
+		nodes[room.name] = { id = room.name, x = x, z = z, y = 0, level = 0, kind = "room", links = {} }
 		local doorX = Hotel.door(room)
 		if not seen[doorX] then
 			seen[doorX] = true
@@ -126,7 +127,7 @@ function Hotel.graph(): { [string]: Node }
 	local previous: string? = nil
 	for _, x in corridorX do
 		local id = "C" .. x
-		nodes[id] = { id = id, x = x, z = 0, links = {} }
+		nodes[id] = { id = id, x = x, z = 0, y = 0, level = 0, kind = "corridor", links = {} }
 		if previous then
 			link(previous, id)
 		end

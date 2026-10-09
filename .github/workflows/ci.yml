@@ -23,6 +23,8 @@ jobs:
         run: stylua --check src tests
       - name: Tests (Lune)
         run: lune run tests/run
+      - name: Type-check against the Roblox API (luau-lsp)
+        run: bash scripts/typecheck.sh
       - name: Build the place file (Rojo)
         run: |
           mkdir -p build
