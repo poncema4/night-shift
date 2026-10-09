@@ -26,9 +26,9 @@ jobs:
       - name: Build the place file (Rojo)
         run: |
           mkdir -p build
-          rojo build -o build/NexusHollow.rbxl
+          rojo build -o build/NightShift.rbxl
       - uses: actions/upload-artifact@v7
         with:
-          name: NexusHollow-place
-          path: build/NexusHollow.rbxl
+          name: NightShift-place
+          path: build/NightShift.rbxl
           retention-days: 7

@@ -22,25 +22,34 @@ selene generate-roblox-std     # once
 selene src tests               # lint
 stylua src tests               # format
 lune run tests/run             # tests (exit code = failures)
-rojo build -o build/NexusHollow.rbxl
+rojo build -o build/NightShift.rbxl
 git add -A && git commit -m "..." && git push
 ```
 
-## Windows PC (play it in Roblox Studio)
+## Quick start (scripts)
 
-One-time setup:
-1. Install **Roblox Studio** and **Git for Windows**.
-2. Download **Rokit** for Windows from <https://github.com/rojo-rbx/rokit/releases> (`rokit-*-windows-x86_64.zip`), unzip it, open PowerShell in that folder and run `.\rokit.exe self-install`. Close and reopen PowerShell.
-3. `git clone https://github.com/poncema4/nexus-hollow.git` and `cd nexus-hollow`.
-4. `rokit install` (trust the tools when asked), then `rojo plugin install` (puts the Rojo plugin into Studio).
+Linux / macOS (laptop where Claude Code runs):
+```bash
+git clone https://github.com/poncema4/night-shift.git && cd night-shift
+./scripts/setup.sh     # once: installs Rokit + all tools
+./scripts/check.sh     # lint + format + tests + place build (same as CI)
+```
 
-Each time you want the latest code:
-1. `git pull`
-2. `rojo serve`  (leave it running)
-3. In Studio: open a new Baseplate, then **Plugins > Rojo > Connect**. Your scripts appear under ServerScriptService / ReplicatedStorage / StarterPlayer and update live as you pull.
-4. Press **Play**.
+Windows PC (where Roblox Studio runs). Install Roblox Studio and Git for Windows first, then in PowerShell:
+```powershell
+git clone https://github.com/poncema4/night-shift.git
+cd night-shift
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1   # once: Rokit, tools, Rojo Studio plugin
+```
+Open a NEW PowerShell window after setup, then every session:
+```powershell
+cd night-shift
+.\scripts\serve.ps1     # git pull + rojo serve, leave it running
+```
+In Studio: open a Baseplate, **Plugins > Rojo > Connect**, press **Play**. Scripts appear under ServerScriptService / ReplicatedStorage / StarterPlayer and update live after each pull.
+`.\scripts\check.ps1` runs the same checks as CI on Windows.
 
-Changes you make in Studio (parts, maps, UI) are NOT in git unless you save them as files; ask Claude how to keep a map in the repo (a `.rbxm` model file or built from code).
+Maps and models built in Studio or Blender are not synced by Rojo; see `docs/WORKFLOW.md`.
 
 ## Connecting the game to the group (once)
 
