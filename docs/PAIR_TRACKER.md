@@ -6,7 +6,7 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 
 **Tiers are community-reported, not an official GitHub page**: 1 (default), 10 (Bronze), 24 (Silver), 48 (Gold) co-authored commits on merged PRs. Whether the badge has advanced can only be seen on the profile at github.com/poncema4.
 
-**Verified count on `main`**: 42 commits carry the poncema4 co-author trailer; 39 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
+**Verified count on `main`**: 43 commits carry the poncema4 co-author trailer; 40 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
 
 ## Merged PRs
 
@@ -51,6 +51,7 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 | [#38](https://github.com/poncema4/night-shift/pull/38) | feat: lockers, holding cell, flashlight item, darker hotel | 2026-10-09 |
 | [#39](https://github.com/poncema4/night-shift/pull/39) | feat: wider hotel, sewer wing, three new tasks | 2026-10-09 |
 | [#40](https://github.com/poncema4/night-shift/pull/40) | feat: cosmetic-only shop, Starlight pass, tips packs, master TODO | 2026-10-09 |
+| [#41](https://github.com/poncema4/night-shift/pull/41) | feat: queue pods, flickering lobby, return to lobby, animated cage, store art | 2026-10-09 |
 
 One PR counts once however many commits it has; the count above is commits, which is what the tiers are described in.
 
