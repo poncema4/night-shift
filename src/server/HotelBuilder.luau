@@ -12,6 +12,7 @@ local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local Furnishing = require(ReplicatedStorage.Shared.Game.Furnishing)
 local Hotel = require(ReplicatedStorage.Shared.Game.Hotel)
 local Props = require(script.Parent.Props)
+local StationProps = require(script.Parent.StationProps)
 
 local HotelBuilder = {}
 
@@ -266,6 +267,7 @@ function HotelBuilder.build(): Result
 		)
 		station:SetAttribute("TaskName", task.name)
 		station:SetAttribute("Level", task.level)
+		StationProps.dress(station, task.id, if task.z > 0 then -1 else 1)
 		stations[task.id] = station
 	end
 

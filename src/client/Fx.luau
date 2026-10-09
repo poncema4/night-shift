@@ -21,6 +21,8 @@ local SUBTITLES: { [string]: { string } } = {
 }
 
 local NEAR = 45 -- studs at which the dread starts
+local LIGHT_CULL = 75 -- lights farther than this are switched off locally
+local FLOOR_GAP = 12 -- ...and so are lights this far above or below you (another floor)
 
 function Fx.start()
 	local player = Players.LocalPlayer
@@ -53,6 +55,8 @@ function Fx.start()
 
 	-- scares from the server: bulbs flicker harder, the camera shudders, a line of text appears
 	local boostUntil, shakeUntil, subtitleUntil = 0, 0, 0
+	local culled: { [PointLight]: boolean } = {}
+	local base: { [PointLight]: number } = {}
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	local scare = remotes:WaitForChild("Scare") :: RemoteEvent
 	scare.OnClientEvent:Connect(function(kind: string, seconds: number)
@@ -98,11 +102,26 @@ function Fx.start()
 		if root then
 			for _, lamp in CollectionService:GetTagged("Bulb") do
 				local light = lamp:FindFirstChildOfClass("PointLight")
-				if light and (lamp.Position - root.Position).Magnitude < 70 then
-					local n = math.noise(now * (3 + flickerIntensity * 12), lamp.Position.X * 0.37)
-					local dip = if n < -0.25 - (1 - flickerIntensity) * 0.15 then 0.15 else 1
-					light.Brightness = 1.1 * dip
+				if not (light and lamp:IsA("BasePart")) then
+					continue
 				end
+				local offset = lamp.Position - root.Position
+				-- lights far away or on another floor are switched off on this screen only (cheap on phones)
+				if offset.Magnitude > LIGHT_CULL or math.abs(offset.Y) > FLOOR_GAP then
+					if light.Enabled then
+						light.Enabled = false
+						culled[light] = true
+					end
+					continue
+				end
+				if culled[light] then
+					light.Enabled = true
+					culled[light] = nil
+				end
+				base[light] = base[light] or light.Brightness
+				local n = math.noise(now * (3 + flickerIntensity * 12), lamp.Position.X * 0.37)
+				local dip = if n < -0.25 - (1 - flickerIntensity) * 0.15 then 0.15 else 1
+				light.Brightness = base[light] * dip
 			end
 		end
 	end)
