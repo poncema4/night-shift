@@ -13,28 +13,59 @@ local ScareDirector = {}
 
 local remote: RemoteEvent? = nil
 local connection: RBXScriptConnection? = nil
-local darkened: { PointLight } = {}
 local paused = false
+local restorers: { () -> () } = {}
 
-local function restoreLights()
-	for _, light in darkened do
-		if light.Parent then
-			light.Enabled = true
-		end
+-- Undo every blackout still running (used when the night ends).
+local function restoreAll()
+	for _, restore in restorers do
+		restore()
 	end
-	darkened = {}
+	restorers = {}
 end
 
--- Turns the lights on one level off for a while (also used by the saboteur's ability).
+-- Turns the lights on one level off for a while (also used by the saboteur's ability). Each blackout remembers and
+-- restores only its own lights, so two overlapping ones do not end each other early.
 function ScareDirector.blackout(level: number, seconds: number)
+	local lights: { PointLight } = {}
+	local dims: { { part: BasePart, color: Color3, material: Enum.Material } } = {}
 	for _, lamp in CollectionService:GetTagged("Bulb") do
 		local light = lamp:FindFirstChildOfClass("PointLight")
 		if lamp:IsA("BasePart") and light and light.Enabled and Floors.levelAt(lamp.Position.Y) == level then
 			light.Enabled = false
-			table.insert(darkened, light)
+			table.insert(lights, light)
+			-- the glowing bulb itself goes dark too, otherwise a blackout still looks lit
+			table.insert(dims, { part = lamp, color = lamp.Color, material = lamp.Material })
+			lamp.Color = Color3.fromRGB(30, 28, 26)
+			lamp.Material = Enum.Material.SmoothPlastic
 		end
 	end
-	task.delay(seconds, restoreLights)
+	local restored = false
+	local function restore()
+		if restored then
+			return
+		end
+		restored = true
+		for _, light in lights do
+			if light.Parent then
+				light.Enabled = true
+			end
+		end
+		for _, d in dims do
+			if d.part.Parent then
+				d.part.Color = d.color
+				d.part.Material = d.material
+			end
+		end
+	end
+	table.insert(restorers, restore)
+	task.delay(seconds, function()
+		restore()
+		local at = table.find(restorers, restore)
+		if at then
+			table.remove(restorers, at)
+		end
+	end)
 end
 
 local function levelOfSomeone(): number
@@ -67,7 +98,7 @@ function ScareDirector.setActive(on: boolean, nightSeconds: number)
 		connection:Disconnect()
 		connection = nil
 	end
-	restoreLights()
+	restoreAll()
 	if not on then
 		return
 	end

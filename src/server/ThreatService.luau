@@ -112,6 +112,10 @@ local function run(patrol: Patrol.Patrol)
 		end
 
 		for _, entry in living do
+			-- someone inside a locker cannot be grabbed in passing: he has to search it (above) and pull them out first
+			if StealthService.hidingPlace(entry.player) then
+				continue
+			end
 			local flat = math.sqrt((entry.x - patrol.x) ^ 2 + (entry.z - patrol.z) ^ 2)
 			if flat <= settings.KillRadius and math.abs(entry.y - patrol.y) <= settings.KillHeight then
 				print(`[Threat] the Night Manager caught {entry.player.Name}`)
