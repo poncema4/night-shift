@@ -25,6 +25,8 @@ return function(t)
 		world.root(p).Position = V3.new(900, 3, 900) -- nobody within earshot: he just patrols
 	end
 	local patrol = threat.current()
+	threat.release(false) -- skip the cell and the lobby search: these specs place him by hand
+	world.advance(0.2)
 	local state = storage:FindFirstChild("ThreatState")
 
 	-- how far he walks in 3 seconds (the path length, so a corner does not hide it), with the crew `done` tasks in

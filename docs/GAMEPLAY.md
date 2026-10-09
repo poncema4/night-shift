@@ -6,7 +6,7 @@ Rules live in `src/shared/Game` as pure modules with tests; the Roblox services 
 |---|---|---|
 | Sprint | `Stamina`: 4.5 s of running, then winded until recovered | `StealthService` sets WalkSpeed 16 / 24 |
 | Flashlight | `Battery`: ~45 s of light, slow recharge, dead until 8 %. It is also a weapon: `Flash` (hold the beam on the Night Manager ~1 s, in a 22 degree cone, within 45 studs, nothing solid between) blinds him for 3 s, then an 18 s cooldown; a blinded Night Manager cannot move or grab | `StealthService` owns a SpotLight on the head; `ThreatService` does the cone, the raycast and the blinding |
-| Hiding | `Stealth.search`: he must linger ~1.5 s within 5 studs; a hidden player is never grabbed in passing; if he HEARD someone and they then hide, he comes and waits at that spot for 8 s and pulls them out | lockers + wardrobes get a Hide prompt; hidden players are invisible and frozen |
+| Hiding | One tap of E. A hidden player is never grabbed in passing, and a locker he has no reason to open is safe. Only if he HEARD you duck in does he come, wait there up to 8 s and (after 4 s of searching) pull you out | lockers + wardrobes get a Hide prompt; the camera looks out through the locker door; hidden players are invisible and frozen |
 | Noise | `Stealth.hearingRange`: sprint x1.5, light x1.25, still x0.4, hidden 0 | `ThreatService` uses it to pick who to hunt |
 | Scares | `Scares`: schedule gets busier through the night; blackouts only after 25 % and a minute apart | `ScareDirector` plays them; `Fx` shakes, flickers, subtitles |
 
@@ -54,3 +54,9 @@ When you are out (caught or ejected) you **spectate**: **Left / Right** (or the 
 ## Co-op and escalation (v0.5)
 - Fewer than 4 players: co-op, no saboteur, survive and finish the tasks.
 - Every finished task makes the Night Manager faster (up to 1.4x). See docs/LOBBY.md.
+
+## The night starts in a cage (v0.6)
+- The Night Manager starts every night locked in a holding cell in the far-east basement (Mop Closet), as far from the crew's lobby spawn as the hotel allows.
+- A 30 s countdown (`Config.Threat.ReleaseSeconds`) is shown to everyone. While caged he hears and grabs no one.
+- When it ends: "HE IS LOOSE", and he goes to search the lobby where the crew started (`SearchSeconds`), then patrols as normal.
+- The flashlight is a hotbar item (equip = on, put away = off; F is a shortcut). The hotel is darker than before, so the flashlight matters.

@@ -30,17 +30,17 @@ return table.freeze({
 	Brand = table.freeze({ GroupId = 749648777 }),
 	-- How the hotel looks. Tune these first if it is too dark or too bright (Studio playtest).
 	Look = table.freeze({
-		Ambient = { 7, 7, 11 },
-		OutdoorAmbient = { 6, 6, 10 },
+		Ambient = { 4, 4, 8 },
+		OutdoorAmbient = { 4, 4, 7 },
 		FogStart = 8,
-		FogEnd = 105,
+		FogEnd = 88,
 		AtmosphereDensity = 0.38,
 		Contrast = 0.12,
 		Saturation = -0.15,
-		BulbRange = 20,
-		BulbBrightness = 0.55,
-		BasementBulbBrightness = 0.28,
-		GradeBrightness = -0.06,
+		BulbRange = 16,
+		BulbBrightness = 0.38,
+		BasementBulbBrightness = 0.18,
+		GradeBrightness = -0.09,
 	}),
 	-- One shown during every intermission.
 	Tips = table.freeze({
@@ -56,8 +56,8 @@ return table.freeze({
 	}),
 	-- The flashlight beam: strong enough that the dark hotel needs it.
 	Beam = table.freeze({
-		Brightness = 5,
-		Range = 60,
+		Brightness = 6,
+		Range = 70,
 		Angle = 48,
 	}),
 	-- Placeholder sounds that ship with the Roblox client (rbxasset://sounds/...). Replace with uploaded assets
@@ -84,7 +84,11 @@ return table.freeze({
 		KillHeight = 6, -- he can only catch someone within this height of him
 		HideGrace = 3, -- hiding within this many seconds of being heard sends him to search that spot
 		InvestigateSeconds = 8, -- ...and he waits there this long
-		StartRoom = "Pool Room",
+		-- He starts the night locked in the far-east basement, as far from the crew as the hotel allows, and is released
+		-- after ReleaseSeconds; then he goes to search the lobby where the crew started.
+		StartRoom = "Mop Closet",
+		ReleaseSeconds = 30,
+		SearchSeconds = 25, -- how long the first search of the lobby lasts after he is released
 	}),
 	-- Used only inside Studio so one person can see the whole loop quickly.
 	StudioRound = table.freeze({

@@ -302,6 +302,8 @@ function Fake.world()
 		CharacterAdded = true,
 		Changed = true,
 		Activated = true,
+		Equipped = true,
+		Unequipped = true,
 		MouseEnter = true,
 		MouseLeave = true,
 		InputBegan = true,
@@ -478,6 +480,34 @@ function Fake.world()
 		table.insert(world.log, { remote = data[self].props.Name, to = "all", args = { ... } })
 		if world.localPlayer then
 			self.OnClientEvent:Fire(...)
+		end
+	end
+	-- Tools: equipping moves the tool from the Backpack into the character (and back), firing the same events as Roblox.
+	local function ownerOf(humanoid)
+		for _, p in world.players do
+			if p.Character and data[p.Character] and humanoid.Parent == p.Character then
+				return p
+			end
+		end
+		return nil
+	end
+	function Methods.EquipTool(self, tool)
+		local player = ownerOf(self)
+		if player then
+			reparent(tool, player.Character)
+			tool.Equipped:Fire()
+		end
+	end
+	function Methods.UnequipTools(self)
+		local player = ownerOf(self)
+		local backpack = player and player:FindFirstChild("Backpack")
+		if player and backpack then
+			for _, child in player.Character:GetChildren() do
+				if child:IsA("Tool") then
+					reparent(child, backpack)
+					child.Unequipped:Fire()
+				end
+			end
 		end
 	end
 	function Methods.SetTeleportData(self, value)
@@ -817,6 +847,9 @@ function Fake.world()
 		local gui = create("PlayerGui")
 		data[gui].props.Name = "PlayerGui"
 		reparent(gui, player)
+		local backpack = create("Backpack")
+		data[backpack].props.Name = "Backpack"
+		reparent(backpack, player)
 		table.insert(world.players, player)
 		service("Players").PlayerAdded:Fire(player)
 		return player

@@ -51,6 +51,12 @@ function Hotel.door(room: Rect): (number, number)
 	return cx, if isNorth(room) then Hotel.CORRIDOR.z2 else Hotel.CORRIDOR.z1
 end
 
+-- Where the crew starts the night: the middle of the lobby, a little in front of the desk.
+function Hotel.spawnPoint(): (number, number)
+	local x = Hotel.centre(Hotel.room("Lobby"))
+	return x, -14
+end
+
 function Hotel.room(name: string): Rect
 	for _, room in Hotel.rooms do
 		if room.name == name then

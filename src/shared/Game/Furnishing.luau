@@ -31,13 +31,14 @@ Furnishing.foot = {
 	chandelier = { w = 1, d = 1, h = 0 },
 	pipe = { w = 16, d = 1.4, h = 0 },
 	sludge = { w = 6, d = 14, h = 0.2 },
+	cell = { w = 7, d = 7, h = 9 },
 } :: { [string]: Foot }
 
 -- Where a player can hide (the server adds a Hide prompt; the Night Manager has to search them).
 Furnishing.hideable = { locker = true, wardrobe = true }
 
 -- Things you can walk through or that hang from the ceiling: they do not block routes.
-Furnishing.soft = { water = true, chandelier = true, pipe = true, sludge = true }
+Furnishing.soft = { water = true, chandelier = true, pipe = true, sludge = true, cell = true }
 Furnishing.ceiling = Hotel.CEILING -- hanging pieces are measured from the floor up to here
 
 local MARGIN = 0.8 -- gap between a wall face and the furniture (the wall dressing sticks out 0.45)
@@ -150,6 +151,8 @@ against(-1, "Mop Closet", "W", "locker", -4.4)
 against(-1, "Mop Closet", "W", "locker", -2.2)
 against(-1, "Mop Closet", "W", "locker", 0)
 against(-1, "Mop Closet", "N", "crate", 5)
+-- the holding cell: where the Night Manager waits at the start of every night (Config.Threat.StartRoom)
+at(-1, "Mop Closet", "cell", 0, 0, 0)
 at(-1, "Parking Garage", "car", -10.2, 0, 0)
 at(-1, "Parking Garage", "car", 10.2, 0, 0)
 at(-1, "Flooded Hall", "water", 0, 0, 0)
