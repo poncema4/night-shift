@@ -2,5 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Hud = require(script.Parent.Hud)
 
 print(`{Config.GameName} client v{Config.Version} started`)
+Hud.start()
