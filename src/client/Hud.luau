@@ -31,7 +31,8 @@ function Hud.start()
 	gui.Parent = playerGui
 
 	local status = label(gui, "Status", UDim2.fromScale(0.5, 0.02), UDim2.fromScale(0.4, 0.07))
-	local role = label(gui, "Role", UDim2.fromScale(0.5, 0.1), UDim2.fromScale(0.3, 0.06))
+	local tasks = label(gui, "Tasks", UDim2.fromScale(0.5, 0.1), UDim2.fromScale(0.25, 0.05))
+	local role = label(gui, "Role", UDim2.fromScale(0.5, 0.16), UDim2.fromScale(0.3, 0.06))
 	local result = label(gui, "Result", UDim2.fromScale(0.5, 0.3), UDim2.fromScale(0.6, 0.3))
 	role.Visible = false
 	result.Visible = false
@@ -64,6 +65,10 @@ function Hud.start()
 		local phase = ReplicatedStorage:GetAttribute("Phase") or "Lobby"
 		local endsAt = ReplicatedStorage:GetAttribute("PhaseEndsAt") or 0
 		local left = math.max(0, math.ceil(endsAt - workspace:GetServerTimeNow()))
+		local done = ReplicatedStorage:GetAttribute("TasksDone") or 0
+		local total = ReplicatedStorage:GetAttribute("TasksTotal") or 0
+		tasks.Visible = phase == "Night"
+		tasks.Text = `TASKS {done}/{total}`
 		if phase == "Lobby" then
 			status.Text = "Waiting for players..."
 			result.Visible = false
