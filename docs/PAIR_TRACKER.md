@@ -6,7 +6,7 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 
 **Tiers are community-reported, not an official GitHub page**: 1 (default), 10 (Bronze), 24 (Silver), 48 (Gold) co-authored commits on merged PRs. Whether the badge has advanced can only be seen on the profile at github.com/poncema4.
 
-**Verified count on `main`**: 27 commits carry the poncema4 co-author trailer; 25 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
+**Verified count on `main`**: 33 commits carry the poncema4 co-author trailer; 31 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
 
 ## Merged PRs
 
@@ -37,6 +37,12 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 | [#24](https://github.com/poncema4/night-shift/pull/24) | test(sim): fake Roblox world runs the real server; fixes for blackouts, hiding, Studio sandbox | 2026-10-09 |
 | [#25](https://github.com/poncema4/night-shift/pull/25) | test(client): real client scripts run against the real server; fixes for 3 launch-breaking bugs | 2026-10-09 |
 | [#26](https://github.com/poncema4/night-shift/pull/26) | test(profile): six nights, a purchase, leave and rejoin | 2026-10-09 |
+| [#27](https://github.com/poncema4/night-shift/pull/27) | perf: cheaper decoration parts, performance notes, refreshed tracker | 2026-10-09 |
+| [#28](https://github.com/poncema4/night-shift/pull/28) | feat(look,sound): tunable look config and placeholder sound layer | 2026-10-09 |
+| [#29](https://github.com/poncema4/night-shift/pull/29) | docs: refresh DESIGN and README | 2026-10-09 |
+| [#30](https://github.com/poncema4/night-shift/pull/30) | feat(ux): lobby count, intermission tip, caught banner | 2026-10-09 |
+| [#31](https://github.com/poncema4/night-shift/pull/31) | art: corridor thumbnail rendered from the real hotel data | 2026-10-09 |
+| [#32](https://github.com/poncema4/night-shift/pull/32) | test(rounds): four rounds in a row prove nothing leaks | 2026-10-09 |
 
 One PR counts once however many commits it has; the count above is commits, which is what the tiers are described in.
 
