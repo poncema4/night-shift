@@ -1,0 +1,54 @@
+name: Publish to Roblox
+
+# Manual on purpose: nothing goes live because a file changed. Run it from the Actions tab
+# (Run workflow), choose "saved" to put the version in Studio without making it live, or
+# "published" to make it live. It needs the secret ROBLOX_API_KEY and the variables
+# ROBLOX_UNIVERSE_ID and ROBLOX_PLACE_ID (see README, "Connecting the game").
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "saved = visible in Studio only, published = live for players"
+        type: choice
+        options: [saved, published]
+        default: saved
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: roblox
+    steps:
+      - uses: actions/checkout@v7
+      - uses: CompeyDev/setup-rokit@v0.2.1
+      - name: Check the connection settings exist
+        env:
+          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+          UNIVERSE_ID: ${{ vars.ROBLOX_UNIVERSE_ID }}
+          PLACE_ID: ${{ vars.ROBLOX_PLACE_ID }}
+        run: |
+          missing=0
+          [ -n "$ROBLOX_API_KEY" ] || { echo "::error::secret ROBLOX_API_KEY is not set"; missing=1; }
+          [ -n "$UNIVERSE_ID" ] || { echo "::error::variable ROBLOX_UNIVERSE_ID is not set"; missing=1; }
+          [ -n "$PLACE_ID" ] || { echo "::error::variable ROBLOX_PLACE_ID is not set"; missing=1; }
+          exit $missing
+      - name: Tests first
+        run: lune run tests/run
+      - name: Build
+        run: |
+          mkdir -p build
+          rojo build -o build/NexusHollow.rbxl
+      - name: Publish
+        env:
+          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+        run: |
+          rbxcloud experience publish \
+            --filename build/NexusHollow.rbxl \
+            --place-id "${{ vars.ROBLOX_PLACE_ID }}" \
+            --universe-id "${{ vars.ROBLOX_UNIVERSE_ID }}" \
+            --version-type "${{ inputs.version_type }}" \
+            --api-key "$ROBLOX_API_KEY"

@@ -1,0 +1,13 @@
+# built places and generated files
+*.rbxl
+*.rbxlx
+*.rbxm
+build/
+roblox.yml
+sourcemap.json
+Packages/
+ServerPackages/
+# secrets: NEVER commit keys; they live in GitHub Secrets
+.env
+*.key
+.DS_Store
