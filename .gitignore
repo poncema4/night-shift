@@ -1,14 +1,47 @@
-# built places and generated files
+# --- secrets: NEVER commit keys. Real keys live in GitHub Secrets / your password manager ---
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+*.token
+secrets/
+credentials*.json
+.roblox-api-key
+rbxcloud.toml
+ROBLOX_API_KEY*
+
+# --- Roblox / Rojo build output ---
 *.rbxl
 *.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
 *.rbxm
+*.rbxmx
 build/
 roblox.yml
 sourcemap.json
 Packages/
 ServerPackages/
-# secrets: NEVER commit keys; they live in GitHub Secrets
-.env
-*.key
-.DS_Store
+
+# --- logs (Studio logs go to the separate night-shift-logs repo) ---
 logs/
+*.log
+studio.log
+
+# --- Blender and Python scratch ---
+*.blend1
+*.blend2
+__pycache__/
+*.pyc
+
+# --- editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/
+node_modules/
