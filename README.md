@@ -65,3 +65,14 @@ Only the group owner can do this, because it needs a key from your Roblox accoun
 - Game logic goes in `src/shared` as modules without Roblox services, with a spec in `tests/specs`, so it is tested before anyone opens Studio.
 - Every change: `selene`, `stylua --check` and `lune run tests/run` must pass (CI runs them on every push).
 - No keys, tokens or personal data in the repo, ever (the repo is public).
+
+## Seeing Studio errors from the laptop (log bridge)
+
+Studio runs on the Windows PC, so its Output window is invisible here. In Studio the game forwards its server Output to a small listener, which pushes it to the `studio-logs` branch; the laptop reads it with `scripts/read-logs.sh`.
+
+On the Windows PC, once per place: **Home > Game Settings > Security > Allow HTTP Requests = ON**. Each playtest session, in a second PowerShell window: `.\scripts\logs.ps1` (leave it running), then press Play. Output arrives within about 12 seconds.
+
+Limits: only SERVER output is forwarded (client-side errors and the Rojo plugin's own messages are not; paste those or send a screenshot). It runs only inside Studio, never in the live game. The branch is public with the repo, so it can show your username in lines the game prints.
+
+### If Rojo says "denied script injection permission"
+Studio > **Plugins** tab > **Manage Plugins** > Rojo > gear icon > turn on **Script Injection**, then Connect again and click **Accept** on the "initializing sync session" prompt.

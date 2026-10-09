@@ -11,3 +11,4 @@ ServerPackages/
 .env
 *.key
 .DS_Store
+logs/
