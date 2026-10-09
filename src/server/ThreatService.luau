@@ -8,6 +8,8 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local Patrol = require(ReplicatedStorage.Shared.Game.Patrol)
+local Stealth = require(ReplicatedStorage.Shared.Game.Stealth)
+local StealthService = require(script.Parent.StealthService)
 
 local ThreatService = {}
 
@@ -48,16 +50,19 @@ function ThreatService.activate()
 	local lastX, lastZ = patrol.x, patrol.z
 	local facing = Vector3.new(0, 0, -1)
 	local sincePublish = PUBLISH_INTERVAL
+	local searching: { [Player]: number } = {}
 	state:SetAttribute("Active", true)
 
 	connection = RunService.Heartbeat:Connect(function(dt)
 		local living = livingPlayers()
-		-- he hears the closest person; someone on another floor counts as farther and is heard from half as far
+		-- he hears the closest person: sprinting and flashlights carry farther, standing still is quiet, a hidden
+		-- player is not heard at all, and someone on another floor is heard from half as far
 		local nearest, nearestScore = nil, math.huge
 		for _, entry in living do
 			local d = math.sqrt((entry.x - patrol.x) ^ 2 + (entry.z - patrol.z) ^ 2)
 			local floorsApart = math.abs(Floors.levelAt(entry.y) - Floors.levelAt(patrol.y))
-			local range = settings.HearRange * (if floorsApart > 0 then settings.FloorHearFactor else 1)
+			local base = settings.HearRange * (if floorsApart > 0 then settings.FloorHearFactor else 1)
+			local range = Stealth.hearingRange(base, StealthService.stateOf(entry.player))
 			local score = d + floorsApart * settings.FloorPenalty
 			if d <= range and score < nearestScore then
 				nearest, nearestScore = entry, score
@@ -84,6 +89,22 @@ function ThreatService.activate()
 			state:SetAttribute("Z", patrol.z)
 			state:SetAttribute("Yaw", math.atan2(-facing.X, -facing.Z))
 			state:SetAttribute("Mode", patrol.mode)
+		end
+
+		-- he searches hiding places he lingers beside; found players are pulled out right in front of him
+		for _, entry in living do
+			local place = StealthService.hidingPlace(entry.player)
+			if place then
+				local away = (Vector3.new(patrol.x, patrol.y, patrol.z) - Vector3.new(place.X, place.Y, place.Z)).Magnitude
+				local timer, found = Stealth.search(searching[entry.player] or 0, dt, away)
+				searching[entry.player] = timer
+				if found then
+					searching[entry.player] = 0
+					StealthService.eject(entry.player)
+				end
+			else
+				searching[entry.player] = nil
+			end
 		end
 
 		for _, entry in living do

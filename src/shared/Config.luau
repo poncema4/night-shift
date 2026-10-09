@@ -13,6 +13,10 @@ return table.freeze({
 		NightSeconds = 240,
 		DawnSeconds = 12,
 	}),
+	Move = table.freeze({
+		Walk = 16,
+		Sprint = 24,
+	}),
 	Threat = table.freeze({
 		PatrolSpeed = 9, -- studs per second (players walk at 16)
 		ChaseSpeed = 13,

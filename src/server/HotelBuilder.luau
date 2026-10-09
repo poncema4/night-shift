@@ -15,7 +15,11 @@ local Props = require(script.Parent.Props)
 
 local HotelBuilder = {}
 
-export type Result = { spawn: SpawnLocation, stations: { [string]: Part } }
+export type Result = {
+	spawn: SpawnLocation,
+	stations: { [string]: Part },
+	hiding: { { model: Model, position: Vector3 } },
+}
 
 type Style = { Color3 | Enum.Material }
 
@@ -225,8 +229,12 @@ function HotelBuilder.build(): Result
 	local props = Instance.new("Folder")
 	props.Name = "Props"
 	props.Parent = folder
+	local hiding: { { model: Model, position: Vector3 } } = {}
 	for _, item in Furnishing.items() do
-		Props.make(props, item, Floors.y(item.level))
+		local model = Props.make(props, item, Floors.y(item.level))
+		if Furnishing.hideable[item.kind] then
+			table.insert(hiding, { model = model, position = Vector3.new(item.x, Floors.y(item.level), item.z) })
+		end
 	end
 
 	local lx = Hotel.centre(Hotel.room("Lobby"))
@@ -258,7 +266,7 @@ function HotelBuilder.build(): Result
 
 	atmosphere()
 	reportStrays(folder)
-	return { spawn = spawn, stations = stations }
+	return { spawn = spawn, stations = stations, hiding = hiding }
 end
 
 return HotelBuilder

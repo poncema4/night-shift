@@ -10,6 +10,8 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Roles = require(ReplicatedStorage.Shared.Game.Roles)
 local Round = require(ReplicatedStorage.Shared.Game.Round)
 local HotelBuilder = require(script.Parent.HotelBuilder)
+local ScareDirector = require(script.Parent.ScareDirector)
+local StealthService = require(script.Parent.StealthService)
 local TaskService = require(script.Parent.TaskService)
 local ThreatService = require(script.Parent.ThreatService)
 
@@ -41,6 +43,8 @@ function RoundService.start()
 	local roundResult = makeRemote(remotes, "RoundResult")
 
 	local hotel = HotelBuilder.build()
+	StealthService.start(remotes, hotel.hiding)
+	ScareDirector.start(remotes)
 	TaskService.start(hotel.stations, function(userId)
 		return roles[userId]
 	end)
@@ -118,9 +122,13 @@ function RoundService.start()
 				roleAssigned:FireClient(player, roles[player.UserId])
 			end
 			TaskService.setActive(true)
+			StealthService.setActive(true)
+			ScareDirector.setActive(true, settings.NightSeconds)
 			ThreatService.activate()
 		elseif event.to == "Dawn" then
 			TaskService.setActive(false)
+			StealthService.setActive(false)
+			ScareDirector.setActive(false, 0)
 			ThreatService.deactivate()
 			local reveal: { [string]: string } = {}
 			for _, player in Players:GetPlayers() do
@@ -129,6 +137,8 @@ function RoundService.start()
 			roundResult:FireAllClients(event.winner, reveal)
 		elseif event.to == "Lobby" then
 			TaskService.setActive(false)
+			StealthService.setActive(false)
+			ScareDirector.setActive(false, 0)
 			ThreatService.deactivate()
 			loadEveryone()
 			TaskService.reset()
