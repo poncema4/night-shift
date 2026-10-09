@@ -27,8 +27,10 @@ local specs = {
 	require("./specs/Roles"),
 	require("./specs/Round"),
 	require("./specs/Hotel"),
-	require("./specs/Dressing"),
+	require("./specs/Building"),
+	require("./specs/Furnishing"),
 	require("./specs/Patrol"),
+	require("./specs/PatrolFloors"),
 	require("./specs/TaskBoard"),
 }
 for _, spec in specs do
