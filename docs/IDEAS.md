@@ -38,5 +38,5 @@ Hooks that make clips: **three floors**, **a monster that uses the stairs**, **o
 ## F. Tech debt and polish
 - F1. Rigged Night Manager from Blender with real walk/chase animations.
 - F2. Texture bake for the Blender props (wood grain, wallpaper).
-- F3. Sound (needs verified asset ids or our own uploads).
+- F3. Sound: placeholder cues are wired (`client/Audio`, ids in `Config.Sounds`); real audio needs our own uploads.
 - F4. Mobile pass with real devices; StreamingEnabled if memory is high.

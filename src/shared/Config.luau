@@ -14,6 +14,29 @@ return table.freeze({
 		DawnSeconds = 12,
 		MeetingSeconds = 50,
 	}),
+	-- How the hotel looks. Tune these first if it is too dark or too bright (Studio playtest).
+	Look = table.freeze({
+		Ambient = { 26, 26, 38 },
+		OutdoorAmbient = { 20, 20, 30 },
+		FogStart = 20,
+		FogEnd = 160,
+		AtmosphereDensity = 0.3,
+		Contrast = 0.12,
+		Saturation = -0.15,
+		BulbRange = 30,
+		BulbBrightness = 1.1,
+		BasementBulbBrightness = 0.8,
+	}),
+	-- Placeholder sounds that ship with the Roblox client (rbxasset://sounds/...). Replace with uploaded assets
+	-- (rbxassetid://...) when we have our own; a missing file is simply silent.
+	Sounds = table.freeze({
+		flashlight = "rbxasset://sounds/switch.mp3",
+		taskDone = "rbxasset://sounds/electronicpingshort.wav",
+		meeting = "rbxasset://sounds/electronicpingshort.wav",
+		thud = "rbxasset://sounds/collide.wav",
+		heartbeat = "rbxasset://sounds/bass.wav",
+		dawn = "rbxasset://sounds/victory.wav",
+	}),
 	Move = table.freeze({
 		Walk = 16,
 		Sprint = 24,

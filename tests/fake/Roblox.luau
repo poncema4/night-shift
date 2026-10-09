@@ -236,6 +236,7 @@ function Fake.world()
 		now = 1000,
 		sleepers = {},
 		actions = {},
+		played = {},
 	}
 	local depth = 0
 	local moduleCache = {}
@@ -422,7 +423,25 @@ function Fake.world()
 		return clone(self)
 	end
 	function Methods.SetAttribute(self, name, value)
-		data[self].attrs[name] = value
+		local d = data[self]
+		local changed = d.attrs[name] ~= value
+		d.attrs[name] = value
+		local watcher = d.signals["attr:" .. name]
+		if changed and watcher then
+			watcher:Fire()
+		end
+	end
+	function Methods.GetAttributeChangedSignal(self, name)
+		local d = data[self]
+		d.signals["attr:" .. name] = d.signals["attr:" .. name] or newSignal()
+		return d.signals["attr:" .. name]
+	end
+	function Methods.Play(self)
+		data[self].props.IsPlaying = true
+		table.insert(world.played, data[self].props.SoundId)
+	end
+	function Methods.Pause(self)
+		data[self].props.IsPlaying = false
 	end
 	function Methods.GetAttribute(self, name)
 		return data[self].attrs[name]

@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Building = require(ReplicatedStorage.Shared.Game.Building)
+local Config = require(ReplicatedStorage.Shared.Config)
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local Furnishing = require(ReplicatedStorage.Shared.Game.Furnishing)
 local Hotel = require(ReplicatedStorage.Shared.Game.Hotel)
@@ -129,8 +130,8 @@ local function bulb(parent: Instance, x: number, y: number, z: number, level: nu
 	)
 	lamp.CanCollide = false
 	local light = Instance.new("PointLight")
-	light.Range = 30
-	light.Brightness = if level < 0 then 0.8 else 1.1
+	light.Range = Config.Look.BulbRange
+	light.Brightness = if level < 0 then Config.Look.BasementBulbBrightness else Config.Look.BulbBrightness
 	light.Color = if level < 0 then Color3.fromRGB(190, 220, 170) else Color3.fromRGB(255, 205, 140)
 	light.Shadows = false
 	light.Parent = lamp
@@ -141,23 +142,24 @@ end
 local function atmosphere()
 	Lighting.ClockTime = 0
 	Lighting.Brightness = 0
-	Lighting.Ambient = Color3.fromRGB(26, 26, 38)
-	Lighting.OutdoorAmbient = Color3.fromRGB(20, 20, 30)
+	local look = Config.Look
+	Lighting.Ambient = Color3.fromRGB(look.Ambient[1], look.Ambient[2], look.Ambient[3])
+	Lighting.OutdoorAmbient = Color3.fromRGB(look.OutdoorAmbient[1], look.OutdoorAmbient[2], look.OutdoorAmbient[3])
 	Lighting.EnvironmentDiffuseScale = 0
 	Lighting.EnvironmentSpecularScale = 0
 	Lighting.FogColor = Color3.fromRGB(6, 6, 12)
-	Lighting.FogStart = 20
-	Lighting.FogEnd = 160
+	Lighting.FogStart = look.FogStart
+	Lighting.FogEnd = look.FogEnd
 	local effects = Instance.new("Folder")
 	effects.Name = "NightShiftEffects"
 	effects.Parent = Lighting
 	local air = Instance.new("Atmosphere")
-	air.Density = 0.3
+	air.Density = look.AtmosphereDensity
 	air.Color = Color3.fromRGB(40, 40, 60)
 	air.Parent = effects
 	local grade = Instance.new("ColorCorrectionEffect")
-	grade.Contrast = 0.12
-	grade.Saturation = -0.15
+	grade.Contrast = look.Contrast
+	grade.Saturation = look.Saturation
 	grade.TintColor = Color3.fromRGB(235, 235, 255)
 	grade.Parent = effects
 	local bloom = Instance.new("BloomEffect")

@@ -46,5 +46,9 @@ Nothing in the game has been run in Studio yet except the very first rounds: eve
 - [ ] **Test > Device**: pick a phone: HUD readable, RUN/LIGHT touch buttons appear, nothing off-screen.
 - [ ] Open the **Stats** (Shift+F3 in game): note FPS and memory; send a screenshot.
 
+## 7b. Look and sound (tune these first)
+- [ ] Too dark or too bright? Edit `Config.Look` in `src/shared/Config.luau` (Ambient, BulbBrightness, BulbRange, FogEnd, Contrast...) and re-Play; Rojo syncs it live.
+- [ ] Sounds are placeholders from the Roblox client (`Config.Sounds`): flashlight click, task ping, meeting bell, scare thud, a heartbeat that swells as the Night Manager gets near, a dawn sting. Tell me which are missing or wrong; we upload our own later.
+
 ## What to send back
 Screenshots of: the lobby, the stairwell, a task station, the Night Manager, the meeting screen, the dawn screen, the Locker. Plus any red text from Output.
