@@ -26,6 +26,8 @@ local specs = {
 	require("./specs/MathUtil"),
 	require("./specs/Roles"),
 	require("./specs/Round"),
+	require("./specs/Stealth"),
+	require("./specs/Scares"),
 	require("./specs/Hotel"),
 	require("./specs/Building"),
 	require("./specs/Furnishing"),

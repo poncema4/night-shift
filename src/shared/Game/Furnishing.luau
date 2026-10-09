@@ -20,6 +20,7 @@ Furnishing.foot = {
 	crate = { w = 3, d = 3, h = 3 },
 	car = { w = 7, d = 14, h = 4.5 },
 	locker = { w = 2, d = 2, h = 7 },
+	wardrobe = { w = 4, d = 2, h = 7.5 },
 	rack = { w = 8, d = 2, h = 6 },
 	furnace = { w = 6, d = 6, h = 8 },
 	generator = { w = 7, d = 4, h = 5 },
@@ -29,6 +30,9 @@ Furnishing.foot = {
 	water = { w = 20, d = 10, h = 0.3 },
 	chandelier = { w = 1, d = 1, h = 0 },
 } :: { [string]: Foot }
+
+-- Where a player can hide (the server adds a Hide prompt; the Night Manager has to search them).
+Furnishing.hideable = { locker = true, wardrobe = true }
 
 -- Things you can walk through or that hang from the ceiling: they do not block routes.
 Furnishing.soft = { water = true, chandelier = true }
@@ -91,12 +95,16 @@ against(0, "Boiler Room", "W", "crate", 5)
 against(0, "Boiler Room", "W", "crate", -5)
 against(0, "Laundry", "W", "shelf", 0)
 against(0, "Laundry", "E", "crate", 6)
+against(0, "Laundry", "N", "locker", -7)
+against(0, "Laundry", "N", "locker", -4.8)
 against(0, "Storage", "W", "shelf", 0)
 against(0, "Storage", "E", "shelf", 0)
 against(0, "Storage", "N", "crate", -6)
 against(0, "Storage", "N", "crate", 6)
 against(0, "Security", "W", "shelf", 0)
 against(0, "Security", "E", "crate", 6)
+against(0, "Security", "N", "locker", -7)
+against(0, "Security", "N", "locker", -4.8)
 against(0, "Pantry", "W", "shelf", 0)
 against(0, "Pantry", "E", "shelf", 0)
 against(0, "Pantry", "N", "crate", -5)
@@ -106,6 +114,7 @@ against(0, "Pantry", "N", "crate", 5)
 for _, n in { "Room 201", "Room 202", "Room 203", "Room 204", "Room 205", "Room 206" } do
 	against(1, n, "N", "bed", 0)
 	against(1, n, "N", "lamp", 5.2)
+	against(1, n, "W", "wardrobe", 0)
 end
 against(1, "Mezzanine", "S", "armchair", -11)
 against(1, "Mezzanine", "S", "armchair", 8)

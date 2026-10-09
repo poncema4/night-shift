@@ -184,6 +184,15 @@ makers.locker = function(model, at)
 	piece(model, "Handle", Vector3.new(0.15, 0.7, 0.15), at(0.6, 3.2, 1.075), BRASS, Enum.Material.Metal)
 end
 
+makers.wardrobe = function(model, at)
+	piece(model, "Body", Vector3.new(4, 7.5, 2), at(0, 3.75, 0), WOOD, Enum.Material.Wood)
+	piece(model, "Crown", Vector3.new(4.3, 0.4, 2.2), at(0, 7.7, 0), WOOD_LIGHT, Enum.Material.Wood)
+	for _, x in { -1, 1 } do
+		piece(model, "Door", Vector3.new(1.8, 6.4, 0.1), at(x, 3.7, 1.05), WOOD_LIGHT, Enum.Material.WoodPlanks)
+		piece(model, "Handle", Vector3.new(0.15, 0.8, 0.15), at(x * 0.25, 3.7, 1.15), BRASS, Enum.Material.Metal)
+	end
+end
+
 makers.rack = function(model, at)
 	for _, x in { -3.8, 3.8 } do
 		piece(model, "Post", Vector3.new(0.3, 6, 2), at(x, 3, 0), WOOD, Enum.Material.Wood)
