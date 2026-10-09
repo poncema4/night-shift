@@ -26,6 +26,8 @@ return table.freeze({
 		FloorHearFactor = 0.5, -- footsteps carry through a floor, but only half as far
 		FloorPenalty = 12, -- studs of 'distance' added per floor between him and a player when choosing who to hunt
 		KillHeight = 6, -- he can only catch someone within this height of him
+		HideGrace = 3, -- hiding within this many seconds of being heard sends him to search that spot
+		InvestigateSeconds = 8, -- ...and he waits there this long
 		StartRoom = "Pool Room",
 	}),
 	-- Used only inside Studio so one person can see the whole loop quickly.

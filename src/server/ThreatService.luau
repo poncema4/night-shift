@@ -51,6 +51,8 @@ local function run(patrol: Patrol.Patrol)
 	local facing = Vector3.new(0, 0, -1)
 	local sincePublish = PUBLISH_INTERVAL
 	local searching: { [Player]: number } = {}
+	local lastHeard: { [Player]: number } = {} -- when he last heard each player
+	local investigating: { [Player]: boolean } = {}
 	state:SetAttribute("Active", true)
 
 	connection = RunService.Heartbeat:Connect(function(dt)
@@ -66,6 +68,9 @@ local function run(patrol: Patrol.Patrol)
 			local score = d + floorsApart * settings.FloorPenalty
 			if d <= range and score < nearestScore then
 				nearest, nearestScore = entry, score
+			end
+			if d <= range then
+				lastHeard[entry.player] = os.clock()
 			end
 		end
 		local target: Patrol.Target? = if nearest then { x = nearest.x, y = nearest.y, z = nearest.z } else nil
@@ -99,6 +104,17 @@ local function run(patrol: Patrol.Patrol)
 		for _, entry in living do
 			local place = StealthService.hidingPlace(entry.player)
 			if place then
+				-- someone he was just hunting slipped into a locker: he heads there and waits (a player he never heard is safe)
+				local heard = lastHeard[entry.player]
+				if not investigating[entry.player] and heard and os.clock() - heard < settings.HideGrace then
+					investigating[entry.player] = true
+					lureTarget = {
+						x = entry.x,
+						y = entry.y,
+						z = entry.z,
+						expires = os.clock() + settings.InvestigateSeconds,
+					}
+				end
 				local away = (Vector3.new(patrol.x, patrol.y, patrol.z) - Vector3.new(place.X, place.Y, place.Z)).Magnitude
 				local timer, found = Stealth.search(searching[entry.player] or 0, dt, away)
 				searching[entry.player] = timer
@@ -108,6 +124,7 @@ local function run(patrol: Patrol.Patrol)
 				end
 			else
 				searching[entry.player] = nil
+				investigating[entry.player] = nil
 			end
 		end
 
@@ -131,6 +148,11 @@ function ThreatService.activate()
 	patrolState = fresh
 	lureTarget = nil
 	run(fresh)
+end
+
+-- His current movement state (tests place him with this; nothing else should).
+function ThreatService.current(): Patrol.Patrol?
+	return patrolState
 end
 
 -- A meeting freezes him in place; resume() carries on from the same spot.

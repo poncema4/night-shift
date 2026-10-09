@@ -127,8 +127,9 @@ function RoundService.start()
 				end
 			end
 		end
-		-- Alone in Studio there is no real saboteur, so a phantom one stops the crew winning instantly.
-		local sandbox = RunService:IsStudio() and #Players:GetPlayers() < 2
+		-- With one or two players in Studio the rules would end the night at once (one crew against one saboteur), so a
+		-- phantom saboteur is added and only a wiped-out crew loses: that lets you test alone or with a second client.
+		local sandbox = RunService:IsStudio() and #Players:GetPlayers() < 3
 		if sandbox then
 			saboteurs += 1
 		end

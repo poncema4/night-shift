@@ -6,7 +6,7 @@ Rules live in `src/shared/Game` as pure modules with tests; the Roblox services 
 |---|---|---|
 | Sprint | `Stamina`: 4.5 s of running, then winded until recovered | `StealthService` sets WalkSpeed 16 / 24 |
 | Flashlight | `Battery`: ~45 s of light, slow recharge, dead until 8 % | `StealthService` owns a SpotLight on the head |
-| Hiding | `Stealth.search`: he must linger ~1.5 s within 5 studs; a hidden player is never grabbed in passing, he has to search and pull them out first | lockers + wardrobes get a Hide prompt; hidden players are invisible and frozen |
+| Hiding | `Stealth.search`: he must linger ~1.5 s within 5 studs; a hidden player is never grabbed in passing; if he HEARD someone and they then hide, he comes and waits at that spot for 8 s and pulls them out | lockers + wardrobes get a Hide prompt; hidden players are invisible and frozen |
 | Noise | `Stealth.hearingRange`: sprint x1.5, light x1.25, still x0.4, hidden 0 | `ThreatService` uses it to pick who to hunt |
 | Scares | `Scares`: schedule gets busier through the night; blackouts only after 25 % and a minute apart | `ScareDirector` plays them; `Fx` shakes, flickers, subtitles |
 
