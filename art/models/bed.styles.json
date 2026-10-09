@@ -1,0 +1,58 @@
+{
+ "base": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "blanket": {
+  "material": "Fabric",
+  "rgb": [
+   114,
+   34,
+   52
+  ]
+ },
+ "fold": {
+  "material": "Fabric",
+  "rgb": [
+   114,
+   34,
+   52
+  ]
+ },
+ "headboard": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "mattress": {
+  "material": "Fabric",
+  "rgb": [
+   228,
+   222,
+   211
+  ]
+ },
+ "pillow": {
+  "material": "Fabric",
+  "rgb": [
+   228,
+   222,
+   211
+  ]
+ },
+ "tuft": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ }
+}

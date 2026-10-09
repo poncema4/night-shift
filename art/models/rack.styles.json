@@ -1,0 +1,34 @@
+{
+ "bottle": {
+  "material": "Glass",
+  "rgb": [
+   52,
+   97,
+   65
+  ]
+ },
+ "neck": {
+  "material": "Glass",
+  "rgb": [
+   52,
+   97,
+   65
+  ]
+ },
+ "post": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "slat": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   123,
+   93,
+   71
+  ]
+ }
+}

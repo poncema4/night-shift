@@ -1,0 +1,50 @@
+{
+ "base": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "belly": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "bulb": {
+  "material": "Neon",
+  "rgb": [
+   255,
+   243,
+   217
+  ]
+ },
+ "shade": {
+  "material": "Neon",
+  "rgb": [
+   255,
+   224,
+   168
+  ]
+ },
+ "stem": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "table": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ }
+}

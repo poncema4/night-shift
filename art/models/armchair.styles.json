@@ -1,0 +1,58 @@
+{
+ "arm": {
+  "material": "Fabric",
+  "rgb": [
+   114,
+   34,
+   52
+  ]
+ },
+ "back": {
+  "material": "Fabric",
+  "rgb": [
+   114,
+   34,
+   52
+  ]
+ },
+ "button": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "cap": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "leg": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "seat": {
+  "material": "Fabric",
+  "rgb": [
+   114,
+   34,
+   52
+  ]
+ },
+ "trim": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ }
+}

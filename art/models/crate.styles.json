@@ -1,0 +1,26 @@
+{
+ "box": {
+  "material": "WoodPlanks",
+  "rgb": [
+   136,
+   111,
+   85
+  ]
+ },
+ "post": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "strap": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ }
+}

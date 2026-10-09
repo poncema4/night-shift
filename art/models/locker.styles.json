@@ -1,0 +1,34 @@
+{
+ "body": {
+  "material": "Metal",
+  "rgb": [
+   117,
+   128,
+   128
+  ]
+ },
+ "door": {
+  "material": "Metal",
+  "rgb": [
+   123,
+   136,
+   136
+  ]
+ },
+ "handle": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "vent": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   43,
+   43,
+   52
+  ]
+ }
+}
