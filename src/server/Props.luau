@@ -42,6 +42,13 @@ local function piece(
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part.CanTouch = false
+	-- small things (books, bottles, handles, candles) are for looking at: no collision, no shadow, no raycast hits
+	local biggest = math.max(size.X, size.Y, size.Z)
+	if biggest < 1.2 then
+		part.CanCollide = false
+		part.CanQuery = false
+		part.CastShadow = false
+	end
 	part.Parent = model
 	return part
 end

@@ -74,6 +74,10 @@ local CORRIDOR: { [number]: Style } = {
 local GUEST_ROOM = style(Color3.fromRGB(40, 58, 66), Enum.Material.Fabric)
 local CELLAR_ROOM = style(Color3.fromRGB(56, 56, 60), Enum.Material.Concrete)
 
+-- Wall dressing that never needs physics.
+local DECORATION: { [string]: boolean } =
+	{ skirting = true, wainscot = true, rail = true, cornice = true, frame = true }
+
 local function styleOf(s: Building.Slab): (Color3, Enum.Material)
 	local level = s.level or 0
 	local chosen: Style
@@ -205,7 +209,14 @@ function HotelBuilder.build(): Result
 	shell.Parent = folder
 	for _, s in Building.solids() do
 		local color, material = styleOf(s)
-		block(shell, s.kind, Vector3.new(s.w, s.h, s.d), Vector3.new(s.x, s.y + s.h / 2, s.z), color, material)
+		local part =
+			block(shell, s.kind, Vector3.new(s.w, s.h, s.d), Vector3.new(s.x, s.y + s.h / 2, s.z), color, material)
+		if DECORATION[s.kind] then
+			-- skirting, panelling and frames are only to look at: nothing to collide with, snag on, or cast shadows
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CastShadow = false
+		end
 	end
 
 	-- ceiling lights: one per room, and along each corridor
