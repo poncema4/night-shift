@@ -29,3 +29,18 @@ Everything the client sends is a *wish* (`Intent`: sprint / light / leave). The 
 A meeting gathers everyone alive in the lobby (frozen in a ring), shows a card per player, lets you talk in the normal chat, then counts the votes. The last 9 seconds show the result. Everyone returns to where they stood and the night carries on from the same second.
 
 **Saboteur abilities.** *Lure* sends the Night Manager to where you stand for 12 s (unless he hears someone closer): use it to pull him off your friends, or onto the crew. *Lights out* darkens the lights on your floor for 8 s. Saboteurs also see who their partner is (9-10 players have two).
+
+## Progression (cosmetics only)
+
+Every night earns **XP** and **tips** (the in-game currency): playing, surviving, winning and finishing tasks (capped at 6 so one lucky run cannot snowball). XP makes your **level**; tips buy **cosmetics** in your Locker (open with **L**): flashlight beam colours, hats and footstep dust. Cosmetics never change speed, noise, vision or anything that matters in a round, so there is nothing to pay for to win.
+
+| Piece | Where |
+|---|---|
+| Levels, awards, merging two saves, repairing a damaged save | `Game/Progress` (pure, tested) |
+| Catalogue, buying, wearing, level locks | `Game/Cosmetics` (pure, tested) |
+| DataStore load/save with retries, autosave every 60 s, save on leave and shutdown, merge-on-save so progress never goes backwards | `server/ProfileService` |
+| Locker screen, reward line on the dawn screen | `client/Locker`, `client/Results` |
+
+Tips are stored as `tipsEarned` and `tipsSpent` (both only ever grow), so merging two saves can never refund a purchase.
+
+**Testing saves in Studio:** Game Settings > Security > *Enable Studio Access to API Services*. Without it the game warns once and plays normally without saving.

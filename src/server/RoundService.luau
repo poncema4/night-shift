@@ -12,6 +12,7 @@ local Round = require(ReplicatedStorage.Shared.Game.Round)
 local AbilityService = require(script.Parent.AbilityService)
 local HotelBuilder = require(script.Parent.HotelBuilder)
 local MeetingService = require(script.Parent.MeetingService)
+local ProfileService = require(script.Parent.ProfileService)
 local ScareDirector = require(script.Parent.ScareDirector)
 local StealthService = require(script.Parent.StealthService)
 local TaskService = require(script.Parent.TaskService)
@@ -55,6 +56,7 @@ function RoundService.start()
 	local meeting: { reason: string, caller: Player, victim: Player? }? = nil
 
 	local hotel = HotelBuilder.build()
+	ProfileService.start(remotes)
 	StealthService.start(remotes, hotel.hiding)
 	ScareDirector.start(remotes)
 	TaskService.start(hotel.stations, roleOf)
@@ -175,6 +177,13 @@ function RoundService.start()
 					elseif isAlive(player) then "survived"
 					else "caught"
 				table.insert(list, { name = player.Name, role = role, fate = fate })
+				local crewSide = role ~= "Saboteur"
+				ProfileService.award(player, {
+					role = role,
+					won = (winner == "Crew") == crewSide and winner ~= nil,
+					survived = fate == "survived",
+					tasks = TaskService.completedBy(player.UserId),
+				})
 			end
 		end
 		table.sort(list, function(a, b)

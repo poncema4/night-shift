@@ -29,6 +29,7 @@ local specs = {
 	require("./specs/Stealth"),
 	require("./specs/Scares"),
 	require("./specs/Meeting"),
+	require("./specs/Progress"),
 	require("./specs/Hotel"),
 	require("./specs/Building"),
 	require("./specs/Furnishing"),

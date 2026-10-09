@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local Battery = require(ReplicatedStorage.Shared.Game.Battery)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Stamina = require(ReplicatedStorage.Shared.Game.Stamina)
+local ProfileService = require(script.Parent.ProfileService)
 local Stealth = require(ReplicatedStorage.Shared.Game.Stealth)
 
 type Entry = {
@@ -73,6 +74,7 @@ local function flashlightOf(player: Player): SpotLight?
 	end
 	local existing = head:FindFirstChild("Flashlight")
 	if existing and existing:IsA("SpotLight") then
+		existing.Color = ProfileService.flashlightColor(player)
 		return existing
 	end
 	local light = Instance.new("SpotLight")
@@ -80,7 +82,7 @@ local function flashlightOf(player: Player): SpotLight?
 	light.Angle = 55
 	light.Range = 40
 	light.Brightness = 3
-	light.Color = Color3.fromRGB(255, 244, 214)
+	light.Color = ProfileService.flashlightColor(player)
 	light.Face = Enum.NormalId.Front
 	light.Shadows = false
 	light.Enabled = false
