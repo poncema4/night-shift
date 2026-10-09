@@ -2,6 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Audio = require(script.Parent.Audio)
 local CameraUi = require(script.Parent.CameraUi)
 local Controls = require(script.Parent.Controls)
 local Fx = require(script.Parent.Fx)
@@ -22,3 +23,4 @@ Results.start()
 Locker.start()
 CameraUi.start()
 Spectate.start()
+Audio.start()

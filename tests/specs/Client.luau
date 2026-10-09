@@ -131,6 +131,13 @@ return function(t)
 	t.equal("releasing RUN stops sprinting", me:GetAttribute("Sprinting"), false)
 	t.equal("LIGHT again turns it off", me:GetAttribute("LightOn"), false)
 
+	-- sound cues fire from what the server says
+	local Config = require("../../src/shared/Config")
+	local function heard(id: string): boolean
+		return table.find(world.played, id) ~= nil
+	end
+	t.check("the flashlight click plays", heard(Config.Sounds.flashlight))
+
 	-- hiding: the screen shows
 	local hide
 	for _, prompt in world.prompts(world.workspace, "Hide") do
@@ -160,6 +167,7 @@ return function(t)
 	cameras.Triggered:Fire(me)
 	play(world, 0.3)
 	t.equal("the tasks counter goes up", find(hud, "Tasks").Text, "TASKS 1/12")
+	t.check("finishing a task plays a ping", heard(Config.Sounds.taskDone))
 	local camButton = find(gui(me, "NightShiftCameras"), "TextButton")
 		or gui(me, "NightShiftCameras"):FindFirstChildOfClass("TextButton")
 	t.check(
@@ -188,6 +196,7 @@ return function(t)
 	play(world, 0.7)
 	local meeting = gui(me, "NightShiftMeeting")
 	t.check("the meeting screen opens", meeting.Enabled)
+	t.check("the meeting plays its bell", heard(Config.Sounds.meeting))
 	t.check("it names who called it", string.find(find(meeting, "Sub").Text, "Marco") ~= nil)
 	local cards = {}
 	for _, c in find(meeting, "Players"):GetChildren() do
@@ -239,6 +248,7 @@ return function(t)
 	t.equal("dawn", storage:GetAttribute("Phase"), "Dawn")
 	local results = gui(me, "NightShiftResults")
 	t.check("the dawn screen opens", results.Enabled)
+	t.check("dawn plays its sound", heard(Config.Sounds.dawn))
 	t.check(
 		"it names the winner",
 		string.find(find(results, "Headline").Text, "SABOTEUR") ~= nil
