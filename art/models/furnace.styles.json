@@ -1,0 +1,50 @@
+{
+ "band": {
+  "material": "Metal",
+  "rgb": [
+   117,
+   123,
+   123
+  ]
+ },
+ "base": {
+  "material": "Metal",
+  "rgb": [
+   117,
+   123,
+   123
+  ]
+ },
+ "door": {
+  "material": "Metal",
+  "rgb": [
+   52,
+   52,
+   52
+  ]
+ },
+ "drum": {
+  "material": "CorrodedMetal",
+  "rgb": [
+   128,
+   85,
+   59
+  ]
+ },
+ "fire": {
+  "material": "Neon",
+  "rgb": [
+   255,
+   168,
+   90
+  ]
+ },
+ "pipe": {
+  "material": "Metal",
+  "rgb": [
+   117,
+   123,
+   123
+  ]
+ }
+}

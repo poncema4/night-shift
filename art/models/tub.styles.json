@@ -1,0 +1,26 @@
+{
+ "rim": {
+  "material": "Marble",
+  "rgb": [
+   233,
+   230,
+   228
+  ]
+ },
+ "tap": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "water": {
+  "material": "Glass",
+  "rgb": [
+   90,
+   158,
+   186
+  ]
+ }
+}

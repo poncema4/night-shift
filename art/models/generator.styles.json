@@ -1,0 +1,50 @@
+{
+ "body": {
+  "material": "Metal",
+  "rgb": [
+   81,
+   111,
+   90
+  ]
+ },
+ "cap": {
+  "material": "Metal",
+  "rgb": [
+   52,
+   52,
+   59
+  ]
+ },
+ "exhaust": {
+  "material": "Metal",
+  "rgb": [
+   52,
+   52,
+   59
+  ]
+ },
+ "frame": {
+  "material": "Metal",
+  "rgb": [
+   52,
+   52,
+   59
+  ]
+ },
+ "led": {
+  "material": "Neon",
+  "rgb": [
+   123,
+   255,
+   168
+  ]
+ },
+ "panel": {
+  "material": "Metal",
+  "rgb": [
+   52,
+   52,
+   59
+  ]
+ }
+}

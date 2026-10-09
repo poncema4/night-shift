@@ -1,0 +1,74 @@
+{
+ "body": {
+  "material": "Metal",
+  "rgb": [
+   97,
+   52,
+   59
+  ]
+ },
+ "bumper": {
+  "material": "Metal",
+  "rgb": [
+   217,
+   217,
+   220
+  ]
+ },
+ "cabin": {
+  "material": "Glass",
+  "rgb": [
+   43,
+   59,
+   71
+  ]
+ },
+ "headlight": {
+  "material": "Neon",
+  "rgb": [
+   255,
+   249,
+   230
+  ]
+ },
+ "hood": {
+  "material": "Metal",
+  "rgb": [
+   97,
+   52,
+   59
+  ]
+ },
+ "hub": {
+  "material": "Metal",
+  "rgb": [
+   217,
+   217,
+   220
+  ]
+ },
+ "roof": {
+  "material": "Metal",
+  "rgb": [
+   97,
+   52,
+   59
+  ]
+ },
+ "trunk": {
+  "material": "Metal",
+  "rgb": [
+   97,
+   52,
+   59
+  ]
+ },
+ "wheel": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   43,
+   43,
+   48
+  ]
+ }
+}

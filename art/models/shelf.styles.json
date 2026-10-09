@@ -1,0 +1,34 @@
+{
+ "back": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "board": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   123,
+   93,
+   71
+  ]
+ },
+ "book": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   148,
+   65,
+   71
+  ]
+ },
+ "side": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ }
+}

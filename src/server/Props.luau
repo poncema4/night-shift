@@ -4,7 +4,11 @@
 -- overlapping them, so no two faces share a plane.
 local CollectionService = game:GetService("CollectionService")
 
-local Furnishing = require(game:GetService("ReplicatedStorage").Shared.Game.Furnishing)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Furnishing = require(ReplicatedStorage.Shared.Game.Furnishing)
+local ModelFit = require(ReplicatedStorage.Shared.Game.ModelFit)
+local ModelStyles = require(ReplicatedStorage.Shared.Game.ModelStyles)
 
 local Props = {}
 
@@ -392,8 +396,139 @@ makers.chandelier = function(model, at, item)
 	local _ = item
 end
 
+-- ===== imported Blender meshes =====
+-- If ReplicatedStorage.Models has a Model (or MeshPart) named like the furniture kind (see docs/ART.md), it is used instead
+-- of the part-built version: cloned, scaled to fit the footprint, painted from ModelStyles, and given the invisible
+-- "Body" / "Bell" parts the hiding and meeting systems look for. Missing models just fall back to the parts above.
+local GLOW: { [string]: { color: Color3, range: number, strength: number, up: number } } = {
+	lamp = { color = Color3.fromRGB(255, 200, 130), range = 14, strength = 0.7, up = 0.8 },
+	furnace = { color = Color3.fromRGB(255, 120, 40), range = 22, strength = 1.4, up = 0.35 },
+	generator = { color = Color3.fromRGB(80, 255, 120), range = 10, strength = 0.5, up = 0.5 },
+}
+local TEMPLATED = {
+	armchair = true,
+	desk = true,
+	bed = true,
+	lamp = true,
+	shelf = true,
+	crate = true,
+	locker = true,
+	wardrobe = true,
+	rack = true,
+	furnace = true,
+	generator = true,
+	table = true,
+	car = true,
+	tub = true,
+}
+
+local function paint(model: Model, kind: string)
+	local styles = ModelStyles[kind]
+	if not styles then
+		return
+	end
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			local style = styles[ModelFit.styleKey(d.Name)]
+			if style then
+				d.Color = Color3.fromRGB(style.rgb[1], style.rgb[2], style.rgb[3])
+				local ok, material = pcall(function()
+					return (Enum.Material :: any)[style.material]
+				end)
+				if ok and material then
+					d.Material = material
+				end
+				if style.material == "Glass" then
+					d.Transparency = 0.35
+				end
+			end
+		end
+	end
+end
+
+local function fromTemplate(parent: Instance, item: Furnishing.Item, floorY: number): Model?
+	if not TEMPLATED[item.kind] then
+		return nil
+	end
+	local folder = ReplicatedStorage:FindFirstChild("Models")
+	local source = folder and folder:FindFirstChild(item.kind)
+	if not source then
+		return nil
+	end
+	local model: Model
+	if source:IsA("Model") then
+		model = source:Clone()
+	elseif source:IsA("BasePart") then
+		model = Instance.new("Model")
+		source:Clone().Parent = model
+	else
+		return nil
+	end
+	model.Name = item.kind
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CanTouch = false
+			if d:IsA("MeshPart") then
+				d.CollisionFidelity = Enum.CollisionFidelity.Box
+			end
+		end
+	end
+	paint(model, item.kind)
+
+	-- scale to the footprint, stand it on the floor, turn it to face the room
+	local extraYaw = (source:GetAttribute("Yaw") :: number?) or 0
+	local foot = Furnishing.foot[item.kind]
+	local _, size = model:GetBoundingBox()
+	model:ScaleTo(model:GetScale() * ModelFit.scale(foot, size.X, size.Y, size.Z, extraYaw))
+	local boxCf, fitted = model:GetBoundingBox()
+	local target = CFrame.new(item.x, floorY + fitted.Y / 2, item.z)
+		* CFrame.Angles(0, math.rad(item.yaw + extraYaw), 0)
+	model:PivotTo(target * boxCf:ToObjectSpace(model:GetPivot()))
+
+	-- the systems that attach to furniture look for these parts by name
+	local width = if extraYaw % 180 == 90 then fitted.Z else fitted.X
+	local depth = if extraYaw % 180 == 90 then fitted.X else fitted.Z
+	if Furnishing.hideable[item.kind] and not model:FindFirstChild("Body") then
+		local body =
+			piece(model, "Body", Vector3.new(width, fitted.Y, depth), target, Color3.new(), Enum.Material.SmoothPlastic)
+		body.Transparency = 1
+		soft(body)
+	end
+	if item.kind == "desk" and not model:FindFirstChild("Bell") then
+		local bell = piece(
+			model,
+			"Bell",
+			Vector3.new(0.7, 0.4, 0.7),
+			target * CFrame.new(-width * 0.34, fitted.Y / 2, 0),
+			Color3.new(),
+			Enum.Material.SmoothPlastic
+		)
+		bell.Transparency = 1
+		soft(bell)
+	end
+	local glowSpec = GLOW[item.kind]
+	if glowSpec then
+		glow(
+			model,
+			"Glow",
+			Vector3.new(0.5, 0.5, 0.5),
+			target * CFrame.new(0, -fitted.Y / 2 + fitted.Y * glowSpec.up, 0),
+			glowSpec.color,
+			glowSpec.range,
+			glowSpec.strength
+		)
+	end
+	model.Parent = parent
+	return model
+end
+
 -- Builds one item standing on a floor at world height `floorY`.
 function Props.make(parent: Instance, item: Furnishing.Item, floorY: number): Model
+	local imported = fromTemplate(parent, item, floorY)
+	if imported then
+		return imported
+	end
 	local model = Instance.new("Model")
 	model.Name = item.kind
 	local base = CFrame.new(item.x, floorY, item.z) * CFrame.Angles(0, math.rad(item.yaw), 0)

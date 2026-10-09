@@ -1,5 +1,5 @@
 """Shared Blender helpers for NIGHT SHIFT assets. Run via tools/blender.sh (headless)."""
-import bpy, math, sys, os
+import bpy, math, sys, os, json
 
 def reset():
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -63,8 +63,44 @@ def render(path):
     bpy.context.scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
 
+def _roblox_material(name, metallic, emission, base):
+    """Guess the closest Roblox material from the Blender material's name and numbers."""
+    n = name.lower()
+    if emission > 0.5:
+        return "Neon"
+    for key, mat_ in (("velvet", "Fabric"), ("linen", "Fabric"), ("cloth", "Fabric"), ("wood", "Wood"), ("walnut", "Wood"),
+                      ("plank", "WoodPlanks"), ("marble", "Marble"), ("glass", "Glass"), ("crystal", "Glass"), ("water", "Glass"),
+                      ("brass", "Metal"), ("steel", "Metal"), ("chrome", "Metal"), ("rust", "CorrodedMetal"), ("tire", "SmoothPlastic")):
+        if key in n:
+            return mat_
+    return "Metal" if metallic > 0.5 else "SmoothPlastic"
+
+def write_styles(path):
+    """Per-part colour and material (by object name) so the game can paint the imported meshes."""
+    import re
+    styles = {}
+    for o in bpy.data.objects:
+        if o.type != "MESH" or o.name in ("Plane",) or not o.data.materials:
+            continue
+        m = o.data.materials[0]
+        if not m or not m.use_nodes:
+            continue
+        b = m.node_tree.nodes.get("Principled BSDF")
+        if not b:
+            continue
+        base = b.inputs["Base Color"].default_value
+        emission = b.inputs["Emission Strength"].default_value if "Emission Strength" in b.inputs else 0
+        rgb = [int(round(255 * (max(0.0, c) ** (1 / 2.2)))) for c in base[:3]]
+        key = re.sub(r"\.\d+$", "", o.name)
+        styles.setdefault(key, {"rgb": rgb, "material": _roblox_material(m.name, b.inputs["Metallic"].default_value, emission, base)})
+    with open(path, "w") as f:
+        json.dump(styles, f, indent=1, sort_keys=True)
+
 def export_glb(path):
+    write_styles(path[:-4] + ".styles.json")
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False)
+    # Roblox's importer likes FBX best: Y up, -Z forward, 1 unit = 1 metre (the game auto-fits the size)
+    bpy.ops.export_scene.fbx(filepath=path[:-4] + ".fbx", use_selection=False, axis_forward="-Z", axis_up="Y", apply_unit_scale=True, bake_space_transform=True)
 
 
 def cone(name, r1, r2, h, loc, material, verts=32):
@@ -104,3 +140,19 @@ def gem(name, r, loc, material):
     bpy.ops.mesh.primitive_ico_sphere_add(radius=r, subdivisions=1, location=loc)
     o = bpy.context.object; o.name = name; o.scale = (1, 1, 1.7); o.data.materials.append(material)
     return o
+
+
+def tapered(name, size, loc, material, top=(0.7, 0.8), bevel=0.04, subsurf=1):
+    """A box whose top face is narrower than its base (a car cabin, a lampshade): top = (x scale, y scale)."""
+    import bmesh
+    bpy.ops.mesh.primitive_cube_add(location=loc)
+    o = bpy.context.object; o.name = name
+    o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
+    bpy.ops.object.transform_apply(scale=True)
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    for v in bm.verts:
+        if v.co.z > 0:
+            v.co.x *= top[0]; v.co.y *= top[1]
+    bm.to_mesh(o.data); bm.free()
+    o.data.materials.append(material)
+    return smooth(o, bevel, subsurf)

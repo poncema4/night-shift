@@ -1,0 +1,42 @@
+{
+ "body": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "crown": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   123,
+   93,
+   71
+  ]
+ },
+ "door": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   114,
+   85,
+   65
+  ]
+ },
+ "knob": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "panel": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ }
+}

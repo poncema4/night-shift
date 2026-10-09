@@ -1,0 +1,66 @@
+{
+ "bell": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "bellbase": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "body": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "frame": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "panel": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "plinth": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   52,
+   43,
+   38
+  ]
+ },
+ "rail": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "top": {
+  "material": "Marble",
+  "rgb": [
+   233,
+   230,
+   228
+  ]
+ }
+}

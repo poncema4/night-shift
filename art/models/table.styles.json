@@ -1,0 +1,50 @@
+{
+ "candle": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   243,
+   238,
+   224
+  ]
+ },
+ "flame": {
+  "material": "Neon",
+  "rgb": [
+   255,
+   224,
+   168
+  ]
+ },
+ "leg": {
+  "material": "Wood",
+  "rgb": [
+   93,
+   65,
+   45
+  ]
+ },
+ "runner": {
+  "material": "Fabric",
+  "rgb": [
+   114,
+   34,
+   52
+  ]
+ },
+ "stick": {
+  "material": "Metal",
+  "rgb": [
+   237,
+   199,
+   128
+  ]
+ },
+ "top": {
+  "material": "SmoothPlastic",
+  "rgb": [
+   123,
+   93,
+   71
+  ]
+ }
+}
