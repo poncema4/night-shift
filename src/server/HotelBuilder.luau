@@ -160,6 +160,7 @@ local function atmosphere()
 	local grade = Instance.new("ColorCorrectionEffect")
 	grade.Contrast = look.Contrast
 	grade.Saturation = look.Saturation
+	grade.Brightness = look.GradeBrightness
 	grade.TintColor = Color3.fromRGB(235, 235, 255)
 	grade.Parent = effects
 	local bloom = Instance.new("BloomEffect")

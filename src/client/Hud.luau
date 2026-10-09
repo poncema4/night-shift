@@ -151,7 +151,7 @@ function Hud.start()
 	guideBody.Text = "<b>The Night Manager hunts this hotel.</b> It has three floors; stairs are at both ends of the long corridor.\n"
 		.. "<b>CREW:</b> hold <b>E</b> at the orange stations to finish every task before dawn.\n"
 		.. "<b>SABOTEUR:</b> secretly help him. Fake tasks, stay unseen, and don't be the last one standing with the crew.\n"
-		.. "<b>RUN</b> (Shift) is loud. <b>LIGHT</b> (F) draws him. Stand still to be quiet.\n"
+		.. "<b>RUN</b> (Shift) is loud. <b>LIGHT</b> (F) draws him, but hold it on him for a second and he is <b>blinded</b> for three. Stand still to be quiet.\n"
 		.. "<b>HIDE</b> in lockers and wardrobes (hold E). He searches the ones he lingers beside."
 	guideBody.Parent = guide
 	local guideClose = Instance.new("TextButton")

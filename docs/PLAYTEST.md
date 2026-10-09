@@ -26,6 +26,9 @@ Nothing in the game has been run in Studio yet except the very first rounds: eve
 - [ ] Hold **E** at a locker/wardrobe: you vanish, black screen with vent slats. **LEAVE (E)** gets you out. Stand next to the locker while he is near: he eventually pulls you out and you die.
 - [ ] Standing still, he hears you from less far; sprinting + light, from farther.
 
+- [ ] Shine the flashlight on him (he needs to be in the beam and not behind a wall) for about a second: he freezes with his arms over his face for 3 seconds and cannot catch you. It has an 18 s cooldown.
+- [ ] The hotel is dark now: the corridors should be dim, the basement nearly black, the flashlight needed. Too dark? Raise `Config.Look.BulbBrightness` / `Ambient`.
+
 ## 4. Atmosphere
 - [ ] Every 15-40 s something happens: flicker burst, a subtitle line, camera thud, and later a blackout on your floor.
 

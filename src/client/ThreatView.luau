@@ -37,7 +37,7 @@ function ThreatView.start()
 		local moving = math.clamp(speed / 9, 0, 1)
 		local bob = math.sin(os.clock() * (if chasing then 11 else 4.5)) * 0.15 * moving
 		local root = CFrame.new(current + Vector3.new(0, bob, 0)) * CFrame.Angles(0, yaw, 0)
-		NightManagerRig.pose(rig, root, os.clock(), moving, chasing)
+		NightManagerRig.pose(rig, root, os.clock(), moving, chasing, state:GetAttribute("Stunned") == true)
 		rig.model.Parent = workspace
 	end)
 end

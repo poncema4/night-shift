@@ -149,7 +149,14 @@ function NightManagerRig.build(): Rig
 end
 
 -- Poses every limb. `moving` is 0..1 (how fast he is walking), `chasing` raises the arms and leans him in.
-function NightManagerRig.pose(rig: Rig, root: CFrame, clock: number, moving: number, chasing: boolean)
+function NightManagerRig.pose(
+	rig: Rig,
+	root: CFrame,
+	clock: number,
+	moving: number,
+	chasing: boolean,
+	stunned: boolean?
+)
 	local phase = clock * (if chasing then 9 else 4.5)
 	local swing = math.sin(phase) * moving
 	local lean = if chasing then 0.3 else 0.1
@@ -163,6 +170,15 @@ function NightManagerRig.pose(rig: Rig, root: CFrame, clock: number, moving: num
 		ArmL = CFrame.Angles(armRaise, 0, 0.05),
 		ArmR = CFrame.Angles(armRaise, 0, -0.05),
 	}
+	if stunned then
+		-- blinded: both long arms up over the mask, head thrown back and shaking, no walking
+		rotations.ArmL = CFrame.Angles(2.7, 0, 0.35)
+		rotations.ArmR = CFrame.Angles(2.7, 0, -0.35)
+		rotations.Head = CFrame.Angles(0.45, 0, math.sin(clock * 22) * 0.18)
+		rotations.Chest = CFrame.Angles(0.15, 0, 0)
+		rotations.LegL = CFrame.identity
+		rotations.LegR = CFrame.identity
+	end
 	local frames: { [string]: CFrame } = {}
 	for _, name in rig.order do
 		local l = rig.limbs[name]

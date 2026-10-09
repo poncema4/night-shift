@@ -460,6 +460,9 @@ function Fake.world()
 	function Methods.GetServerTimeNow(_)
 		return world.now
 	end
+	function Methods.Raycast(_, _origin, _direction, _params)
+		return if world.rayBlocked then { Instance = world.workspace } else nil
+	end
 	-- Remotes deliver to the local fake client too, so server and client code talk to each other in one world.
 	function Methods.FireClient(self, player, ...)
 		table.insert(world.log, { remote = data[self].props.Name, to = "client", args = { player, ... } })
@@ -675,6 +678,11 @@ function Fake.world()
 			NumberSequence = NumberSequence,
 			ColorSequence = ColorSequence,
 			Enum = world.enum,
+			RaycastParams = {
+				new = function()
+					return { FilterDescendantsInstances = {} }
+				end,
+			},
 			game = game,
 			workspace = workspaceInstance,
 			script = proxy(path),
