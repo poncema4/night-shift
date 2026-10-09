@@ -235,7 +235,7 @@ function HotelBuilder.build(): Result
 			local x, z = Hotel.centre(room)
 			bulb(lights, x, y, z, level)
 		end
-		for x = -50, 50, 20 do
+		for x = -70, 70, 20 do
 			bulb(lights, x, y, 0, level)
 		end
 	end

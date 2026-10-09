@@ -51,7 +51,7 @@ return function(t)
 		end
 	end
 	t.check("every task is inside its room and clear of walls", wellPlaced)
-	t.equal("six tasks", #Hotel.tasks, 6)
+	t.equal("nine ground-floor tasks (six originals plus one in each new wing room)", #Hotel.tasks, 9)
 
 	local graph = Hotel.graph()
 	-- connected: walk from the lobby and count what we reach

@@ -3,6 +3,7 @@
 -- crew, the saboteur is voted out): everything must reset between rounds (tasks, cameras, the bell, hiding places,
 -- cooldowns, lights, the Night Manager's start) so round four plays exactly like round one.
 local Fake = require("../fake/Roblox")
+local Floors = require("../../src/shared/Game/Floors")
 
 local function logged(world: any, remote: string, to: string?): { any }
 	local list = {}
@@ -117,20 +118,10 @@ return function(t)
 	checkClean("round 1", crew1, sab1)
 	threat.pause()
 	local finishers = { crew1[1], crew1[2], crew1[3] }
-	local taskNames = {
-		"Reset the breaker",
-		"Restock the minibar",
-		"Fold the linens",
-		"Fix the cameras",
-		"Wind the grand clock",
-		"Refill the pool chlorine",
-		"Fix the elevator panel",
-		"Turn down the bed in Room 204",
-		"Drain the rooftop spa",
-		"Restart the generator",
-		"Close the steam valve",
-		"Replace the fuse box",
-	}
+	local taskNames = {}
+	for _, task in Floors.tasks() do
+		table.insert(taskNames, task.name)
+	end
 	for i, name in taskNames do
 		local who = finishers[(i % 3) + 1]
 		local prompt = stationPrompt(name)

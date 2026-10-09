@@ -3,6 +3,7 @@
 -- running against the real server in the fake Roblox world, talking over the same remotes. It checks that every screen
 -- builds, reacts to what the server sends, and that pressing things reaches the server.
 local Fake = require("../fake/Roblox")
+local Floors = require("../../src/shared/Game/Floors")
 
 local function logged(world: any, remote: string, to: string?): { any }
 	local list = {}
@@ -135,7 +136,10 @@ return function(t)
 	t.check("the status shows the night and a countdown", string.find(find(hud, "Status").Text, "NIGHT") ~= nil)
 	t.check("the role is shown", string.find(find(hud, "Role").Text, "CREW") ~= nil and find(hud, "Role").Visible)
 	t.equal("the floor is shown", find(hud, "Floor").Text, "GROUND FLOOR")
-	t.check("the tasks counter shows 0 of 12", find(hud, "Tasks").Text == "TASKS 0/12" and find(hud, "Tasks").Visible)
+	t.check(
+		"the tasks counter shows 0 of all of them",
+		find(hud, "Tasks").Text == `TASKS 0/{#Floors.tasks()}` and find(hud, "Tasks").Visible
+	)
 	local guide = find(hud, "Guide")
 	t.check("the How to Play card is shown the first time", guide.Visible)
 	for _, b in guide:GetChildren() do
@@ -219,7 +223,7 @@ return function(t)
 	world.root(me).Position = cameras.Parent.Position + V3.new(0, 0, 3)
 	cameras.Triggered:Fire(me)
 	play(world, 0.3)
-	t.equal("the tasks counter goes up", find(hud, "Tasks").Text, "TASKS 1/12")
+	t.equal("the tasks counter goes up", find(hud, "Tasks").Text, `TASKS 1/{#Floors.tasks()}`)
 	t.check("finishing a task plays a ping", heard(Config.Sounds.taskDone))
 	local camButton = find(gui(me, "NightShiftCameras"), "TextButton")
 		or gui(me, "NightShiftCameras"):FindFirstChildOfClass("TextButton")

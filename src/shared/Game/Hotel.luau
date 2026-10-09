@@ -13,7 +13,7 @@ local Hotel = {}
 Hotel.CEILING = 14
 Hotel.WALL = 1
 Hotel.DOOR = 8
-Hotel.CORRIDOR = { x1 = -60, z1 = -5, x2 = 60, z2 = 5 }
+Hotel.CORRIDOR = { x1 = -80, z1 = -5, x2 = 80, z2 = 5 }
 
 Hotel.rooms = {
 	{ name = "Kitchen", x1 = -60, z1 = 5, x2 = -40, z2 = 25 },
@@ -26,6 +26,11 @@ Hotel.rooms = {
 	{ name = "Office", x1 = -30, z1 = -25, x2 = -10, z2 = -5 },
 	{ name = "Ballroom", x1 = -10, z1 = -25, x2 = 30, z2 = -5 },
 	{ name = "Pool Room", x1 = 30, z1 = -25, x2 = 60, z2 = -5 },
+	-- the two end rooms on each side (the east and west wings added in v0.7); upstairs and the basement name them in Floors
+	{ name = "Cloakroom", x1 = -80, z1 = 5, x2 = -60, z2 = 25 },
+	{ name = "Chapel", x1 = 60, z1 = 5, x2 = 80, z2 = 25 },
+	{ name = "Gift Shop", x1 = -80, z1 = -25, x2 = -60, z2 = -5 },
+	{ name = "Billiards", x1 = 60, z1 = -25, x2 = 80, z2 = -5 },
 } :: { Rect }
 
 Hotel.tasks = {
@@ -35,6 +40,9 @@ Hotel.tasks = {
 	{ id = "cameras", name = "Fix the cameras", room = "Security", x = 30, z = 21 },
 	{ id = "clock", name = "Wind the grand clock", room = "Ballroom", x = 10, z = -21 },
 	{ id = "chlorine", name = "Refill the pool chlorine", room = "Pool Room", x = 45, z = -21 },
+	{ id = "coats", name = "Sort the lost coats", room = "Cloakroom", x = -70, z = 21 },
+	{ id = "candles", name = "Light the chapel candles", room = "Chapel", x = 70, z = 21 },
+	{ id = "billiards", name = "Rack the billiard balls", room = "Billiards", x = 70, z = -21 },
 } :: { TaskSpot }
 
 function Hotel.centre(room: Rect): (number, number)

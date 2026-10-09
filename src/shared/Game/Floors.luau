@@ -48,6 +48,10 @@ local ROOM_NAMES: { [number]: { string } } = {
 		"Library",
 		"Grand Suite",
 		"Rooftop Spa",
+		"Room 207",
+		"Room 208",
+		"Gallery",
+		"Observatory",
 	},
 	[-1] = {
 		"Wine Cellar",
@@ -60,12 +64,16 @@ local ROOM_NAMES: { [number]: { string } } = {
 		"Maintenance",
 		"Flooded Hall",
 		"Locker Room",
+		"Sewer Junction",
+		"Drain Room",
+		"Crypt",
+		"Cistern",
 	},
 }
 
 Floors.annexes = {
-	{ id = "West", x1 = -76, z1 = -8, x2 = -60, z2 = 8, side = -1, levels = { 0, 1 } },
-	{ id = "East", x1 = 60, z1 = -8, x2 = 76, z2 = 8, side = 1, levels = { 0, -1 } },
+	{ id = "West", x1 = -96, z1 = -8, x2 = -80, z2 = 8, side = -1, levels = { 0, 1 } },
+	{ id = "East", x1 = 80, z1 = -8, x2 = 96, z2 = 8, side = 1, levels = { 0, -1 } },
 } :: { Annex }
 
 function Floors.y(level: number): number
@@ -541,8 +549,8 @@ function Floors.graph(): { [string]: Node }
 		for i = 1, #defs - 1 do
 			link(`{tag}{i - 1}`, `{tag}{i}`)
 		end
-		link(tag .. "0", Floors.corridorId(0, a.side * 50))
-		link(`{tag}{#defs - 1}`, Floors.corridorId(upper, a.side * 50))
+		link(tag .. "0", Floors.corridorId(0, a.side * 70))
+		link(`{tag}{#defs - 1}`, Floors.corridorId(upper, a.side * 70))
 	end
 	return nodes
 end

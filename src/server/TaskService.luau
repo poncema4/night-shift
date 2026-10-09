@@ -1,5 +1,6 @@
 --!strict
 -- Task stations. The server decides everything: who may work, what counts, and the progress shown to all.
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
@@ -21,14 +22,20 @@ local roleOf: (number) -> string? = function(_userId: number)
 	return nil
 end
 
-local function publish()
+-- (done, how many are needed to win): see TaskBoard.target
+local function progress(): (number, number)
 	local done, total = board:count()
+	return done, TaskBoard.target(total, #Players:GetPlayers())
+end
+
+local function publish()
+	local done, total = progress()
 	ReplicatedStorage:SetAttribute("TasksDone", done)
 	ReplicatedStorage:SetAttribute("TasksTotal", total)
 end
 
 function TaskService.counts(): (number, number)
-	return board:count()
+	return progress()
 end
 
 -- Call `fn(taskId, player)` whenever a task is completed (used to unlock the cameras).

@@ -169,6 +169,47 @@ local builders: { [string]: Builder } = {
 		wheel.Shape = Enum.PartType.Cylinder
 		wheel.CFrame = wheel.CFrame * CFrame.Angles(0, math.pi / 2, 0)
 	end,
+	coats = function(put)
+		put("Rail", Vector3.new(3.6, 0.2, 0.2), 0, 4.2, 0, BRASS, Enum.Material.Metal)
+		for _, x in { -1.4, 1.4 } do
+			put("Post", Vector3.new(0.2, 4.2, 0.2), x, 2.1, 0, BRASS, Enum.Material.Metal)
+		end
+		for i = -1, 1 do
+			put(
+				"Coat",
+				Vector3.new(0.9, 2.2, 0.35),
+				i * 1.1,
+				3.0,
+				0.2,
+				Color3.fromRGB(40 + (i + 1) * 20, 34, 40),
+				Enum.Material.Fabric
+			)
+		end
+	end,
+	candles = function(put)
+		put("Altar", Vector3.new(3.4, 1.8, 1.6), 0, 0.9, 0, Color3.fromRGB(80, 74, 70), Enum.Material.Slate)
+		for i = -1, 1 do
+			put(
+				"Candle",
+				Vector3.new(0.3, 1.0, 0.3),
+				i * 1.0,
+				2.3,
+				0.1,
+				Color3.fromRGB(230, 222, 196),
+				Enum.Material.SmoothPlastic
+			)
+			put("Flame", Vector3.new(0.2, 0.35, 0.2), i * 1.0, 3.0, 0.1, AMBER, Enum.Material.Neon)
+		end
+	end,
+	billiards = function(put)
+		put("Rail", Vector3.new(3.6, 0.5, 2.0), 0, 2.0, 0, WOOD, Enum.Material.Wood)
+		put("Cloth", Vector3.new(3.2, 0.1, 1.6), 0, 2.3, 0, Color3.fromRGB(26, 90, 52), Enum.Material.Fabric)
+		for i, color in { Color3.fromRGB(200, 40, 40), Color3.fromRGB(230, 220, 60), Color3.fromRGB(240, 240, 240) } do
+			local ball =
+				put("Ball", Vector3.new(0.45, 0.45, 0.45), -0.8 + i * 0.7, 2.6, 0.1, color, Enum.Material.SmoothPlastic)
+			ball.Shape = Enum.PartType.Ball
+		end
+	end,
 	fuse = function(put)
 		put("Box", Vector3.new(3.0, 3.4, 1.0), 0, 2.4, -0.5, STEEL, Enum.Material.Metal)
 		put("Door", Vector3.new(2.8, 3.2, 0.1), 0, 2.4, 0.05, Color3.fromRGB(44, 48, 52), Enum.Material.Metal)
