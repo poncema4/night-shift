@@ -73,31 +73,47 @@ return function(t)
 	end
 	t.equal("carve leaves slab area minus hole area", area, 60 - 12)
 
-	-- 4. stairs: each step up is a climbable height and the flights meet their landings and floors
+	-- 4. stairs: walking a stairwell, every step up is one climbable rise, the flights and landings are continuous, and the
+	-- last tread leaves exactly one rise to the next floor
 	local steps = true
+	local stepNote = ""
 	for _, a in Floors.annexes do
 		local dir = if a.side < 0 then 1 else -1
-		local tops = {}
+		local tops: { [string]: number } = {}
 		for _, s in Floors.treads() do
-			if string.sub(s.name or "", 1, #a.id) == a.id then
+			if string.sub(s.name or "", 1, #a.id + 1) == a.id .. "_" then
+				tops[s.name :: string] = s.y + s.h
+			end
+		end
+		for _, s in Floors.landings() do
+			if string.sub(s.name or "", 1, #a.id + 1) == a.id .. "_" then
 				tops[s.name :: string] = s.y + s.h
 			end
 		end
 		local previous = 0
-		for _, flight in { "1", "2" } do
-			for i = 1, Floors.STEPS do
-				local top = tops[a.id .. flight .. "_" .. i] or dir * 2 * Floors.STEPS * Floors.RISE -- the floor is the last step
-				if math.abs(top - previous) > MAX_STEP then
-					steps = false
-				end
-				previous = top
+		local order = {}
+		for i = 1, Floors.FLIGHT_STEPS * 3 do
+			table.insert(order, `{a.id}_T{i}`)
+			if i == Floors.FLIGHT_STEPS then
+				table.insert(order, `{a.id}_LandingFarNorth`)
+			elseif i == Floors.FLIGHT_STEPS * 2 then
+				table.insert(order, `{a.id}_LandingFarSouth`)
 			end
 		end
-		if math.abs(previous - dir * 2 * Floors.STEPS * Floors.RISE) > 1e-6 then
-			steps = false -- the top step must land exactly on the next floor
+		for _, name in order do
+			local top = tops[name]
+			if top == nil or math.abs(top - previous) > MAX_STEP then
+				steps = false
+				stepNote = `{name} is {top} after {previous}`
+			end
+			previous = top or previous
+		end
+		if math.abs(previous - dir * Floors.FLIGHT_STEPS * 3 * Floors.RISE) > 1e-6 then
+			steps = false
+			stepNote = `{a.id} ends at {previous}`
 		end
 	end
-	t.check("every stair step is climbable and the flights reach the next floor", steps)
+	t.check("every stair step is climbable and each flight reaches the next", steps, stepNote)
 
 	-- 5. every graph node is standable (floor underneath, headroom above)
 	local graph = Floors.graph()

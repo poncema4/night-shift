@@ -71,6 +71,6 @@ for name, lvl, y0 in (("plan_basement", -1, -16), ("plan_ground", 0, 0), ("plan_
 # stairwells as cutaways: floors, treads, landings and guard rails only
 CUT = ("wall", "header", "frame", "skirting", "wainscot", "rail", "cornice", "roof")
 draw([0, 1], show_items=False, nodes=True, xrange=(-85, -55), skip=CUT)
-setup_render(os.path.join(out_dir, "stairs_west.png"), (-110, -45, 45), (-70, 0, 8), res=(1600, 900))
+setup_render(os.path.join(out_dir, "stairs_west.png"), (-100, -30, 42), (-68, 0, 8), res=(1600, 900))
 draw([0, -1], show_items=False, nodes=True, xrange=(55, 85), skip=CUT)
-setup_render(os.path.join(out_dir, "stairs_east.png"), (110, -45, 30), (70, 0, -6), res=(1600, 900))
+setup_render(os.path.join(out_dir, "stairs_east.png"), (100, -30, 24), (68, 0, -8), res=(1600, 900))

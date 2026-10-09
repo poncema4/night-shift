@@ -30,11 +30,11 @@ Floors.HEIGHT = 16 -- walking surface to walking surface
 Floors.TILE = 2 -- floor slab thickness (also the next level's ceiling)
 Floors.levels = { 0, 1, -1 }
 Floors.RISE = 1
-Floors.RUN = 1.5
-Floors.STEPS = 8
 Floors.TREAD = 0.4
-Floors.LANE_Z = 5 -- centre of each flight's lane (+/-)
-Floors.LANE_HALF = 2
+-- The stairwells are square spirals around an open well: three flights of FLIGHT_STEPS steps joined by corner landings,
+-- going round the well, 15 steps = one floor (the 16th "step" is the next floor itself).
+Floors.FLIGHT_STEPS = 5
+Floors.FLIGHT_RUN = 1.6
 
 local ROOM_NAMES: { [number]: { string } } = {
 	[1] = {
@@ -64,8 +64,8 @@ local ROOM_NAMES: { [number]: { string } } = {
 }
 
 Floors.annexes = {
-	{ id = "West", x1 = -80, z1 = -8, x2 = -60, z2 = 8, side = -1, levels = { 0, 1 } },
-	{ id = "East", x1 = 60, z1 = -8, x2 = 80, z2 = 8, side = 1, levels = { 0, -1 } },
+	{ id = "West", x1 = -76, z1 = -8, x2 = -60, z2 = 8, side = -1, levels = { 0, 1 } },
+	{ id = "East", x1 = 60, z1 = -8, x2 = 76, z2 = 8, side = 1, levels = { 0, -1 } },
 } :: { Annex }
 
 function Floors.y(level: number): number
@@ -197,27 +197,70 @@ function Floors.inWall(level: number, x: number, z: number, margin: number): boo
 end
 
 -- ===== stairs =====
+-- A stairwell is laid out in local coordinates: u is the distance from the corridor wall, v is z. The shaft interior is
+-- u 0.5..15.5, v -7.5..7.5. Around a 8 x 8 well (u 4..12, v -4..4) run four strips 3.5 wide:
+--   near strip (u 0.5..4)   the entrance: flat, level with the corridor
+--   north flight (v 4..7)   5 steps going away from the corridor
+--   far strip (u 12..15)    5 steps going south, after a corner landing
+--   south flight (v -7..-4) 5 steps coming back toward the corridor, then the near-south corner is the next floor
+-- A stairwell going UP (West) has its opening in the upper floor; one going DOWN (East) has its opening in the entrance floor.
 
-local function flightX(annex: Annex, i: number, second: boolean): (number, number)
-	-- Flight 1 leaves the corridor-side landing; flight 2 returns along the other lane. Returns x1, x2 of tread i.
-	local inner = if annex.side < 0 then Hotel.CORRIDOR.x1 else Hotel.CORRIDOR.x2
-	local sign = annex.side
-	local start = inner + sign * 4 -- landing A is 4 studs deep
-	local far = start + sign * Floors.RUN * Floors.STEPS
-	local a, b
-	if not second then
-		a = start + sign * Floors.RUN * (i - 1)
-		b = start + sign * Floors.RUN * i
-	else
-		a = far - sign * Floors.RUN * (i - 1)
-		b = far - sign * Floors.RUN * i
-	end
-	return math.min(a, b), math.max(a, b)
-end
+local INSET = 0.5 -- treads stop this far from the shaft walls, so they never touch the wall trim
+local FRONT = 4 -- where the well starts (u)
+local BACK = 12 -- where the well ends (u)
 
 -- +1 for the annex that climbs (West), -1 for the one that descends (East).
 local function direction(annex: Annex): number
 	return if annex.side < 0 then 1 else -1
+end
+
+local function innerX(annex: Annex): number
+	return if annex.side < 0 then Hotel.CORRIDOR.x1 else Hotel.CORRIDOR.x2
+end
+
+-- A local rectangle (u1..u2, v1..v2) as a world rectangle.
+local function worldRect(
+	annex: Annex,
+	u1: number,
+	u2: number,
+	v1: number,
+	v2: number
+): { x1: number, z1: number, x2: number, z2: number }
+	local xa, xb = innerX(annex) + annex.side * u1, innerX(annex) + annex.side * u2
+	return { x1 = math.min(xa, xb), x2 = math.max(xa, xb), z1 = math.min(v1, v2), z2 = math.max(v1, v2) }
+end
+
+type Step = { name: string, u1: number, u2: number, v1: number, v2: number, top: number, landing: boolean }
+
+-- Every tread and landing of a stairwell, in the order you walk them. `top` is the height above the entrance floor.
+local function spiral(annex: Annex): { Step }
+	local steps: { Step } = {}
+	local n, run = Floors.FLIGHT_STEPS, Floors.FLIGHT_RUN
+	local function add(name: string, u1: number, u2: number, v1: number, v2: number, top: number, landing: boolean)
+		table.insert(
+			steps,
+			{ name = `{annex.id}_{name}`, u1 = u1, u2 = u2, v1 = v1, v2 = v2, top = top, landing = landing }
+		)
+	end
+	local far1, far2 = BACK, 15.5 - INSET -- far strip u 12..15
+	local north1, north2 = 4, 7.5 - INSET -- north flight v 4..7
+	local south1, south2 = -(7.5 - INSET), -4 -- south flight v -7..-4
+	local count = 0
+	for k = 1, n do -- north flight, away from the corridor
+		count += 1
+		add(`T{count}`, FRONT + run * (k - 1), FRONT + run * k, north1, north2, count * Floors.RISE, false)
+	end
+	add("LandingFarNorth", far1, far2, north1, north2, count * Floors.RISE, true)
+	for k = 1, n do -- far flight, going south
+		count += 1
+		add(`T{count}`, far1, far2, north1 - run * k, north1 - run * (k - 1), count * Floors.RISE, false)
+	end
+	add("LandingFarSouth", far1, far2, south1, south2, count * Floors.RISE, true)
+	for k = 1, n do -- south flight, coming back toward the corridor
+		count += 1
+		add(`T{count}`, BACK - run * k, BACK - run * (k - 1), south1, south2, count * Floors.RISE, false)
+	end
+	return steps
 end
 
 -- Tread slabs, in world coordinates (y is the world y of the bottom of the tread).
@@ -225,24 +268,18 @@ function Floors.treads(): { Slab }
 	local list: { Slab } = {}
 	for _, a in Floors.annexes do
 		local dir = direction(a)
-		for _, second in { false, true } do
-			local zc = if second then Floors.LANE_Z else -Floors.LANE_Z
-			for i = 1, Floors.STEPS do
-				if dir < 0 and second and i == Floors.STEPS then
-					continue -- this step is the basement floor itself
-				end
-				local x1, x2 = flightX(a, i, second)
-				local step = if second then Floors.STEPS + i else i
-				local top = dir * step * Floors.RISE
+		for _, st in spiral(a) do
+			if not st.landing then
+				local r = worldRect(a, st.u1, st.u2, st.v1, st.v2)
 				table.insert(list, {
-					x = (x1 + x2) / 2,
-					z = zc,
-					w = x2 - x1,
-					d = Floors.LANE_HALF * 2,
-					y = top - Floors.TREAD,
+					x = (r.x1 + r.x2) / 2,
+					z = (r.z1 + r.z2) / 2,
+					w = r.x2 - r.x1,
+					d = r.z2 - r.z1,
+					y = dir * st.top - Floors.TREAD,
 					h = Floors.TREAD,
 					kind = "tread",
-					name = `{a.id}{if second then "2" else "1"}_{i}`,
+					name = st.name,
 				})
 			end
 		end
@@ -250,82 +287,73 @@ function Floors.treads(): { Slab }
 	return list
 end
 
--- The half landing between the two flights.
+-- The two corner landings halfway round each stairwell.
 function Floors.landings(): { Slab }
 	local list: { Slab } = {}
 	for _, a in Floors.annexes do
 		local dir = direction(a)
-		local far = if a.side < 0 then a.x1 + Hotel.WALL / 2 else a.x2 - Hotel.WALL / 2
-		local inner = (if a.side < 0 then Hotel.CORRIDOR.x1 else Hotel.CORRIDOR.x2)
-			+ a.side * (4 + Floors.RUN * Floors.STEPS)
-		local x1, x2 = math.min(far, inner), math.max(far, inner)
-		local top = dir * Floors.STEPS * Floors.RISE
-		table.insert(list, {
-			x = (x1 + x2) / 2,
-			z = 0,
-			w = x2 - x1,
-			d = a.z2 - a.z1 - Hotel.WALL,
-			y = top - 0.6,
-			h = 0.6,
-			kind = "landing",
-			name = a.id .. "Landing",
-		})
-	end
-	return list
-end
-
--- Openings in a level's floor slab where a flight needs headroom: {level, rect}.
-function Floors.holes(level: number): { { x1: number, z1: number, x2: number, z2: number } }
-	local list = {}
-	for _, a in Floors.annexesOf(level) do
-		local second = a.side < 0 -- West climbs: the 2nd flight rises through the upstairs floor; East descends through the ground floor via flight 1
-		local owner = if a.side < 0 then 1 else 0
-		if level == owner then
-			local x1, x2 = flightX(a, 1, second)
-			local x3, x4 = flightX(a, Floors.STEPS, second)
-			local lane = if second then Floors.LANE_Z else -Floors.LANE_Z
-			table.insert(list, {
-				x1 = math.min(x1, x2, x3, x4),
-				x2 = math.max(x1, x2, x3, x4),
-				z1 = lane - Floors.LANE_HALF,
-				z2 = lane + Floors.LANE_HALF,
-			})
+		for _, st in spiral(a) do
+			if st.landing then
+				local r = worldRect(a, st.u1, st.u2, st.v1, st.v2)
+				table.insert(list, {
+					x = (r.x1 + r.x2) / 2,
+					z = (r.z1 + r.z2) / 2,
+					w = r.x2 - r.x1,
+					d = r.z2 - r.z1,
+					y = dir * st.top - 0.6,
+					h = 0.6,
+					kind = "landing",
+					name = st.name,
+				})
+			end
 		end
 	end
 	return list
 end
 
--- Guard rails along the sides of each hole that are not the way in (local y, on the level's own floor).
+-- The opening in a level's floor above the flights (and the well). Local: West opens on the upper floor over u 4..15.5,
+-- v -7.5..4; East opens on the entrance floor over u 4..15.5, v -4..7.5.
+function Floors.holes(level: number): { { x1: number, z1: number, x2: number, z2: number } }
+	local list = {}
+	for _, a in Floors.annexesOf(level) do
+		local owner = if a.side < 0 then 1 else 0
+		if level == owner then
+			if a.side < 0 then
+				table.insert(list, worldRect(a, FRONT, 15.5, -7.5, 4))
+			else
+				table.insert(list, worldRect(a, FRONT, 15.5, -4, 7.5))
+			end
+		end
+	end
+	return list
+end
+
+-- Guard rails along the edges of the opening that have floor beside them, except where you step on or off the stairs.
 function Floors.rails(level: number): { Slab }
 	local list: { Slab } = {}
-	for _, hole in Floors.holes(level) do
-		local a = if hole.x1 < 0 then Floors.annexes[1] else Floors.annexes[2]
-		local lane = (hole.z1 + hole.z2) / 2
-		-- the open end is the corridor-side end of the hole
-		local openEast = a.side < 0 -- West hole opens to the east (towards the corridor)
-		local inwardZ = if lane > 0 then hole.z1 - 0.2 else hole.z2 + 0.2
-		local gap = 1.5 -- leave the way in open and wide enough to walk past
-		local railX1 = if openEast then hole.x1 else hole.x1 + gap
-		local railX2 = if openEast then hole.x2 - gap else hole.x2
-		table.insert(list, {
-			x = (railX1 + railX2) / 2,
-			z = inwardZ,
-			w = railX2 - railX1,
-			d = 0.3,
-			y = 0,
-			h = 3.5,
-			kind = "guardrail",
-		})
-		local endX = if openEast then hole.x1 - 0.2 else hole.x2 + 0.2
-		table.insert(list, {
-			x = endX,
-			z = (hole.z1 + hole.z2) / 2,
-			w = 0.3,
-			d = hole.z2 - hole.z1,
-			y = 0,
-			h = 3.5,
-			kind = "guardrail",
-		})
+	for _, a in Floors.annexesOf(level) do
+		if #Floors.holes(level) > 0 and ((a.side < 0 and level == 1) or (a.side > 0 and level == 0)) then
+			local function rail(u1: number, u2: number, v1: number, v2: number)
+				local r = worldRect(a, u1, u2, v1, v2)
+				table.insert(list, {
+					x = (r.x1 + r.x2) / 2,
+					z = (r.z1 + r.z2) / 2,
+					w = math.max(r.x2 - r.x1, 0.3),
+					d = math.max(r.z2 - r.z1, 0.3),
+					y = 0,
+					h = 3.5,
+					kind = "guardrail",
+				})
+			end
+			-- the edge toward the corridor, along the near strip (the ends stay open for the way on and off)
+			rail(FRONT - 0.35, FRONT - 0.05, -4, 4)
+			-- the long edge beside the balcony (north strip going up, south strip going down)
+			if a.side < 0 then
+				rail(FRONT, 15, 4.05, 4.35)
+			else
+				rail(FRONT, 15, -4.35, -4.05)
+			end
+		end
 	end
 	return list
 end
@@ -481,35 +509,40 @@ function Floors.graph(): { [string]: Node }
 	for _, a in Floors.annexes do
 		local tag = string.sub(a.id, 1, 1) .. "A"
 		local dir = direction(a)
-		local sign = a.side
-		local inner = if sign < 0 then Hotel.CORRIDOR.x1 else Hotel.CORRIDOR.x2
-		local start = inner + sign * 4 -- foot of flight 1 (landing A is 4 studs deep)
-		local turn = start + sign * Floors.RUN * Floors.STEPS -- where flight 1 ends and flight 2 begins
-		local function centre(i: number, second: boolean): number
-			local x1, x2 = flightX(a, i, second)
-			return (x1 + x2) / 2
+		local ix = innerX(a)
+		local n, run = Floors.FLIGHT_STEPS, Floors.FLIGHT_RUN
+		local function at(
+			u: number,
+			v: number,
+			top: number,
+			lvl: number
+		): { x: number, z: number, y: number, level: number }
+			return { x = ix + a.side * u, z = v, y = dir * top, level = lvl }
 		end
-		local rise = dir * Floors.STEPS * Floors.RISE
 		local lower, upper = 0, if dir > 0 then 1 else -1
-		local farWall = if sign < 0 then a.x1 else a.x2
 		local defs = {
-			{ id = tag .. "0", x = inner + sign * 2, z = 0, y = 0, level = lower },
-			{ id = tag .. "1", x = start, z = -Floors.LANE_Z, y = 0, level = lower },
-			{ id = tag .. "2", x = centre(Floors.STEPS, false), z = -Floors.LANE_Z, y = rise, level = lower },
-			{ id = tag .. "3", x = (turn + farWall) / 2, z = 0, y = rise, level = lower },
-			{ id = tag .. "4", x = turn, z = Floors.LANE_Z, y = rise, level = upper },
-			{ id = tag .. "5", x = centre(Floors.STEPS, true), z = Floors.LANE_Z, y = 2 * rise, level = upper },
-			{ id = tag .. "6", x = inner + sign * 2, z = Floors.LANE_Z, y = 2 * rise, level = upper },
-			{ id = tag .. "7", x = inner + sign * 2, z = 0, y = 2 * rise, level = upper },
+			at(2.25, 0, 0, lower), -- 0 the entrance strip, level with the corridor
+			at(2.25, 5.5, 0, lower), -- 1 the near-north corner
+			at(FRONT, 5.5, 0, lower), -- 2 foot of the north flight
+			at(FRONT + run * (n - 0.5), 5.5, n, lower), -- 3 top of the north flight
+			at(13.5, 5.5, n, lower), -- 4 far-north landing
+			at(13.5, 4, n, lower), -- 5 head of the far flight
+			at(13.5, 4 - run * (n - 0.5), 2 * n, upper), -- 6 foot of the south flight's landing
+			at(13.5, -5.5, 2 * n, upper), -- 7 far-south landing
+			at(BACK, -5.5, 2 * n, upper), -- 8 head of the south flight
+			at(BACK - run * (n - 0.5), -5.5, 3 * n, upper), -- 9 top of the south flight
+			at(2.25, -5.5, 3 * n + 1, upper), -- 10 the near-south corner: this is the next floor
+			at(2.25, 0, 3 * n + 1, upper), -- 11 the entrance strip on the next floor
 		}
-		for _, d in defs do
-			nodes[d.id] = { id = d.id, x = d.x, z = d.z, y = d.y, level = d.level, kind = "stair", links = {} }
+		for i, d in defs do
+			nodes[`{tag}{i - 1}`] =
+				{ id = `{tag}{i - 1}`, x = d.x, z = d.z, y = d.y, level = d.level, kind = "stair", links = {} }
 		end
 		for i = 1, #defs - 1 do
-			link(defs[i].id, defs[i + 1].id)
+			link(`{tag}{i - 1}`, `{tag}{i}`)
 		end
-		link(tag .. "0", Floors.corridorId(0, sign * 50))
-		link(tag .. "7", Floors.corridorId(upper, sign * 50))
+		link(tag .. "0", Floors.corridorId(0, a.side * 50))
+		link(`{tag}{#defs - 1}`, Floors.corridorId(upper, a.side * 50))
 	end
 	return nodes
 end

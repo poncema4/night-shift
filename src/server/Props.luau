@@ -318,6 +318,57 @@ makers.water = function(model, at)
 	soft(water)
 end
 
+makers.sludge = function(model, at)
+	local pool =
+		piece(model, "Sludge", Vector3.new(6, 0.2, 14), at(0, 0.1, 0), Color3.fromRGB(34, 52, 30), Enum.Material.Glass)
+	pool.Transparency = 0.2
+	soft(pool)
+end
+
+-- Rusted pipe run under the basement ceiling: a long barrel, flange rings, a valve wheel and a slow drip.
+makers.pipe = function(model, at)
+	local top = Furnishing.ceiling :: number
+	local rust = Color3.fromRGB(88, 52, 34)
+	piece(model, "Barrel", Vector3.new(16, 0.9, 0.9), at(0, top - 1.2, 0), rust, Enum.Material.CorrodedMetal)
+	for _, x in { -6, 0, 6 } do
+		piece(
+			model,
+			"Flange",
+			Vector3.new(0.4, 1.3, 1.3),
+			at(x, top - 1.2, 0),
+			Color3.fromRGB(62, 46, 38),
+			Enum.Material.Metal
+		)
+	end
+	for _, x in { -6, 6 } do
+		piece(
+			model,
+			"Bracket",
+			Vector3.new(0.3, 0.8, 0.3),
+			at(x + 1.5, top - 0.4, 0),
+			Color3.fromRGB(50, 44, 40),
+			Enum.Material.Metal
+		)
+	end
+	piece(
+		model,
+		"Wheel",
+		Vector3.new(0.2, 1.2, 1.2),
+		at(3, top - 1.2, 0.8),
+		Color3.fromRGB(120, 30, 26),
+		Enum.Material.Metal
+	)
+	local drip = piece(
+		model,
+		"Drip",
+		Vector3.new(0.12, 0.5, 0.12),
+		at(-3, top - 2, 0),
+		Color3.fromRGB(90, 120, 80),
+		Enum.Material.Glass
+	)
+	soft(drip)
+end
+
 makers.car = function(model, at)
 	piece(model, "Chassis", Vector3.new(6.4, 1.4, 13.2), at(0, 1.1, 0), Color3.fromRGB(46, 22, 24), Enum.Material.Metal)
 	piece(model, "Hood", Vector3.new(6, 0.4, 4), at(0, 2.0, 4.4), Color3.fromRGB(52, 26, 28), Enum.Material.Metal)

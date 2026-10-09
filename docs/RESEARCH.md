@@ -55,3 +55,11 @@ Applied to NIGHT SHIFT: the Night Manager's pale mask and red-lit eyes at the en
 
 ## Honest limits
 Nobody can promise a game blows up. What we control: a strong icon and title, a first minute that does not bounce, a reason to return, a reason to bring friends, and clips that are easy to make. Those are the signals Roblox and TikTok both measure.
+
+## TikTok horror-Roblox feed (checked live 2026-10-09)
+
+- Search "roblox horror game": clips are 1 monster + 1 hook. Winning hooks: a creature that knows your name, gets faster, or hunts by sound.
+- Captions are short and reaction-led ("i was scared i had to", "how did it get faster"); creators say "invite all your friends" for co-op.
+- Tags that recur: #roblox #robloxhorror #robloxhorrorgame #scary #horror #fyp #scarygames. Long 20-tag walls exist but the top-liked clips use 3-5.
+- Takeaways for NIGHT SHIFT: the Night Manager hearing you (sprint/flashlight noise) is the clip moment; party co-op is a feature creators pitch; the blinding flashlight beat is a shareable "I survived" moment.
+- Launch tags to use: #roblox #robloxhorror #nightshift #scary #fyp.
