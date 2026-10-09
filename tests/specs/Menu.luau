@@ -56,12 +56,29 @@ return function(t)
 	t.check("SHOP is there too", buttonText(menu, "SHOP") ~= nil)
 	t.check("the match HUD is not started in the lobby", me.PlayerGui:FindFirstChild("NightShiftHud") == nil)
 
+	-- the lobby lamps flicker: they dip to nearly dark at times and are back to full between bursts
+	local lamps = world.service("CollectionService"):GetTagged("LobbyLamp")
+	t.check("the lobby has plenty of lamps", #lamps >= 10)
+	local lowest, highest = math.huge, 0
+	for _ = 1, 300 do
+		step(0.1)
+		for _, lamp in lamps do
+			local light = lamp:FindFirstChildOfClass("PointLight")
+			if light then
+				lowest = math.min(lowest, light.Brightness)
+				highest = math.max(highest, light.Brightness)
+			end
+		end
+	end
+	t.check("a lamp dips to nearly dark", lowest < 0.1, `{lowest}`)
+	t.check("and shines at full between bursts", highest > 0.65, `{highest}`)
+
 	-- play: quick play puts you in a party and the status follows the clock
 	buttonText(menu, "PLAY").Activated:Fire()
 	step(0.5)
 	buttonText(menu, "QUICK PLAY").Activated:Fire()
 	step(1)
-	t.check("quick play joined a party", labelContaining(menu, "in your party. Starting in") ~= nil)
+	t.check("quick play joined a party", labelContaining(menu, "need 3 more. Starting in") ~= nil)
 	step(10)
 	local before = labelContaining(menu, "Starting in")
 	t.check("the countdown is running", before ~= nil and not string.find(before.Text, "in 30s", 1, true))

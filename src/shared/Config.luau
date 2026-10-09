@@ -24,6 +24,8 @@ return table.freeze({
 		QueueSeconds = 30,
 		FullSeconds = 5,
 		ActionCooldown = 0.25, -- seconds between party actions from one player
+		PodZ = 14, -- the row of queue pads along the back of the lobby
+		PodSpacing = 10,
 	}),
 	-- Studio is not a real server: pick which job it plays ("Match" = the round, "Lobby" = the party screen).
 	Server = table.freeze({ StudioMode = "Match" }),

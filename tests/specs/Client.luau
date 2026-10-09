@@ -106,12 +106,27 @@ return function(t)
 		return text
 	end
 	t.check("a countdown shows while he is locked up", string.find(jailText(), "LOCKED UP", 1, true) ~= nil, jailText())
+	local cell = world.service("CollectionService"):GetTagged("HoldingCell")[1]
+	local bar = cell and cell:FindFirstChild("Bar")
+	t.check("the holding cell is in the hotel", bar ~= nil)
+	local closedY = bar and bar.CFrame.Position.Y or 0
+	play(world, 1)
+	t.check(
+		"the cage stays shut while he is locked up",
+		bar ~= nil and math.abs(bar.CFrame.Position.Y - closedY) < 0.01
+	)
 	threat.release(false)
 	play(world, 0.5)
 	t.check(
 		"when he is released the screen says so",
 		string.find(jailText(), "HE IS LOOSE", 1, true) ~= nil,
 		jailText()
+	)
+	play(world, 2)
+	t.check(
+		"the cage bars slide up and out of the way",
+		bar ~= nil and bar.CFrame.Position.Y > closedY + 8,
+		`{closedY} -> {bar and bar.CFrame.Position.Y}`
 	)
 
 	-- every screen is built

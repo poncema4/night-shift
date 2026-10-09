@@ -14,6 +14,20 @@ One published place runs in two jobs (`Shared/Game/ServerMode`):
 - Players see their own loading screen ("ENTERING THE HOTEL" + a tip) through the teleport (`SetTeleportGui`),
   after the studio-logo loading screen on first join (`src/first/Loading.client.luau`).
 
+## Pods (walk onto a pad)
+The back of the lobby has six queue pads (SOLO, DUO, TRIO, SQUAD 4, SIX, FULL HOUSE). Step on one and you join that pad's
+party (the first person starts it), step off and you leave. Each pad's sign shows how many more are needed and the clock;
+the ring goes green when someone is queued and red for the last 5 s. Rules are the same 30 s / 5 s queue. Layout in
+`Shared/Game/Pods`, behaviour in `LobbyService`, tests in `tests/specs/LobbyPods.luau`.
+
+## Quick Play
+Quick Play fills from THIS lobby server only: it joins the fullest open party, or starts one of 4. The screens say how many
+more players are needed ("2/5 need 3 more"). Searching across lobby servers needs MemoryStoreService (see TODO).
+
+## After the night
+A match server is one night long. When it ends, everyone is teleported back to a public lobby (`Teleport.toLobby`), or sooner
+with RETURN TO LOBBY on the results screen. Dead players spectate until then.
+
 ## Co-op
 Fewer than 4 players = co-op (`Roles.COOP_BELOW`): nobody is a saboteur, a phantom is counted so only a wiped-out crew
 loses, and finishing the tasks wins. 4 or more: one saboteur (two at 9+).

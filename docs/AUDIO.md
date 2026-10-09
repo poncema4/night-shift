@@ -1,0 +1,30 @@
+# Sound, music and voice chat
+
+## What is wired today
+Every cue reads an id from `Config.Sounds` (flashlight click, task done, meeting, thud, dawn, heartbeat). They are Roblox's
+built-in placeholders. The heartbeat swells and quickens as he nears and as the crew finishes tasks (rage). The lobby plays a
+distant thud every 25 to 60 s and the lamps flicker. Volume and subtitles are in Options.
+
+## What makes horror audio work (and what to upload)
+Pick or make about ten sounds, upload them under the group (Creator Hub > Assets > Audio; needs ID verification; short
+sounds are free), and paste the ids into `Config.Sounds`:
+1. **Lobby/hotel ambience loop**: low drone, faint room tone, an occasional pipe knock. Quiet and constant.
+2. **His footsteps**: slow, heavy, on carpet and on tile (two variants). Plays from HIM in 3D so you can locate him.
+3. **Cage alarm**: a slow klaxon during the 30 s countdown; a metal clang when the bars rise.
+4. **"He is loose" sting**: one low hit.
+5. **Locker creak** on enter/leave, and muffled breathing while hidden.
+6. **Flashlight click** and a faint electrical buzz while on; a failing flicker when the battery dies.
+7. **Blind scream** when the flashlight stuns him (a short distorted shriek: it is the clip moment).
+8. **Distant thud / whisper** one-shots for the scare director.
+Rules: no loud music beds (they hide his footsteps), use silence before a scare, and keep everything under the voice level.
+Sources: your own recordings, or CC0 libraries (freesound.org with a CC0 filter, and Roblox's Creator Store audio that shows
+as free). Check each licence before uploading. Claude cannot upload audio to your account.
+
+## Voice chat
+- Roblox voice is an experience setting plus your account: Creator Hub > the experience > Settings > Communication, turn on
+  "Enable Voice Chat" (needs the owner to be age/ID verified; players need to be verified themselves).
+- Use **proximity (spatial) voice**: it suits a hotel where you whisper to the people near you. Roblox's spatial voice is the
+  default once voice is on; no code is needed.
+- Big later idea (not built): make HIS hearing react to mic loudness through the Audio API, so shouting in voice chat draws
+  him. It is a strong clip mechanic (the "Mimic the Voice" games prove it) but it needs real Studio testing first.
+- Moderation: voice is covered by Roblox's rules; keep Report buttons visible in the lobby.
