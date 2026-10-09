@@ -17,6 +17,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local ScareDirector = require(script.Parent.ScareDirector)
 local StealthService = require(script.Parent.StealthService)
 local TaskService = require(script.Parent.TaskService)
+local Teleport = require(script.Parent.Teleport)
 local ThreatService = require(script.Parent.ThreatService)
 
 local STEP = 0.5
@@ -45,6 +46,17 @@ function RoundService.start()
 	remotes.Parent = ReplicatedStorage
 	local roleAssigned = makeRemote(remotes, "RoleAssigned")
 	local roundResult = makeRemote(remotes, "RoundResult")
+	local leaveMatch = makeRemote(remotes, "LeaveMatch")
+
+	-- A real match server sends everyone back to the public lobby when the night is over (a Studio test just keeps looping).
+	local function returnsToLobby(): boolean
+		return ReplicatedStorage:GetAttribute("ServerMode") == "Match" and not RunService:IsStudio()
+	end
+	leaveMatch.OnServerEvent:Connect(function(player: Player)
+		if returnsToLobby() then
+			task.spawn(Teleport.toLobby, { player })
+		end
+	end)
 
 	local function roleOf(userId: number): string?
 		return roles[userId]
@@ -242,6 +254,10 @@ function RoundService.start()
 			CameraService.reset()
 			dawnReport(event.winner)
 		elseif event.to == "Lobby" then
+			if returnsToLobby() then
+				print("[Round] the night is over: sending everyone back to the lobby")
+				task.spawn(Teleport.toLobby, Players:GetPlayers())
+			end
 			TaskService.setActive(false)
 			StealthService.setActive(false)
 			ScareDirector.setActive(false, 0)

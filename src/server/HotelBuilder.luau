@@ -256,6 +256,9 @@ function HotelBuilder.build(): Result
 		if item.kind == "desk" and not bell then
 			bell = model:FindFirstChild("Bell") :: BasePart? -- the reception bell: ring it to call a meeting
 		end
+		if item.kind == "cell" then
+			CollectionService:AddTag(model, "HoldingCell") -- the client animates it (client/Jail)
+		end
 		if Furnishing.hideable[item.kind] then
 			table.insert(hiding, { model = model, position = Vector3.new(item.x, Floors.y(item.level), item.z) })
 		end

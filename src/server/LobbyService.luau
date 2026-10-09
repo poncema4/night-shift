@@ -4,15 +4,17 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TeleportService = game:GetService("TeleportService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Party = require(ReplicatedStorage.Shared.Game.Party)
+local Pods = require(ReplicatedStorage.Shared.Game.Pods)
+local Teleport = require(script.Parent.Teleport)
+
+type PodView = { status: TextLabel, ring: Part }
 
 local LobbyService = {}
 
 local STEP = 0.5
-local TELEPORT_TRIES = 3
 
 local function makeRemote(parent: Instance, name: string): RemoteEvent
 	local remote = Instance.new("RemoteEvent")
@@ -21,26 +23,7 @@ local function makeRemote(parent: Instance, name: string): RemoteEvent
 	return remote
 end
 
--- Sends the players to a fresh reserved server; returns whether Roblox accepted it.
-local function teleport(players: { Player }): boolean
-	for attempt = 1, TELEPORT_TRIES do
-		local ok, err = pcall(function()
-			local code = TeleportService:ReserveServer(game.PlaceId)
-			local options = Instance.new("TeleportOptions")
-			options.ReservedServerAccessCode = code
-			options:SetTeleportData({ size = #players })
-			TeleportService:TeleportAsync(game.PlaceId, players, options)
-		end)
-		if ok then
-			return true
-		end
-		warn(`[Lobby] teleport attempt {attempt} failed: {err}`)
-		task.wait(1)
-	end
-	return false
-end
-
-function LobbyService.start(remotes: Folder)
+function LobbyService.start(remotes: Folder, podViews: { [number]: PodView }?)
 	local lobby = Party.new({
 		MaxSize = Config.Lobby.MaxParty,
 		QueueSeconds = Config.Lobby.QueueSeconds,
@@ -52,6 +35,63 @@ function LobbyService.start(remotes: Folder)
 	local notice = makeRemote(remotes, "PartyNotice") -- server -> one player: why something did not work
 
 	local lastAction: { [Player]: number } = {}
+
+	-- Queue pods: stepping onto a pad puts you in that pad's party (the first one makes it), stepping off takes you out.
+	local pods = Pods.layout(0, Config.Lobby.PodZ, Config.Lobby.PodSpacing)
+	local podParty: { [number]: number } = {} -- pod id -> the party that pad is currently queueing
+	local memberPod: { [number]: number } = {} -- userId -> the pod that put them in their party
+
+	local function syncPods()
+		for _, player in Players:GetPlayers() do
+			local userId = player.UserId
+			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+			local pod = if root then Pods.at(pods, root.Position.X, root.Position.Z) else nil
+			local was: number? = memberPod[userId]
+			if was and lobby:partyOf(userId) == nil then
+				memberPod[userId] = nil -- their party launched or was disbanded
+				was = nil
+			end
+			if was and (not pod or pod.id ~= was) then
+				lobby:leave(userId)
+				memberPod[userId] = nil
+			end
+			if pod and not memberPod[userId] and lobby:partyOf(userId) == nil then
+				local existing = podParty[pod.id]
+				local joined = false
+				if existing and lobby.parties[existing] then
+					joined = lobby:join(userId, existing)
+				end
+				if not joined then
+					local created = lobby:create(userId, pod.size)
+					if created then
+						podParty[pod.id] = created.id
+						joined = true
+					end
+				end
+				if joined then
+					memberPod[userId] = pod.id
+				end
+			end
+		end
+		if podViews then
+			for _, pod in pods do
+				local view = podViews[pod.id]
+				local party = lobby.parties[podParty[pod.id] or -1]
+				if view then
+					if party then
+						local line = Pods.status(#party.members, party.size)
+						view.status.Text = `{line}  {math.ceil(party.timeLeft)}s`
+						view.ring.Color = if party.timeLeft <= Config.Lobby.FullSeconds
+							then Color3.fromRGB(210, 40, 50)
+							else Color3.fromRGB(110, 220, 130)
+					else
+						view.status.Text = Pods.status(0, pod.size)
+						view.ring.Color = Color3.fromRGB(255, 190, 90)
+					end
+				end
+			end
+		end
+	end
 
 	local function broadcast()
 		state:FireAllClients(lobby:view())
@@ -112,7 +152,7 @@ function LobbyService.start(remotes: Folder)
 			print("[Lobby] Studio cannot teleport: publish the place to test the real hand-off")
 			return
 		end
-		if not teleport(people) then
+		if not Teleport.toMatch(people) then
 			for _, player in people do
 				notice:FireClient(player, "Could not start your game. Please try again.")
 			end
@@ -122,6 +162,7 @@ function LobbyService.start(remotes: Folder)
 	task.spawn(function()
 		while true do
 			task.wait(STEP)
+			syncPods()
 			for _, ready in lobby:tick(STEP) do
 				launch(ready.members)
 			end

@@ -12,8 +12,9 @@ Legend: [x] done and merged, [~] built, needs your eyes in Studio, [ ] to do, [Y
 
 ## 2. Look and sound (what makes clips and thumbnails)
 - [YOU] Import the Blender FBX models (`docs/ART.md`) so props look hand-made, not boxes.
-- [ ] Real sound: replace the placeholder ids in `Config.Sounds` (heartbeat, his footsteps, the cage alarm, locker creak, lights buzz). Sound sells horror more than anything.
-- [ ] Store icon (512), 3 to 5 thumbnails (1920x1080) from Blender renders of real geometry (corridor, spiral well, sewer, locker POV), group logo unchanged. Not started; needs a render pass.
+- [~] Lobby pods, flickering lobby, return-to-lobby, animated cage (bars rise, lamp pulses). See `docs/LOBBY.md`.
+- [ ] Real sound (full plan in `docs/AUDIO.md`): replace the placeholder ids in `Config.Sounds` (heartbeat, his footsteps, the cage alarm, locker creak, lights buzz). Sound sells horror more than anything.
+- [~] Store art generated from real renders with the group logo unchanged: `brand/store_icon_512.png`, `brand/store_thumb_corridor.png`, `brand/store_thumb_face.png` (re-run `python3 brand/make_store_art.py`). [YOU] upload them in Creator Hub (Claude did not publish or upload anything to your experience). Still wanted: a spiral-well and a sewer render.
 - [ ] A 30 s trailer clip captured from a real match (this is also your first TikTok).
 
 ## 3. Store page (Creator Hub, before publishing)
@@ -34,6 +35,8 @@ Legend: [x] done and merged, [~] built, needs your eyes in Studio, [ ] to do, [Y
 - [YOU] TikTok bio still shows the old game name (the save kept being rejected). Set: `Roblox horror THE NIGHT MANAGER. Join us: roblox.com/communities/749648777`.
 - [ ] Add a record-friendly mode: hide HUD, "clip moment" camera shake on near misses.
 
+- [YOU] Voice chat: turn it on in Creator Hub (see `docs/AUDIO.md`).
+
 ## 6. Money (cosmetic only)
 - [~] Shop, Starlight pass, tips packs. [YOU] create the pass and products in Creator Hub and paste the ids (`docs/MONETIZATION.md`).
 - [ ] Seasonal cosmetics, subscription, private servers.
@@ -41,7 +44,7 @@ Legend: [x] done and merged, [~] built, needs your eyes in Studio, [ ] to do, [Y
 ## 7. Content depth (keeps players)
 - [ ] More saboteur abilities, a second Night Manager variant, hotel events (blackout waves, flooded basement), a second map.
 - [ ] Spectator chat, emotes, end-of-night awards, a leaderboard.
-- [ ] Options saved to the profile; cross-server queue (MemoryStore) so small parties can merge.
+- [ ] Options saved to the profile; cross-server Quick Play (MemoryStore) so small parties across lobby servers can merge.
 
 ## 8. Housekeeping
 - [YOU] Delete the `poncema4/night-shift-logs` GitHub repo (`gh auth refresh -h github.com -s delete_repo`), close the old PowerShell `scripts/logs` window, delete its folder.

@@ -625,6 +625,13 @@ function Fake.world()
 				world.tags[tag] = world.tags[tag] or {}
 				table.insert(world.tags[tag], inst)
 			end
+			s.GetInstanceAddedSignal = function()
+				return {
+					Connect = function()
+						return { Disconnect = function() end }
+					end,
+				}
+			end
 			s.GetTagged = function(_, tag)
 				return world.tags[tag] or {}
 			end

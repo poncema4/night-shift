@@ -4,6 +4,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Ui = require(script.Parent.Ui)
+
 local Results = {}
 
 local FATE_TEXT = { survived = "SURVIVED", caught = "CAUGHT", ejected = "EJECTED" }
@@ -59,6 +61,18 @@ function Results.start()
 	layout.Padding = UDim.new(0, 4)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
+
+	-- leave now instead of waiting for the automatic trip back to the lobby
+	local leave = Ui.button(
+		panel,
+		"RETURN TO LOBBY",
+		UDim2.fromScale(0.32, 0.92),
+		UDim2.fromScale(0.36, 0.06),
+		function()
+			ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("LeaveMatch"):FireServer()
+		end
+	)
+	leave.ZIndex = 5
 
 	local shownAt = -100 -- the phase attribute can arrive a moment after the result message
 	local awardEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Award") :: RemoteEvent

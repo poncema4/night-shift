@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Pods = require(ReplicatedStorage.Shared.Game.Pods)
 local Ui = require(script.Parent.Ui)
 
 local PartyUi = {}
@@ -62,6 +63,15 @@ function PartyUi.build(parent: Instance, remotes: Instance): Frame
 		action:FireServer("quick")
 	end)
 
+	Ui.label(
+		panel,
+		"Quick Play fills from this lobby. You can also walk onto a pad.",
+		Enum.Font.Gotham,
+		Ui.MUTED,
+		UDim2.fromScale(0.05, 0.395),
+		UDim2.fromScale(0.9, 0.03)
+	)
+
 	-- each row joins whichever party it currently shows (the server sends the list in a stable order)
 	local rows: { TextButton } = {}
 	local shown: { [number]: number? } = {}
@@ -113,9 +123,7 @@ function PartyUi.build(parent: Instance, remotes: Instance): Frame
 		end
 		if mine then
 			local wait = math.ceil(mine.timeLeft)
-			status.Text = if mine.full
-				then `Party full. Starting in {wait}s`
-				else `{mine.count}/{mine.size} in your party. Starting in {wait}s`
+			status.Text = `{Pods.status(mine.count, mine.size)}. Starting in {wait}s`
 		else
 			status.Text = "Not in a party"
 		end
@@ -127,9 +135,10 @@ function PartyUi.build(parent: Instance, remotes: Instance): Frame
 			shown[i] = if party then party.id else nil
 			if party then
 				local host = Players:GetPlayerByUserId(party.leader)
-				row.Text = `{if host then host.Name else "A player"}   {party.count}/{party.size}   {math.ceil(
-					party.timeLeft
-				)}s`
+				row.Text =
+					`{if host then host.Name else "A player"}   {Pods.status(party.count, party.size)}   {math.ceil(
+						party.timeLeft
+					)}s`
 				row.TextTransparency = if mine == nil and not party.full then 0 else 0.5
 			end
 		end

@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local LobbyFx = require(script.Parent.LobbyFx)
 local Options = require(script.Parent.Options)
 local PartyUi = require(script.Parent.PartyUi)
 local StoreUi = require(script.Parent.StoreUi)
@@ -23,6 +24,7 @@ local INFO = {
 
 function Menu.start()
 	local me = Players.LocalPlayer
+	LobbyFx.start()
 	local gui = Ui.screen(me:WaitForChild("PlayerGui"), "NightShiftMenu", 30)
 
 	local backdrop = Instance.new("Frame")

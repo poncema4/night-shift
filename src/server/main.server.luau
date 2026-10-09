@@ -17,14 +17,14 @@ ReplicatedStorage:SetAttribute("ServerMode", mode)
 print(`{Config.GameName} server v{Config.Version} started as {mode}`)
 
 if mode == "Lobby" then
-	LobbyBuilder.build()
+	local _, podViews = LobbyBuilder.build()
 	local remotes = Instance.new("Folder")
 	remotes.Name = "Remotes"
 	remotes.Parent = ReplicatedStorage
 	Players.CharacterAutoLoads = true
 	ProfileService.start(remotes) -- the shop and cosmetics work in the lobby too
 	PurchaseService.start(remotes)
-	LobbyService.start(remotes)
+	LobbyService.start(remotes, podViews)
 else
 	RoundService.start()
 	PurchaseService.start(ReplicatedStorage:WaitForChild("Remotes"))
