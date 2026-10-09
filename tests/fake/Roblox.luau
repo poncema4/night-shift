@@ -316,14 +316,10 @@ function Fake.world()
 			props.CanCollide = true
 			props.Transparency = 0
 			props.Color = Color3.new(0.63, 0.63, 0.63)
-		elseif isA(class, "Light") then
+		elseif isA(class, "Light") or class == "ScreenGui" or class == "ProximityPrompt" then
 			props.Enabled = true
 			props.Range = 8
 			props.Brightness = 1
-		elseif class == "ProximityPrompt" then
-			props.Enabled = true
-		elseif class == "ScreenGui" then
-			props.Enabled = true
 		elseif
 			class == "Frame"
 			or class == "TextLabel"
