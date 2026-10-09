@@ -10,7 +10,8 @@ src/server   server scripts (ServerScriptService.Server)
 src/client   client scripts (StarterPlayerScripts.Client)
 tests        checks that run without Roblox:  lune run tests/run
 brand        logo and store art
-docs         plans, marketing, notes
+art          Blender scripts, models, renders (docs/ART.md)
+docs         HANDOFF, GAMEPLAY, MAP, ART, PLAYTEST, IDEAS, ROADMAP, marketing
 ```
 
 ## Every day (Linux laptop: write code, check it)

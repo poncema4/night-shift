@@ -6,7 +6,7 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 
 **Tiers are community-reported, not an official GitHub page**: 1 (default), 10 (Bronze), 24 (Silver), 48 (Gold) co-authored commits on merged PRs. Whether the badge has advanced can only be seen on the profile at github.com/poncema4.
 
-**Verified count on `main`**: 12 commits carry the poncema4 co-author trailer (`git log origin/main --format=%B | grep -c '^Co-authored-by: poncema4'`).
+**Verified count on `main`**: 20 commits carry the poncema4 co-author trailer; 19 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
 
 ## Merged PRs
 
@@ -23,6 +23,14 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 | [#10](https://github.com/poncema4/night-shift/pull/10) | fix(round): solo Studio rounds ended 0.5s into the Night | 2026-10-09 |
 | [#11](https://github.com/poncema4/night-shift/pull/11) | chore: logs to a separate repo, hardened .gitignore | 2026-10-09 |
 | [#12](https://github.com/poncema4/night-shift/pull/12) | fix(hotel): remove template Baseplate and default spawn | 2026-10-09 |
+| [#13](https://github.com/poncema4/night-shift/pull/13) | docs: Pair Extraordinaire tracker | 2026-10-09 |
+| [#14](https://github.com/poncema4/night-shift/pull/14) | chore: remove the Studio log bridge | 2026-10-09 |
+| [#15](https://github.com/poncema4/night-shift/pull/15) | fix(ci): stop linting the removed tools folder | 2026-10-09 |
+| [#16](https://github.com/poncema4/night-shift/pull/16) | feat(world): three floors, stairs, 3D Night Manager, furnishing, type-check | 2026-10-09 |
+| [#17](https://github.com/poncema4/night-shift/pull/17) | feat(stealth): sprint, flashlight, hiding, noise, scares, how-to-play | 2026-10-09 |
+| [#18](https://github.com/poncema4/night-shift/pull/18) | feat(social): meetings, voting, reports, bell, saboteur abilities, dawn screen | 2026-10-09 |
+| [#19](https://github.com/poncema4/night-shift/pull/19) | feat(progress): XP, levels, tips, cosmetics Locker, DataStore saving | 2026-10-09 |
+| [#20](https://github.com/poncema4/night-shift/pull/20) | feat(art): full Blender prop set, FBX export, model loader, art guide | 2026-10-09 |
 
 One PR counts once however many commits it has; the count above is commits, which is what the tiers are described in.
 
