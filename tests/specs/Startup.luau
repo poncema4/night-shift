@@ -91,7 +91,8 @@ return function(t)
 		local lobbyWorld = Fake.world()
 		local lobbyRemotes = lobbyWorld.instance.new("Folder")
 		lobbyWorld.load("src/server/LobbyService").start(lobbyRemotes)
-		local lobbyFiles = { ["Menu.luau"] = true, ["PartyUi.luau"] = true }
+		lobbyWorld.load("src/server/PurchaseService").start(lobbyRemotes)
+		local lobbyFiles = { ["Menu.luau"] = true, ["PartyUi.luau"] = true, ["StoreUi.luau"] = true }
 		local missing = {}
 		local ignore = { PlayerGui = true, Remotes = true, ThreatState = true }
 		for _, file in fs.readDir("src/client") do

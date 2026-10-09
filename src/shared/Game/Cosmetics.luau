@@ -14,6 +14,7 @@ export type Item = {
 	level: number,
 	rgb: { number }?,
 	note: string?,
+	pass: string?, -- owned through this game pass instead of being bought with tips
 }
 
 -- Slots: "flashlight" (beam colour), "hat" (worn on the head), "dust" (colour of footstep dust).
@@ -54,6 +55,26 @@ Cosmetics.items = {
 	{ id = "hat_bellhop", name = "Bellhop Cap", slot = "hat", price = 90, level = 3 },
 	{ id = "hat_top", name = "Night Manager's Top Hat", slot = "hat", price = 200, level = 6 },
 	{ id = "hat_crown", name = "Paper Crown", slot = "hat", price = 320, level = 9 },
+	-- the Starlight Collection (game pass): looks only, never an advantage
+	{
+		id = "light_starlight",
+		name = "Starlight",
+		slot = "flashlight",
+		price = 0,
+		level = 1,
+		rgb = { 200, 170, 255 },
+		pass = "starlight",
+	},
+	{
+		id = "light_crimson",
+		name = "Crimson Beam",
+		slot = "flashlight",
+		price = 0,
+		level = 1,
+		rgb = { 255, 70, 90 },
+		pass = "starlight",
+	},
+	{ id = "hat_halo", name = "Halo", slot = "hat", price = 0, level = 1, pass = "starlight" },
 	{ id = "dust_none", name = "No Dust", slot = "dust", price = 0, level = 1 },
 	{ id = "dust_rose", name = "Rose", slot = "dust", price = 70, level = 2, rgb = { 255, 130, 170 } },
 	{ id = "dust_gold", name = "Gold", slot = "dust", price = 180, level = 5, rgb = { 255, 210, 90 } },
@@ -71,10 +92,13 @@ end
 -- Free items are yours from the start.
 function Cosmetics.owns(profile: Progress.Profile, id: string): boolean
 	local item = byId[id]
+	if item and item.pass then
+		return profile.passes[item.pass] == true
+	end
 	return item ~= nil and (item.price == 0 or profile.owned[id] == true)
 end
 
-export type Outcome = "ok" | "unknown" | "owned" | "level" | "tips"
+export type Outcome = "ok" | "unknown" | "owned" | "level" | "tips" | "locked"
 
 -- Buy an item with tips. Returns why not when it fails.
 function Cosmetics.buy(profile: Progress.Profile, id: string): Outcome
@@ -84,6 +108,9 @@ function Cosmetics.buy(profile: Progress.Profile, id: string): Outcome
 	end
 	if Cosmetics.owns(profile, id) then
 		return "owned"
+	end
+	if item.pass then
+		return "locked" -- a pass item cannot be bought with tips
 	end
 	if Progress.levelFor(profile.xp) < item.level then
 		return "level"

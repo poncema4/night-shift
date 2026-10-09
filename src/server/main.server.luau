@@ -7,6 +7,8 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ServerMode = require(ReplicatedStorage.Shared.Game.ServerMode)
 local LobbyBuilder = require(script.Parent.LobbyBuilder)
 local LobbyService = require(script.Parent.LobbyService)
+local ProfileService = require(script.Parent.ProfileService)
+local PurchaseService = require(script.Parent.PurchaseService)
 local RoundService = require(script.Parent.RoundService)
 
 local mode =
@@ -20,7 +22,10 @@ if mode == "Lobby" then
 	remotes.Name = "Remotes"
 	remotes.Parent = ReplicatedStorage
 	Players.CharacterAutoLoads = true
+	ProfileService.start(remotes) -- the shop and cosmetics work in the lobby too
+	PurchaseService.start(remotes)
 	LobbyService.start(remotes)
 else
 	RoundService.start()
+	PurchaseService.start(ReplicatedStorage:WaitForChild("Remotes"))
 end
