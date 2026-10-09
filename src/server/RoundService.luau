@@ -178,6 +178,7 @@ function RoundService.start()
 
 	local function dawnReport(winner: string?)
 		local list = {}
+		local reports: { { player: Player, report: any } } = {}
 		for _, player in Players:GetPlayers() do
 			local role = roles[player.UserId]
 			if role then
@@ -187,11 +188,14 @@ function RoundService.start()
 					else "caught"
 				table.insert(list, { name = player.Name, role = role, fate = fate })
 				local crewSide = role ~= "Saboteur"
-				ProfileService.award(player, {
-					role = role,
-					won = (winner == "Crew") == crewSide and winner ~= nil,
-					survived = fate == "survived",
-					tasks = TaskService.completedBy(player.UserId),
+				table.insert(reports, {
+					player = player,
+					report = {
+						role = role,
+						won = (winner == "Crew") == crewSide and winner ~= nil,
+						survived = fate == "survived",
+						tasks = TaskService.completedBy(player.UserId),
+					},
 				})
 			end
 		end
@@ -200,9 +204,14 @@ function RoundService.start()
 		end)
 		local done, total = TaskService.counts()
 		roundResult:FireAllClients({ winner = winner, players = list, tasksDone = done, tasksTotal = total })
+		-- rewards after the result, so each player's "+XP" line lands on a screen that is already showing
+		for _, entry in reports do
+			ProfileService.award(entry.player, entry.report)
+		end
 	end
 
 	onChange = function(event: Round.Event)
+		publish() -- clients read the phase from these attributes: they must be current before any remote below arrives
 		print(`[Round] {event.from} -> {event.to}{if event.winner then " (winner: " .. event.winner .. ")" else ""}`)
 		if event.to == "Intermission" then
 			loadEveryone()

@@ -120,6 +120,7 @@ function MeetingUi.start()
 	local cards: { [number]: Card } = {}
 	local voted = false
 	local endsAt = 0
+	local openedAt = -100 -- when the meeting opened: the phase attribute can arrive a moment after the message
 
 	local function clearCards()
 		for _, card in cards do
@@ -264,7 +265,7 @@ function MeetingUi.start()
 	RunService.RenderStepped:Connect(function()
 		local phase = ReplicatedStorage:GetAttribute("Phase")
 		if phase ~= "Meeting" then
-			if gui.Enabled then
+			if gui.Enabled and os.clock() - openedAt > 3 then
 				gui.Enabled = false
 				skip.Visible = true
 			end
