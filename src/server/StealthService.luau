@@ -83,9 +83,9 @@ local function flashlightOf(player: Player): SpotLight?
 	end
 	local light = Instance.new("SpotLight")
 	light.Name = "Flashlight"
-	light.Angle = 55
-	light.Range = 40
-	light.Brightness = 3
+	light.Angle = Config.Beam.Angle
+	light.Range = Config.Beam.Range
+	light.Brightness = Config.Beam.Brightness
 	light.Color = ProfileService.flashlightColor(player)
 	light.Face = Enum.NormalId.Front
 	light.Shadows = false

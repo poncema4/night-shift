@@ -16,20 +16,22 @@ return table.freeze({
 	}),
 	-- How the hotel looks. Tune these first if it is too dark or too bright (Studio playtest).
 	Look = table.freeze({
-		Ambient = { 26, 26, 38 },
-		OutdoorAmbient = { 20, 20, 30 },
-		FogStart = 20,
-		FogEnd = 160,
-		AtmosphereDensity = 0.3,
+		Ambient = { 7, 7, 11 },
+		OutdoorAmbient = { 6, 6, 10 },
+		FogStart = 8,
+		FogEnd = 105,
+		AtmosphereDensity = 0.38,
 		Contrast = 0.12,
 		Saturation = -0.15,
-		BulbRange = 30,
-		BulbBrightness = 1.1,
-		BasementBulbBrightness = 0.8,
+		BulbRange = 20,
+		BulbBrightness = 0.55,
+		BasementBulbBrightness = 0.28,
+		GradeBrightness = -0.06,
 	}),
 	-- One shown during every intermission.
 	Tips = table.freeze({
 		"Standing still makes you much quieter than running.",
+		"Hold your flashlight on him for a second and he is blinded for three.",
 		"The flashlight lights the way, and shows him where you are.",
 		"Lockers and wardrobes hide you, but he searches the one you dive into.",
 		"Finish the camera task: the crew can then watch where he is.",
@@ -37,6 +39,12 @@ return table.freeze({
 		"The lobby bell calls a meeting. Each player can ring it once a night.",
 		"Stairs are at both ends of the long corridor. He uses them too.",
 		"Saboteurs: lure him onto the crew, then be somewhere else.",
+	}),
+	-- The flashlight beam: strong enough that the dark hotel needs it.
+	Beam = table.freeze({
+		Brightness = 5,
+		Range = 60,
+		Angle = 48,
 	}),
 	-- Placeholder sounds that ship with the Roblox client (rbxasset://sounds/...). Replace with uploaded assets
 	-- (rbxassetid://...) when we have our own; a missing file is simply silent.

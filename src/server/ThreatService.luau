@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Flash = require(ReplicatedStorage.Shared.Game.Flash)
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local Patrol = require(ReplicatedStorage.Shared.Game.Patrol)
 local Stealth = require(ReplicatedStorage.Shared.Game.Stealth)
@@ -25,7 +26,9 @@ state.Parent = ReplicatedStorage
 
 local PUBLISH_INTERVAL = 1 / 20
 
-local function livingPlayers(): { { player: Player, humanoid: Humanoid, x: number, y: number, z: number } }
+type Living = { player: Player, humanoid: Humanoid, root: BasePart, x: number, y: number, z: number }
+
+local function livingPlayers(): { Living }
 	local list = {}
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
@@ -36,6 +39,7 @@ local function livingPlayers(): { { player: Player, humanoid: Humanoid, x: numbe
 			table.insert(list, {
 				player = player,
 				humanoid = humanoid,
+				root = root,
 				x = root.Position.X,
 				y = root.Position.Y - 3,
 				z = root.Position.Z,
@@ -45,10 +49,26 @@ local function livingPlayers(): { { player: Player, humanoid: Humanoid, x: numbe
 	return list
 end
 
+-- Is there nothing solid between two points? (player characters do not block the beam)
+local function clearLine(from: Vector3, to: Vector3, living: { Living }): boolean
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local ignore: { Instance } = {}
+	for _, entry in living do
+		local character = entry.player.Character
+		if character then
+			table.insert(ignore, character)
+		end
+	end
+	params.FilterDescendantsInstances = ignore
+	return workspace:Raycast(from, to - from, params) == nil
+end
+
 local function run(patrol: Patrol.Patrol)
 	local settings = Config.Threat
 	local lastX, lastZ = patrol.x, patrol.z
 	local facing = Vector3.new(0, 0, -1)
+	local flash = Flash.new()
 	local sincePublish = PUBLISH_INTERVAL
 	local searching: { [Player]: number } = {}
 	local lastHeard: { [Player]: number } = {} -- when he last heard each player
@@ -57,6 +77,36 @@ local function run(patrol: Patrol.Patrol)
 
 	connection = RunService.Heartbeat:Connect(function(dt)
 		local living = livingPlayers()
+		local now = os.clock()
+
+		-- a flashlight held on him blinds him: in the cone, in range, and nothing solid in the way
+		local lit = false
+		if not Flash.stunned(flash, now) then
+			local target = { patrol.x, patrol.y + 5, patrol.z }
+			for _, entry in living do
+				if StealthService.stateOf(entry.player).flashlight then
+					local head = entry.root.Position + Vector3.new(0, 1.5, 0)
+					local look = entry.root.CFrame.LookVector
+					if
+						Flash.inBeam(
+							{ head.X, head.Y, head.Z },
+							{ look.X, look.Y, look.Z },
+							target,
+							Flash.RANGE,
+							Flash.HALF_ANGLE
+						) and clearLine(head, Vector3.new(target[1], target[2], target[3]), living)
+					then
+						lit = true
+						break
+					end
+				end
+			end
+		end
+		if Flash.step(flash, dt, lit, now) then
+			print("[Threat] the Night Manager is blinded by a flashlight")
+		end
+		local blinded = Flash.stunned(flash, now)
+		state:SetAttribute("Stunned", blinded)
 		-- he hears the closest person: sprinting and flashlights carry farther, standing still is quiet, a hidden
 		-- player is not heard at all, and someone on another floor is heard from half as far
 		local nearest, nearestScore = nil, math.huge
@@ -82,7 +132,9 @@ local function run(patrol: Patrol.Patrol)
 				lureTarget = nil
 			end
 		end
-		patrol:tick(dt, settings.PatrolSpeed, settings.ChaseSpeed, target)
+		if not blinded then
+			patrol:tick(dt, settings.PatrolSpeed, settings.ChaseSpeed, target)
+		end
 
 		local dx, dz = patrol.x - lastX, patrol.z - lastZ
 		if dx * dx + dz * dz > 1e-6 then
@@ -129,6 +181,9 @@ local function run(patrol: Patrol.Patrol)
 		end
 
 		for _, entry in living do
+			if blinded then
+				continue -- he cannot grab anyone while he cannot see
+			end
 			-- someone inside a locker cannot be grabbed in passing: he has to search it (above) and pull them out first
 			if StealthService.hidingPlace(entry.player) then
 				continue
