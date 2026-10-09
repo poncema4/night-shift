@@ -41,6 +41,7 @@ local specs = {
 	require("./specs/Client"),
 	require("./specs/Blind"),
 	require("./specs/Rage"),
+	require("./specs/Jail"),
 	require("./specs/Profile"),
 	require("./specs/Rounds"),
 	require("./specs/Progress"),

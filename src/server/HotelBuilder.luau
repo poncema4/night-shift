@@ -261,14 +261,14 @@ function HotelBuilder.build(): Result
 		end
 	end
 
-	local lx = Hotel.centre(Hotel.room("Lobby"))
+	local lx, lz = Hotel.spawnPoint()
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "LobbySpawn"
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
 	spawn.Size = Vector3.new(4, 0.2, 4)
-	spawn.Position = Vector3.new(lx, 0.1, -14)
+	spawn.Position = Vector3.new(lx, 0.1, lz)
 	spawn.Transparency = 1
 	spawn.CanCollide = false
 	spawn.Parent = folder

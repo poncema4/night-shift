@@ -318,6 +318,35 @@ makers.water = function(model, at)
 	soft(water)
 end
 
+-- The holding cell: a square cage of iron bars around the spot where the Night Manager starts the night, with a red lamp
+-- above it. You can walk through it (the bars are for show, so no route is ever blocked).
+makers.cell = function(model, at)
+	local iron = Color3.fromRGB(46, 44, 52)
+	local half = 3.2
+	for step = -3, 3 do
+		local offset = step * 1.05
+		for _, side in { -half, half } do
+			soft(piece(model, "Bar", Vector3.new(0.3, 9, 0.3), at(offset, 4.5, side), iron, Enum.Material.Metal))
+			soft(piece(model, "Bar", Vector3.new(0.3, 9, 0.3), at(side, 4.5, offset), iron, Enum.Material.Metal))
+		end
+	end
+	for _, y in { 0.4, 4.5, 8.8 } do
+		for _, side in { -half, half } do
+			soft(piece(model, "Rail", Vector3.new(6.7, 0.3, 0.3), at(0, y, side), iron, Enum.Material.Metal))
+			soft(piece(model, "Rail", Vector3.new(0.3, 0.3, 6.7), at(side, y, 0), iron, Enum.Material.Metal))
+		end
+	end
+	local lamp =
+		piece(model, "Lamp", Vector3.new(0.8, 0.5, 0.8), at(0, 9.6, 0), Color3.fromRGB(190, 24, 30), Enum.Material.Neon)
+	soft(lamp)
+	local glow = Instance.new("PointLight")
+	glow.Color = Color3.fromRGB(220, 40, 40)
+	glow.Range = 14
+	glow.Brightness = 0.6
+	glow.Shadows = false
+	glow.Parent = lamp
+end
+
 makers.sludge = function(model, at)
 	local pool =
 		piece(model, "Sludge", Vector3.new(6, 0.2, 14), at(0, 0.1, 0), Color3.fromRGB(34, 52, 30), Enum.Material.Glass)

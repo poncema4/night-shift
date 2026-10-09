@@ -96,9 +96,11 @@ return function(t)
 	hide.Triggered:Fire(victim)
 	t.equal("a crew member hides", victim:GetAttribute("Hidden"), true)
 	local patrol = threat.current()
+	threat.release(false) -- skip the cell and the lobby search: these specs place him by hand
+	world.advance(0.2)
 	threat.resume()
 	patrol.x, patrol.z, patrol.y = body.Position.X + 2.5, body.Position.Z, 0
-	patrol.from, patrol.to = patrol.to, patrol.to
+	patrol.from, patrol.to, patrol.level = "C10", "C10", 0
 	world.advance(0.6)
 	t.equal("passing close by does not kill a hidden player", world.humanoid(victim).Health, 100)
 	t.equal("he does not hear them", patrol.mode, "Patrol")
@@ -112,7 +114,7 @@ return function(t)
 	-- now he is close and hears them (standing still, 14 studs), then they dive into the locker: he comes to search it
 	world.root(victim).Position = body.Position + V3.new(0, 0, 3)
 	patrol.x, patrol.z, patrol.y = body.Position.X + 9, body.Position.Z, 0
-	patrol.from, patrol.to = patrol.to, patrol.to
+	patrol.from, patrol.to, patrol.level = "C10", "C10", 0
 	threat.resume()
 	world.advance(0.3)
 	t.equal("he hears someone standing close by", patrol.mode, "Chase")

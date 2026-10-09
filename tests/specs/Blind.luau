@@ -23,6 +23,8 @@ return function(t)
 	end
 	local me = players[1]
 	local patrol = threat.current()
+	threat.release(false) -- skip the cell and the lobby search: these specs place him by hand
+	world.advance(0.2)
 	local state = storage:FindFirstChild("ThreatState")
 	local intent = storage:FindFirstChild("Remotes"):FindFirstChild("Intent")
 

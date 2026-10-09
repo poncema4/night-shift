@@ -71,14 +71,19 @@ return function(t)
 
 	-- searching a hiding place
 	local timer, found = 0, false
-	for _ = 1, 10 do
+	for _ = 1, 20 do
 		timer, found = Stealth.search(timer, 0.1, 3)
 	end
-	t.check("a brief visit does not find you", not found)
-	for _ = 1, 10 do
+	t.check("a brief visit (2 s) does not find you", not found)
+	for _ = 1, 25 do
 		timer, found = Stealth.search(timer, 0.1, 3)
 	end
-	t.check("lingering next to the locker finds you", found)
+	t.check("lingering next to the locker for 4 s finds you", found)
+	local far, farFound = 0, false
+	for _ = 1, 100 do
+		far, farFound = Stealth.search(far, 0.1, math.huge)
+	end
+	t.check("a locker he has no reason to open is never searched", not farFound and far == 0)
 	local cooled = Stealth.search(1.0, 0.25, 30)
 	t.check("walking away cools the search", cooled < 1.0)
 end

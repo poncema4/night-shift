@@ -8,7 +8,7 @@ Stealth.SPRINT = 1.5 -- running is loud
 Stealth.STILL = 0.4 -- standing still is quiet
 Stealth.LIGHT = 1.25 -- a flashlight draws attention
 Stealth.SMELL = 5 -- within this many studs he can find you even in a locker
-Stealth.SEARCH_SECONDS = 1.5 -- he needs this long near a locker to pull you out
+Stealth.SEARCH_SECONDS = 4 -- once he knows which locker, he needs this long next to it to pull you out
 
 -- Hearing range for one player given the base range. Hidden players are not heard at all.
 function Stealth.hearingRange(base: number, state: State): number
@@ -28,6 +28,7 @@ function Stealth.hearingRange(base: number, state: State): number
 end
 
 -- Time near a hiding place builds up; he finds you once it passes SEARCH_SECONDS. Moving away cools it.
+-- (The caller only passes a real distance when he HEARD you hide: a locker he has no reason to open is safe.)
 -- Returns the new timer and whether you were found.
 function Stealth.search(timer: number, dt: number, distance: number): (number, boolean)
 	if distance <= Stealth.SMELL then

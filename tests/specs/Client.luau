@@ -93,11 +93,32 @@ return function(t)
 	local remotes = storage:FindFirstChild("Remotes")
 	t.equal("the local player is on the crew", role, "Crew")
 
+	-- he starts locked up: the crew sees a countdown, then "HE IS LOOSE"
+	local jail = gui(me, "NightShiftJail")
+	local function jailText(): string
+		local text = ""
+		for _, d in jail:GetDescendants() do
+			if d:IsA("TextLabel") and d.Visible and d.Text ~= "" then
+				text ..= d.Text .. " | "
+			end
+		end
+		return text
+	end
+	t.check("a countdown shows while he is locked up", string.find(jailText(), "LOCKED UP", 1, true) ~= nil, jailText())
+	threat.release(false)
+	play(world, 0.5)
+	t.check(
+		"when he is released the screen says so",
+		string.find(jailText(), "HE IS LOOSE", 1, true) ~= nil,
+		jailText()
+	)
+
 	-- every screen is built
 	for _, name in
 		{
 			"NightShiftHud",
 			"NightShiftFx",
+			"NightShiftJail",
 			"NightShiftMeeting",
 			"NightShiftResults",
 			"NightShiftLocker",
@@ -166,9 +187,20 @@ return function(t)
 		end
 	end
 	world.root(me).Position = hide.Parent.Position + V3.new(0, 0, 3)
+	t.equal("hiding is one tap of E, not a hold", hide.HoldDuration, 0)
 	hide.Triggered:Fire(me)
 	play(world, 0.3)
 	t.check("the hiding screen appears", find(hud, "Hiding").Visible)
+	local camera = world.workspace.CurrentCamera
+	t.equal("the locker is marked as occupied by you", hide.Parent.Parent:GetAttribute("Occupant"), me.UserId)
+	t.equal(
+		"the camera looks out through the door instead of sitting blind inside",
+		camera.CameraType,
+		world.enum.CameraType.Scriptable
+	)
+	local eye, out =
+		camera.CFrame.Position, (hide.Parent.CFrame * world.CFrame.new(0, 0, 1)).Position - hide.Parent.Position
+	t.check("the eye is at the door side, looking away from the box", (eye - hide.Parent.Position):Dot(out) > 0)
 	for _, b in find(hud, "Hiding"):GetChildren() do
 		if b:IsA("TextButton") then
 			b.Activated:Fire()
@@ -176,6 +208,8 @@ return function(t)
 	end
 	play(world, 0.3)
 	t.check("LEAVE on screen gets you out", not find(hud, "Hiding").Visible and me:GetAttribute("Hidden") == false)
+	t.equal("and the normal camera comes back", camera.CameraType, world.enum.CameraType.Custom)
+	t.equal("and the locker is free again", hide.Parent.Parent:GetAttribute("Occupant"), nil)
 
 	-- a task and the cameras
 	local function station(name: string)

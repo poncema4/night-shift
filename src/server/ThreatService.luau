@@ -9,6 +9,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Escalation = require(ReplicatedStorage.Shared.Game.Escalation)
 local Flash = require(ReplicatedStorage.Shared.Game.Flash)
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
+local Hotel = require(ReplicatedStorage.Shared.Game.Hotel)
 local Patrol = require(ReplicatedStorage.Shared.Game.Patrol)
 local Stealth = require(ReplicatedStorage.Shared.Game.Stealth)
 local StealthService = require(script.Parent.StealthService)
@@ -19,6 +20,8 @@ local ThreatService = {}
 local connection: RBXScriptConnection? = nil
 local patrolState: Patrol.Patrol? = nil
 local lureTarget: { x: number, y: number, z: number, expires: number }? = nil
+local holdLeft = 0 -- seconds until he is released from the holding cell
+local searchOnRelease = true -- ...and whether he then goes to search the lobby
 
 -- The server only publishes where he is; every client draws and smooths its own copy (client/ThreatView).
 local state = Instance.new("Folder")
@@ -80,6 +83,23 @@ local function run(patrol: Patrol.Patrol)
 	connection = RunService.Heartbeat:Connect(function(dt)
 		local living = livingPlayers()
 		local now = os.clock()
+
+		-- locked in the holding cell: he stands there (the crew can see the countdown) and hears and grabs no one
+		if holdLeft > 0 then
+			holdLeft -= dt
+			state:SetAttribute("Hold", math.max(0, math.ceil(holdLeft)))
+			state:SetAttribute("X", patrol.x)
+			state:SetAttribute("Y", patrol.y)
+			state:SetAttribute("Z", patrol.z)
+			if holdLeft <= 0 then
+				print("[Threat] the Night Manager is released")
+				if searchOnRelease then
+					local sx, sz = Hotel.spawnPoint()
+					lureTarget = { x = sx, y = 0, z = sz, expires = os.clock() + settings.SearchSeconds }
+				end
+			end
+			return
+		end
 
 		-- a flashlight held on him blinds him: in the cone, in range, and nothing solid in the way
 		local lit = false
@@ -174,7 +194,10 @@ local function run(patrol: Patrol.Patrol)
 						expires = os.clock() + settings.InvestigateSeconds,
 					}
 				end
-				local away = (Vector3.new(patrol.x, patrol.y, patrol.z) - Vector3.new(place.X, place.Y, place.Z)).Magnitude
+				-- he only opens a locker he has a reason to: he heard this player duck into it. Otherwise it is safe.
+				local away = if investigating[entry.player]
+					then (Vector3.new(patrol.x, patrol.y, patrol.z) - Vector3.new(place.X, place.Y, place.Z)).Magnitude
+					else math.huge
 				local timer, found = Stealth.search(searching[entry.player] or 0, dt, away)
 				searching[entry.player] = timer
 				if found then
@@ -209,12 +232,21 @@ function ThreatService.activate()
 	local fresh = Patrol.new(Floors.graph(), Config.Threat.StartRoom, math.random)
 	patrolState = fresh
 	lureTarget = nil
+	holdLeft = Config.Threat.ReleaseSeconds
+	searchOnRelease = true
+	state:SetAttribute("Hold", holdLeft)
 	run(fresh)
 end
 
 -- His current movement state (tests place him with this; nothing else should).
 function ThreatService.current(): Patrol.Patrol?
 	return patrolState
+end
+
+-- Lets him out of the holding cell now (what the countdown does when it reaches zero; tests use it to skip the wait).
+function ThreatService.release(search: boolean?)
+	holdLeft = math.min(holdLeft, 0.001)
+	searchOnRelease = search ~= false
 end
 
 -- A meeting freezes him in place; resume() carries on from the same spot.
@@ -245,6 +277,8 @@ function ThreatService.deactivate()
 	end
 	patrolState = nil
 	lureTarget = nil
+	holdLeft = 0
+	state:SetAttribute("Hold", 0)
 	state:SetAttribute("Active", false)
 end
 

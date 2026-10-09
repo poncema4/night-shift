@@ -2,6 +2,7 @@
 -- Sprint, flashlight and hiding. The server decides everything: clients only say what they WANT (hold sprint,
 -- flashlight on, leave the hiding place), and the pure rules in Shared/Game (Stamina, Battery, Stealth) decide
 -- what actually happens. Other systems (the Night Manager) read the results from here.
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -94,6 +95,60 @@ local function flashlightOf(player: Player): SpotLight?
 	return light
 end
 
+local TOOL_NAME = "Flashlight"
+
+local function toolOf(player: Player): Tool?
+	local backpack = player:FindFirstChildOfClass("Backpack")
+	local held = player.Character and player.Character:FindFirstChild(TOOL_NAME)
+	local found = held or (backpack and backpack:FindFirstChild(TOOL_NAME))
+	return if found and found:IsA("Tool") then found else nil
+end
+
+-- The flashlight is a real item in the hotbar: equip it and the beam is on, put it away and it is off.
+local function giveFlashlight(player: Player)
+	local backpack = player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack", 5)
+	if not backpack then
+		return
+	end
+	local old = toolOf(player)
+	if old then
+		old:Destroy()
+	end
+	local tool = Instance.new("Tool")
+	tool.Name = TOOL_NAME
+	tool.ToolTip = "Blinds him for a moment. Drains the battery."
+	tool.CanBeDropped = false
+	tool.RequiresHandle = true
+	local handle = Instance.new("Part")
+	handle.Name = "Handle"
+	handle.Size = Vector3.new(0.5, 0.5, 1.6)
+	handle.Color = Color3.fromRGB(38, 38, 44)
+	handle.Material = Enum.Material.Metal
+	handle.CanCollide = false
+	handle.Parent = tool
+	local lens = Instance.new("Part")
+	lens.Name = "Lens"
+	lens.Size = Vector3.new(0.6, 0.6, 0.2)
+	lens.Color = ProfileService.flashlightColor(player)
+	lens.Material = Enum.Material.Neon
+	lens.CanCollide = false
+	lens.Massless = true
+	lens.CFrame = handle.CFrame * CFrame.new(0, 0, -0.9)
+	lens.Parent = tool
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = handle
+	weld.Part1 = lens
+	weld.Parent = tool
+	tool.Equipped:Connect(function()
+		local entry = entryOf(player)
+		entry.wantsLight = entry.hiddenIn == nil
+	end)
+	tool.Unequipped:Connect(function()
+		entryOf(player).wantsLight = false
+	end)
+	tool.Parent = backpack
+end
+
 local function setVisible(player: Player, entry: Entry, visible: boolean)
 	local character = player.Character
 	if not character then
@@ -126,6 +181,7 @@ local function leave(player: Player)
 	local spot = entry.hiddenIn
 	entry.hiddenIn = nil
 	occupant[spot] = nil
+	spot:SetAttribute("Occupant", nil)
 	if prompts[spot] then
 		prompts[spot].Enabled = active
 	end
@@ -154,6 +210,8 @@ local function enter(player: Player, spot: Model, body: BasePart)
 	root.Anchored = true
 	humanoid.WalkSpeed = 0 -- frozen at once, not on the next frame
 	entry.wantsLight = false
+	humanoid:UnequipTools()
+	spot:SetAttribute("Occupant", player.UserId)
 	player:SetAttribute("Hidden", true)
 end
 
@@ -238,6 +296,16 @@ local function onIntent(player: Player, payload: unknown)
 	end
 	if typeof(data.light) == "boolean" then
 		entry.wantsLight = (data.light :: boolean) and entry.hiddenIn == nil
+		-- the key is a shortcut for the hotbar: it equips or puts away the flashlight item
+		local humanoid = humanoidOf(player)
+		local tool = toolOf(player)
+		if humanoid and tool then
+			if entry.wantsLight and tool.Parent ~= player.Character then
+				humanoid:EquipTool(tool)
+			elseif not entry.wantsLight and tool.Parent == player.Character then
+				humanoid:UnequipTools()
+			end
+		end
 	end
 	if data.leave == true then
 		leave(player)
@@ -276,12 +344,13 @@ function StealthService.start(remotes: Folder, spots: { HidingSpot })
 	intent.OnServerEvent:Connect(onIntent)
 
 	for _, spot in spots do
+		CollectionService:AddTag(spot.model, "HidingSpot")
 		local body = spot.model:FindFirstChild("Body") :: BasePart?
 		if body then
 			local prompt = Instance.new("ProximityPrompt")
 			prompt.ActionText = "Hide"
 			prompt.ObjectText = spot.model.Name
-			prompt.HoldDuration = 0.6
+			prompt.HoldDuration = 0 -- one tap of E
 			prompt.MaxActivationDistance = 7
 			prompt.RequiresLineOfSight = false
 			prompt.Enabled = false
@@ -304,6 +373,7 @@ function StealthService.start(remotes: Folder, spots: { HidingSpot })
 				entry.saved = {}
 			end
 			reset(player)
+			giveFlashlight(player)
 		end)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
