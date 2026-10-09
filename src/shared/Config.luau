@@ -27,6 +27,17 @@ return table.freeze({
 		BulbBrightness = 1.1,
 		BasementBulbBrightness = 0.8,
 	}),
+	-- One shown during every intermission.
+	Tips = table.freeze({
+		"Standing still makes you much quieter than running.",
+		"The flashlight lights the way, and shows him where you are.",
+		"Lockers and wardrobes hide you, but he searches the one you dive into.",
+		"Finish the camera task: the crew can then watch where he is.",
+		"Someone who 'finishes' a task far too fast may be faking it.",
+		"The lobby bell calls a meeting. Each player can ring it once a night.",
+		"Stairs are at both ends of the long corridor. He uses them too.",
+		"Saboteurs: lure him onto the crew, then be somewhere else.",
+	}),
 	-- Placeholder sounds that ship with the Roblox client (rbxasset://sounds/...). Replace with uploaded assets
 	-- (rbxassetid://...) when we have our own; a missing file is simply silent.
 	Sounds = table.freeze({

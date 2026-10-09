@@ -147,6 +147,7 @@ function RoundService.start()
 		ReplicatedStorage:SetAttribute("Phase", round.phase)
 		ReplicatedStorage:SetAttribute("PhaseEndsAt", workspace:GetServerTimeNow() + round.timeLeft)
 		ReplicatedStorage:SetAttribute("RoundNumber", round.roundNumber)
+		ReplicatedStorage:SetAttribute("MinPlayers", settings.MinPlayers)
 	end
 
 	local function startNight()

@@ -59,6 +59,26 @@ local function play(world: any, seconds: number)
 end
 
 return function(t)
+	-- before the night: a lobby that says how many are needed, then a tip while waiting
+	do
+		local lobbyWorld, lobbyMe = boot(2, false)
+		local lobbyStorage = lobbyWorld.service("ReplicatedStorage")
+		local lobbyHud = gui(lobbyMe, "NightShiftHud")
+		local guard = 0
+		while lobbyStorage:GetAttribute("Phase") ~= "Intermission" and guard < 100 do
+			play(lobbyWorld, 0.5)
+			guard += 1
+		end
+		t.check(
+			"the intermission counts down to the night",
+			string.find(find(lobbyHud, "Status").Text, "Night begins in") ~= nil
+		)
+		t.check(
+			"and shows a tip",
+			find(lobbyHud, "Tip").Visible and string.find(find(lobbyHud, "Tip").Text, "TIP:") ~= nil
+		)
+	end
+
 	-- pick a seed where the local player is on the crew (so the crew-only screens can be shown)
 	local seed = 1
 	for candidate = 1, 40 do
@@ -239,6 +259,13 @@ return function(t)
 		end
 	end
 	t.check("when you are out you spectate the living", watching)
+	local banner = false
+	for _, l in spectate:GetChildren() do
+		if l:IsA("TextLabel") and l.Visible and (l.Text == "YOU WERE CAUGHT" or l.Text == "YOU WERE VOTED OUT") then
+			banner = true
+		end
+	end
+	t.check("and you are told you were caught", banner)
 	t.check("the camera follows someone else", world.workspace.CurrentCamera.CameraSubject ~= world.humanoid(me))
 	-- the others are still alive: let the night go on until the saboteur or crew wins by killing the rest
 	for _, p in others do

@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 
 local Hud = {}
@@ -34,6 +35,9 @@ function Hud.start()
 
 	local status = label(gui, "Status", UDim2.fromScale(0.5, 0.02), UDim2.fromScale(0.4, 0.07))
 	local tasks = label(gui, "Tasks", UDim2.fromScale(0.5, 0.1), UDim2.fromScale(0.25, 0.05))
+	local tip = label(gui, "Tip", UDim2.fromScale(0.5, 0.82), UDim2.fromScale(0.6, 0.06))
+	tip.Visible = false
+	local tipFor = -1
 	local floorLabel = label(gui, "Floor", UDim2.fromScale(0.12, 0.02), UDim2.fromScale(0.17, 0.05))
 	local role = label(gui, "Role", UDim2.fromScale(0.5, 0.16), UDim2.fromScale(0.3, 0.06))
 	role.Visible = false
@@ -239,9 +243,23 @@ function Hud.start()
 		tasks.Visible = phase == "Night" or phase == "Meeting"
 		tasks.Text = `TASKS {done}/{total}`
 		if phase == "Lobby" then
-			status.Text = "Waiting for players..."
+			local need = ReplicatedStorage:GetAttribute("MinPlayers") or 1
+			status.Text = `Waiting for players ({#Players:GetPlayers()}/{need})`
+		elseif phase == "Intermission" then
+			status.Text = `Night begins in {left}s`
+		elseif phase == "Dawn" then
+			status.Text = "DAWN"
 		else
 			status.Text = `{string.upper(phase)}  {left}s`
+		end
+		-- a tip of the night while you wait (the same one for everybody in a round)
+		tip.Visible = phase == "Intermission"
+		if tip.Visible then
+			local round = ReplicatedStorage:GetAttribute("RoundNumber") or 0
+			if tipFor ~= round then
+				tipFor = round
+				tip.Text = "TIP: " .. Config.Tips[(round % #Config.Tips) + 1]
+			end
 		end
 	end)
 end
