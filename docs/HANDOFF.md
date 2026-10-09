@@ -39,3 +39,7 @@ Nothing since the first round loop has been run in **Studio** (it looks and feel
 
 ## How Claude works here
 Small, tested steps; pure logic in `shared/Game` with a spec; Roblox glue stays thin; every claim of "works" names how it was verified and what was not. A mutation check (break the rule, see the test fail) is done for every new rule. Errors from Studio arrive as pasted text or screenshots (there is no log bridge on purpose).
+
+## Roblox IDs (public, safe in the repo)
+- Group: Nexus Hollow Studios, id 749648777 (emblem unchanged; description and cover photo set 2026-10-09).
+- Experience "Night Shift": universe id 10770001120, root place id 84666312718541 (exists under the group, not yet published).
