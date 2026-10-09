@@ -34,6 +34,10 @@ Nothing in the game has been run in Studio yet except the very first rounds: eve
 - [ ] Everyone is gathered in the lobby, meeting screen shows a card per player. Vote or SKIP; the result shows who was ejected and their role. Everyone returns to where they stood and the night continues.
 - [ ] Saboteur: **Q** lure, **R** lights out (buttons bottom-right), with cooldown timers.
 
+## 5b. Cameras and spectating
+- [ ] Finish the **Fix the cameras** task in the Security room (ground floor, north). A CAMERAS (C) x3 button appears (crew only). Press C: a three-floor map with a red blip for 15 s, then a 40 s cooldown.
+- [ ] After you die, Left/Right arrows switch whose view you watch (needs 2+ players in a Clients and Servers test).
+
 ## 6. Dawn and progress
 - [ ] Dawn screen: winner, tasks, every player's role and fate, `+XP +tips`.
 - [ ] **L** opens the Locker: level, XP bar, cosmetics. Buy/wear a hat or flashlight colour. Stop and re-Play: progress is still there (needs API access on).

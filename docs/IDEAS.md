@@ -12,7 +12,7 @@ Hooks that make clips: **three floors**, **a monster that uses the stairs**, **o
 - Title formulas: "3 floors. 1 monster. 1 liar." / "The Night Manager hears you running" / "Can you hide from him?".
 
 ## B. Hotel (levels and rooms)
-- B1. Security room cameras: finishing "Fix the cameras" lets the crew watch the Night Manager's position for 20 s (huge tension).
+- B1. ~~Security cameras~~ built: finishing "Fix the cameras" lets the crew watch the Night Manager on a map (3 charges, 15 s, team cooldown).
 - B2. Keycards and locked doors on the basement (explore for the keycard).
 - B3. Elevator shortcut that makes noise and can be sabotaged.
 - B4. Vents for saboteurs (crawl between rooms, loud on exit).
@@ -25,7 +25,7 @@ Hooks that make clips: **three floors**, **a monster that uses the stairs**, **o
 
 ## D. Social
 - D1. Quick-chat "accuse" wheel during meetings (easier on phones).
-- D2. Spectator mode for the dead (watch + chat with other ghosts).
+- D2. ~~Spectator mode~~ built (arrow keys); still to do: chat with other ghosts.
 - D3. Friend invites with a "Friends first" private lobby; private servers (Roblox revenue source).
 - D4. Proximity voice (Roblox rules apply: verify availability first).
 

@@ -1,0 +1,21 @@
+--!strict
+local Cameras = require("../../src/shared/Game/Cameras")
+
+return function(t)
+	local c = Cameras.new()
+	t.check("the monitor does nothing before the task is finished", not Cameras.use(c, 0))
+	Cameras.unlock(c)
+	t.equal("finishing the task gives three charges", c.charges, 3)
+	Cameras.unlock(c)
+	t.equal("finishing it again does not stack", c.charges, 3)
+	t.check("the first use works", Cameras.use(c, 100))
+	t.equal("a use spends a charge", c.charges, 2)
+	t.check("the team cooldown blocks the next use", not Cameras.use(c, 120))
+	t.equal("the wait counts down", Cameras.wait(c, 120), 20)
+	t.check("it works again after the cooldown", Cameras.use(c, 141))
+	t.check("and a third time", Cameras.use(c, 200))
+	t.check("no charges left", not Cameras.use(c, 400))
+	t.equal("no wait is shown when there is nothing to wait for", Cameras.wait(c, 400), 0)
+	Cameras.unlock(c)
+	t.check("a new night (unlock again) refills", Cameras.use(c, 500))
+end

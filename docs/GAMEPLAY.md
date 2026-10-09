@@ -44,3 +44,9 @@ Every night earns **XP** and **tips** (the in-game currency): playing, surviving
 Tips are stored as `tipsEarned` and `tipsSpent` (both only ever grow), so merging two saves can never refund a purchase.
 
 **Testing saves in Studio:** Game Settings > Security > *Enable Studio Access to API Services*. Without it the game warns once and plays normally without saving.
+
+## Security cameras and spectating
+
+Finishing the **Fix the cameras** task (Security room) powers the monitor for the whole crew: **3 charges**, each lets one crew member watch the Night Manager as a red blip on a three-floor map for **15 seconds** (press **C**), with a **40 second team cooldown**. Saboteurs cannot use it. Rules: `Game/Cameras` (pure, tested); `CameraService` enforces them; `client/CameraUi` draws the map from the same room data the hotel is built from.
+
+When you are out (caught or ejected) you **spectate**: **Left / Right** (or the on-screen arrows) switch between living players (`client/Spectate`).
