@@ -68,7 +68,7 @@ Only the group owner can do this, because it needs a key from your Roblox accoun
 
 ## Seeing Studio errors from the laptop (log bridge)
 
-Studio runs on the Windows PC, so its Output window is invisible here. In Studio the game forwards its server Output to a small listener, which pushes it to the `studio-logs` branch; the laptop reads it with `scripts/read-logs.sh`.
+Studio runs on the Windows PC, so its Output window is invisible here. In Studio the game forwards its server Output to a small listener, which pushes it to a separate private repo, `night-shift-logs` (cloned next to this one on the PC), so this repo never gets a log branch. The laptop reads it with `scripts/read-logs.sh`. If you used the old `studio-logs` branch, delete the old `night-shift-logs` folder on the PC (then `git worktree prune`) before starting `scripts/logs` again.
 
 On the Windows PC, once per place: **Home > Game Settings > Security > Allow HTTP Requests = ON**. Each playtest session, in a second PowerShell window: `.\scripts\logs.ps1` (leave it running), then press Play. Output arrives within about 12 seconds.
 
