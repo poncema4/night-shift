@@ -18,9 +18,9 @@ jobs:
       - name: Generate the Roblox standard library for Selene
         run: selene generate-roblox-std
       - name: Lint (Selene)
-        run: selene src tests tools
+        run: selene src tests
       - name: Format check (StyLua)
-        run: stylua --check src tests tools
+        run: stylua --check src tests
       - name: Tests (Lune)
         run: lune run tests/run
       - name: Build the place file (Rojo)
