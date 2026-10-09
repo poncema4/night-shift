@@ -3,6 +3,8 @@
 -- sprints, uses the flashlight, finishes a task, hides, unlocks and uses the cameras, rings the bell, votes, dies, and the
 -- dawn screen and rewards arrive. Everything the server decides is checked; only the visuals are not.
 local Fake = require("../fake/Roblox")
+local Floors = require("../../src/shared/Game/Floors")
+local TaskBoard = require("../../src/shared/Game/TaskBoard")
 local Config = require("../../src/shared/Config")
 
 local function logged(world: any, remote: string, to: string?): { any }
@@ -37,7 +39,11 @@ return function(t)
 	t.equal("the night begins", storage:GetAttribute("Phase"), "Night")
 	t.check("the player has a character", player.Character ~= nil)
 	t.equal("the role is sent to that player only", #logged(world, "RoleAssigned", "client"), 1)
-	t.equal("there are 12 tasks to do", storage:GetAttribute("TasksTotal"), 12)
+	t.equal(
+		"a lone player (co-op) needs a share of the tasks, not all of them",
+		storage:GetAttribute("TasksTotal"),
+		TaskBoard.target(#Floors.tasks(), 1)
+	)
 	t.equal("the Night Manager is hunting", storage:FindFirstChild("ThreatState"):GetAttribute("Active"), true)
 	threat.pause() -- keep him out of the way for the rest of the checks
 	local humanoid, root = world.humanoid(player), world.root(player)
