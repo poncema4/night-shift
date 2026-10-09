@@ -1,4 +1,4 @@
-# NIGHT SHIFT - design (working draft)
+# THE NIGHT MANAGER (formerly NIGHT SHIFT) - design (working draft)
 
 Not final. Each mechanic must support the identity below or it does not go in.
 

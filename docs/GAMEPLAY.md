@@ -50,3 +50,7 @@ Tips are stored as `tipsEarned` and `tipsSpent` (both only ever grow), so mergin
 Finishing the **Fix the cameras** task (Security room) powers the monitor for the whole crew: **3 charges**, each lets one crew member watch the Night Manager as a red blip on a three-floor map for **15 seconds** (press **C**), with a **40 second team cooldown**. Saboteurs cannot use it. Rules: `Game/Cameras` (pure, tested); `CameraService` enforces them; `client/CameraUi` draws the map from the same room data the hotel is built from.
 
 When you are out (caught or ejected) you **spectate**: **Left / Right** (or the on-screen arrows) switch between living players (`client/Spectate`).
+
+## Co-op and escalation (v0.5)
+- Fewer than 4 players: co-op, no saboteur, survive and finish the tasks.
+- Every finished task makes the Night Manager faster (up to 1.4x). See docs/LOBBY.md.

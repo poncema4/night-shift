@@ -130,7 +130,7 @@ function Hud.start()
 	guideTitle.BackgroundTransparency = 1
 	guideTitle.Position = UDim2.fromScale(0.05, 0.04)
 	guideTitle.Size = UDim2.fromScale(0.9, 0.12)
-	guideTitle.Text = "NIGHT SHIFT: HOW TO PLAY"
+	guideTitle.Text = `{Config.GameName}: HOW TO PLAY`
 	guideTitle.TextColor3 = Color3.fromRGB(255, 190, 90)
 	guideTitle.Font = Enum.Font.GothamBlack
 	guideTitle.TextScaled = true

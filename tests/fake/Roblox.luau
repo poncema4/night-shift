@@ -237,6 +237,8 @@ function Fake.world()
 		sleepers = {},
 		actions = {},
 		played = {},
+		teleports = {},
+		studio = true,
 	}
 	local depth = 0
 	local moduleCache = {}
@@ -300,6 +302,8 @@ function Fake.world()
 		CharacterAdded = true,
 		Changed = true,
 		Activated = true,
+		MouseEnter = true,
+		MouseLeave = true,
 		InputBegan = true,
 	}
 	local Methods = {}
@@ -476,6 +480,9 @@ function Fake.world()
 			self.OnClientEvent:Fire(...)
 		end
 	end
+	function Methods.SetTeleportData(self, value)
+		data[self].props.TeleportData = value
+	end
 	function Methods.FireServer(self, ...)
 		table.insert(world.log, { remote = data[self].props.Name, to = "server", args = { ... } })
 		if world.localPlayer then
@@ -580,7 +587,7 @@ function Fake.world()
 			s.SetPosition = function() end
 		elseif name == "RunService" then
 			s.IsStudio = function()
-				return true
+				return world.studio
 			end
 		elseif name == "CollectionService" then
 			s.AddTag = function(_, inst, tag)
@@ -589,6 +596,16 @@ function Fake.world()
 			end
 			s.GetTagged = function(_, tag)
 				return world.tags[tag] or {}
+			end
+		elseif name == "TeleportService" then
+			s.SetTeleportGui = function(_, gui)
+				world.teleportGui = gui
+			end
+			s.ReserveServer = function()
+				return "reserved-code"
+			end
+			s.TeleportAsync = function(_, placeId, players, options)
+				table.insert(world.teleports, { placeId = placeId, players = players, options = options })
 			end
 		elseif name == "DataStoreService" then
 			s.GetDataStore = function()
@@ -607,7 +624,7 @@ function Fake.world()
 		return s
 	end
 
-	local game = { PlaceId = 1 }
+	local game = { PlaceId = 1, PrivateServerId = "", PrivateServerOwnerId = 0 }
 	function game.GetService(_, name)
 		return service(name)
 	end

@@ -13,14 +13,14 @@ export type Settings = {
 }
 export type Phase = "Lobby" | "Intermission" | "Night" | "Meeting" | "Dawn"
 export type Winner = "Crew" | "Saboteurs"
--- `sandbox` marks a solo test round in Studio: the saboteur is a phantom, so the parity rule is replaced
--- by "the crew is wiped out", otherwise a lone player would lose the moment the Night starts.
+-- `coop` marks a round with too few players for a saboteur: a phantom one is counted, so the parity rule is replaced
+-- by "the crew is wiped out" (otherwise a lone player would lose the moment the Night starts).
 export type Stats = {
 	crewAlive: number,
 	saboteursAlive: number,
 	tasksDone: number,
 	tasksTotal: number,
-	sandbox: boolean?,
+	coop: boolean?,
 }
 export type Event = { from: Phase, to: Phase, winner: Winner? }
 
@@ -44,7 +44,7 @@ function Round.evaluate(stats: Stats): Winner?
 	if stats.saboteursAlive <= 0 then
 		return "Crew"
 	end
-	local crewLost = if stats.sandbox then stats.crewAlive <= 0 else stats.crewAlive <= stats.saboteursAlive
+	local crewLost = if stats.coop then stats.crewAlive <= 0 else stats.crewAlive <= stats.saboteursAlive
 	if crewLost then
 		return "Saboteurs"
 	end

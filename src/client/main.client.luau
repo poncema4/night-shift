@@ -9,18 +9,29 @@ local Fx = require(script.Parent.Fx)
 local Hud = require(script.Parent.Hud)
 local Locker = require(script.Parent.Locker)
 local MeetingUi = require(script.Parent.MeetingUi)
+local Menu = require(script.Parent.Menu)
 local Results = require(script.Parent.Results)
 local Spectate = require(script.Parent.Spectate)
 local ThreatView = require(script.Parent.ThreatView)
 
-print(`{Config.GameName} client v{Config.Version} started`)
-Hud.start()
-Fx.start()
-ThreatView.start()
-Controls.start()
-MeetingUi.start()
-Results.start()
-Locker.start()
-CameraUi.start()
-Spectate.start()
-Audio.start()
+-- The server says whether this is the party lobby or a match (see Shared/Game/ServerMode).
+while ReplicatedStorage:GetAttribute("ServerMode") == nil do
+	ReplicatedStorage:GetAttributeChangedSignal("ServerMode"):Wait()
+end
+local mode = ReplicatedStorage:GetAttribute("ServerMode")
+
+print(`{Config.GameName} client v{Config.Version} started in {mode}`)
+if mode == "Lobby" then
+	Menu.start()
+else
+	Hud.start()
+	Fx.start()
+	ThreatView.start()
+	Controls.start()
+	MeetingUi.start()
+	Results.start()
+	Locker.start()
+	CameraUi.start()
+	Spectate.start()
+	Audio.start()
+end

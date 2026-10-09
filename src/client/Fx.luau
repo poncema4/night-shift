@@ -6,6 +6,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Options = require(script.Parent.Options)
+
 local Fx = {}
 
 local SUBTITLES: { [string]: { string } } = {
@@ -67,9 +69,23 @@ function Fx.start()
 			shakeUntil = now + seconds
 		end
 		local lines = SUBTITLES[kind]
-		if lines then
+		if lines and Options.get("subtitles") then
 			subtitle.Text = lines[math.random(#lines)]
 			subtitleUntil = now + math.max(seconds, 3)
+		end
+	end)
+
+	-- the crew's progress angers him: warn once per night when he crosses half-way
+	local warned = false
+	local threatState = ReplicatedStorage:WaitForChild("ThreatState")
+	threatState:GetAttributeChangedSignal("Rage"):Connect(function()
+		local rage = threatState:GetAttribute("Rage") or 0
+		if rage < 0.05 then
+			warned = false
+		elseif rage >= 0.5 and not warned and Options.get("subtitles") then
+			warned = true
+			subtitle.Text = "He is getting faster."
+			subtitleUntil = os.clock() + 4
 		end
 	end)
 
@@ -89,10 +105,12 @@ function Fx.start()
 			intensity = math.clamp(1 - d / NEAR, 0, 1)
 		end
 
-		local pulse = 0.5 + 0.5 * math.sin(now * (2 + intensity * 8))
+		local calm = Options.get("calm") == true -- reduced flashing: no pulsing, a gentler shake
+		local pulse = if calm then 0.5 else 0.5 + 0.5 * math.sin(now * (2 + intensity * 8))
 		dread.BackgroundTransparency = 1 - intensity * 0.4 * (0.5 + 0.5 * pulse)
 		if humanoid then
-			local shake = intensity * intensity * 0.5 + (if now < shakeUntil then 0.35 else 0)
+			local shake = (intensity * intensity * 0.5 + (if now < shakeUntil then 0.35 else 0))
+				* (if calm then 0.3 else 1)
 			humanoid.CameraOffset =
 				Vector3.new((math.noise(now * 9, 1) - 0) * shake, (math.noise(now * 9, 7) - 0) * shake, 0)
 		end

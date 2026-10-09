@@ -6,11 +6,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Escalation = require(ReplicatedStorage.Shared.Game.Escalation)
 local Flash = require(ReplicatedStorage.Shared.Game.Flash)
 local Floors = require(ReplicatedStorage.Shared.Game.Floors)
 local Patrol = require(ReplicatedStorage.Shared.Game.Patrol)
 local Stealth = require(ReplicatedStorage.Shared.Game.Stealth)
 local StealthService = require(script.Parent.StealthService)
+local TaskService = require(script.Parent.TaskService)
 
 local ThreatService = {}
 
@@ -107,6 +109,11 @@ local function run(patrol: Patrol.Patrol)
 		end
 		local blinded = Flash.stunned(flash, now)
 		state:SetAttribute("Stunned", blinded)
+		-- every task the crew finishes makes him faster ("how did it get faster"): see Shared/Game/Escalation
+		local done, total = TaskService.counts()
+		local rage = Escalation.rage(done, total)
+		local speedUp = Escalation.factor(rage)
+		state:SetAttribute("Rage", rage)
 		-- he hears the closest person: sprinting and flashlights carry farther, standing still is quiet, a hidden
 		-- player is not heard at all, and someone on another floor is heard from half as far
 		local nearest, nearestScore = nil, math.huge
@@ -133,7 +140,7 @@ local function run(patrol: Patrol.Patrol)
 			end
 		end
 		if not blinded then
-			patrol:tick(dt, settings.PatrolSpeed, settings.ChaseSpeed, target)
+			patrol:tick(dt, settings.PatrolSpeed * speedUp, settings.ChaseSpeed * speedUp, target)
 		end
 
 		local dx, dz = patrol.x - lastX, patrol.z - lastZ

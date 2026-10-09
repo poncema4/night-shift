@@ -119,6 +119,9 @@ local function block(
 	return part
 end
 
+-- Shared with the lobby room (LobbyBuilder): one way to make an anchored, styled box.
+HotelBuilder.block = block
+
 local function bulb(parent: Instance, x: number, y: number, z: number, level: number)
 	local lamp = block(
 		parent,
@@ -139,7 +142,7 @@ local function bulb(parent: Instance, x: number, y: number, z: number, level: nu
 	CollectionService:AddTag(lamp, "Bulb")
 end
 
-local function atmosphere()
+function HotelBuilder.atmosphere()
 	Lighting.ClockTime = 0
 	Lighting.Brightness = 0
 	local look = Config.Look
@@ -172,7 +175,7 @@ end
 
 -- A fresh Studio place ships a Baseplate whose top is at y = 0 (the same plane as our floor tiles, so the
 -- floor shimmers) and a large SpawnLocation. The hotel owns the floor and the spawn, so remove both.
-local function clearTemplate()
+function HotelBuilder.clearTemplate()
 	for _, child in workspace:GetChildren() do
 		local isBaseplate = child.Name == "Baseplate" and child:IsA("BasePart")
 		if isBaseplate or child:IsA("SpawnLocation") then
@@ -201,7 +204,7 @@ local function reportStrays(hotel: Instance)
 end
 
 function HotelBuilder.build(): Result
-	clearTemplate()
+	HotelBuilder.clearTemplate()
 	local folder = Instance.new("Folder")
 	folder.Name = "Hotel"
 	folder.Parent = workspace
@@ -286,7 +289,7 @@ function HotelBuilder.build(): Result
 		stations[task.id] = station
 	end
 
-	atmosphere()
+	HotelBuilder.atmosphere()
 	reportStrays(folder)
 	return { spawn = spawn, stations = stations, hiding = hiding, bell = bell }
 end
