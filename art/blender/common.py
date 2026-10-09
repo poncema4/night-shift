@@ -1,4 +1,4 @@
-"""Shared Blender helpers for NIGHT SHIFT assets. Run via tools/blender.sh (headless)."""
+"""Shared Blender helpers for THE NIGHT MANAGER assets. Run via tools/blender.sh (headless)."""
 import bpy, math, sys, os, json
 
 def reset():

@@ -6,7 +6,7 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 
 **Tiers are community-reported, not an official GitHub page**: 1 (default), 10 (Bronze), 24 (Silver), 48 (Gold) co-authored commits on merged PRs. Whether the badge has advanced can only be seen on the profile at github.com/poncema4.
 
-**Verified count on `main`**: 33 commits carry the poncema4 co-author trailer; 31 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
+**Verified count on `main`**: 37 commits carry the poncema4 co-author trailer; 35 merged PRs (`python3 scripts/pair-tracker.py` regenerates this file).
 
 ## Merged PRs
 
@@ -43,6 +43,10 @@ Goal: raise the Pair Extraordinaire badge on the personal account `poncema4`.
 | [#30](https://github.com/poncema4/night-shift/pull/30) | feat(ux): lobby count, intermission tip, caught banner | 2026-10-09 |
 | [#31](https://github.com/poncema4/night-shift/pull/31) | art: corridor thumbnail rendered from the real hotel data | 2026-10-09 |
 | [#32](https://github.com/poncema4/night-shift/pull/32) | test(rounds): four rounds in a row prove nothing leaks | 2026-10-09 |
+| [#33](https://github.com/poncema4/night-shift/pull/33) | docs: refresh the Pair Extraordinaire tracker | 2026-10-09 |
+| [#34](https://github.com/poncema4/night-shift/pull/34) | docs: research on what makes Roblox horror hits work | 2026-10-09 |
+| [#35](https://github.com/poncema4/night-shift/pull/35) | feat(dark,flashlight): a darker hotel and a flashlight that blinds the Night Manager | 2026-10-09 |
+| [#36](https://github.com/poncema4/night-shift/pull/36) | feat: spiral staircases and sewer basement | 2026-10-09 |
 
 One PR counts once however many commits it has; the count above is commits, which is what the tiers are described in.
 

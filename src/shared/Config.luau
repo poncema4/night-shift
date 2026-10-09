@@ -2,18 +2,32 @@
 -- Game-wide constants. Plain data: safe to require from the server, the client and the tests.
 
 return table.freeze({
-	GameName = "NIGHT SHIFT",
+	GameName = "THE NIGHT MANAGER",
+	-- The Roblox experience title: hook first, one emoji, genre tag (searchable, no money words).
+	StoreTitle = "THE NIGHT MANAGER 🛎️ [HORROR]",
 	StudioName = "Nexus Hollow Studios",
 	Version = "0.4.0",
 
+	-- A match server holds one party: the round starts as soon as someone is in, others arrive during the intermission.
 	Round = table.freeze({
-		MinPlayers = 6,
-		MaxPlayers = 10,
-		IntermissionSeconds = 20,
+		MinPlayers = 1,
+		MaxPlayers = 8,
+		IntermissionSeconds = 15,
 		NightSeconds = 240,
 		DawnSeconds = 12,
 		MeetingSeconds = 50,
 	}),
+	-- The lobby: parties of any size up to MaxParty queue for QueueSeconds; a full party only waits FullSeconds.
+	Lobby = table.freeze({
+		MaxParty = 8,
+		DefaultParty = 4,
+		QueueSeconds = 30,
+		FullSeconds = 5,
+		ActionCooldown = 0.25, -- seconds between party actions from one player
+	}),
+	-- Studio is not a real server: pick which job it plays ("Match" = the round, "Lobby" = the party screen).
+	Server = table.freeze({ StudioMode = "Match" }),
+	Brand = table.freeze({ GroupId = 749648777 }),
 	-- How the hotel looks. Tune these first if it is too dark or too bright (Studio playtest).
 	Look = table.freeze({
 		Ambient = { 7, 7, 11 },

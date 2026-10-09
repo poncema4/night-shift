@@ -1,6 +1,6 @@
 # art/
 
-Blender pipeline for NIGHT SHIFT models. Scripts in `art/blender/` build a model,
+Blender pipeline for THE NIGHT MANAGER models. Scripts in `art/blender/` build a model,
 render a preview to `art/renders/` and export a `.glb`. Look at the render before
 anything goes to Studio.
 

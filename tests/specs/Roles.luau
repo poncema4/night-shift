@@ -21,7 +21,9 @@ end
 
 return function(t)
 	t.equal("alone: no saboteur", Roles.saboteurCount(1), 0)
-	t.equal("2 players: 1 saboteur", Roles.saboteurCount(2), 1)
+	t.equal("2 players: co-op, no saboteur", Roles.saboteurCount(2), 0)
+	t.equal("3 players: co-op, no saboteur", Roles.saboteurCount(3), 0)
+	t.equal("4 players: 1 saboteur", Roles.saboteurCount(4), 1)
 	t.equal("8 players: 1 saboteur", Roles.saboteurCount(8), 1)
 	t.equal("9 players: 2 saboteurs", Roles.saboteurCount(9), 2)
 	t.equal("10 players: 2 saboteurs", Roles.saboteurCount(10), 2)

@@ -5,9 +5,12 @@ export type Role = "Crew" | "Saboteur"
 
 local Roles = {}
 
--- 1 saboteur for 2-8 players, 2 for 9+, none when playing alone (Studio test).
+-- Fewer than this many players play co-op: nobody is a saboteur and the crew just has to survive the night.
+Roles.COOP_BELOW = 4
+
+-- 1 saboteur for 4-8 players, 2 for 9+, none in co-op.
 function Roles.saboteurCount(playerCount: number): number
-	if playerCount < 2 then
+	if playerCount < Roles.COOP_BELOW then
 		return 0
 	end
 	if playerCount >= 9 then

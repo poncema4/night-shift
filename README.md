@@ -1,4 +1,4 @@
-# NIGHT SHIFT
+# THE NIGHT MANAGER
 
 A multiplayer survival-horror / social-deduction / life-sim Roblox game by **Nexus Hollow Studios** (group owner: Swag_Boy435 / V1RTU4L).
 

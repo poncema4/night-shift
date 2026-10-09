@@ -1,4 +1,4 @@
-# NIGHT SHIFT: handoff
+# THE NIGHT MANAGER (formerly NIGHT SHIFT): handoff
 
 **Studio:** Nexus Hollow Studios. **Repo:** poncema4/night-shift. **Stack:** Luau, Rojo, Lune (tests), Selene, StyLua, luau-lsp (type-check), Blender 4.5 (headless).
 **Rule of the repo:** every change is a PR; CI (lint, format, tests, type-check, place build) must pass; merge with rebase; delete the branch; commits are authored by Claude with `Co-authored-by: poncema4 <144962839+poncema4@users.noreply.github.com>`. `main` is the only long-lived branch.

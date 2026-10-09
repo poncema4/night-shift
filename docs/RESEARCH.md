@@ -63,3 +63,12 @@ Nobody can promise a game blows up. What we control: a strong icon and title, a 
 - Tags that recur: #roblox #robloxhorror #robloxhorrorgame #scary #horror #fyp #scarygames. Long 20-tag walls exist but the top-liked clips use 3-5.
 - Takeaways for NIGHT SHIFT: the Night Manager hearing you (sprint/flashlight noise) is the clip moment; party co-op is a feature creators pitch; the blinding flashlight beat is a shareable "I survived" moment.
 - Launch tags to use: #roblox #robloxhorror #nightshift #scary #fyp.
+
+## Naming (checked live on Roblox search, 2026-10-09)
+
+- "Night Shift" is a crowded pattern: gas station, grocery, kiosk, morgue, ramen, tacos ("[HORROR]" tag in most titles; the biggest is ~6K players).
+- Sound hooks are saturated too: BE QUIET, It Hears You, Quiet or Die, Quiet Hours, Don't Ring the Bell.
+- Taken: Quiet Hours, No Vacancy (Anomaly), The Hollow Hotel (x4, dead). Free: THE NIGHT MANAGER.
+- Why this name: the monster is the star (Doors, Piggy, Granny pattern), it reads well in a TikTok caption, "night" and "hotel" cover discovery keywords, and a bell emoji ties to the in-game bell.
+- Store title: "THE NIGHT MANAGER 🛎️ [HORROR]" (Config.StoreTitle). The repo and Rojo project keep the old name; changing the title is one constant.
+- Pattern of winners: sentence-style hooks ("he ate them." 8K), a bare strong noun (THRESHOLD 10K, Nightfall), "99 Nights in the Forest" 180K.

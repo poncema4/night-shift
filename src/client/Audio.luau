@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Options = require(script.Parent.Options)
 
 local Audio = {}
 
@@ -29,7 +30,7 @@ function Audio.start()
 	local sounds = Config.Sounds
 
 	local function cue(id: string, volume: number, speed: number?)
-		local sound = newSound(id, volume, false)
+		local sound = newSound(id, volume * Options.volume(), false)
 		sound.PlaybackSpeed = speed or 1
 		sound:Play()
 		task.delay(4, function()
@@ -75,8 +76,8 @@ function Audio.start()
 			local dz = (state:GetAttribute("Z") or 0) - root.Position.Z
 			intensity = math.clamp(1 - math.sqrt(dx * dx + dy * dy + dz * dz) / NEAR, 0, 1)
 		end
-		beat.Volume = intensity * 0.7
-		beat.PlaybackSpeed = 0.7 + intensity * 0.8
+		beat.Volume = intensity * 0.7 * Options.volume()
+		beat.PlaybackSpeed = 0.7 + intensity * 0.8 + (state:GetAttribute("Rage") or 0) * 0.25
 		if intensity > 0.02 and not beat.IsPlaying then
 			beat:Play()
 		elseif intensity <= 0.02 and beat.IsPlaying then

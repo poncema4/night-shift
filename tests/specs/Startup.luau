@@ -87,11 +87,17 @@ return function(t)
 		t.check("the Night Manager state folder exists", storage:FindFirstChild("ThreatState") ~= nil)
 
 		-- every remote a client script waits for must exist, or that client hangs forever
+		-- (the menu screens belong to the lobby server, so they are checked against the lobby's remotes)
+		local lobbyWorld = Fake.world()
+		local lobbyRemotes = lobbyWorld.instance.new("Folder")
+		lobbyWorld.load("src/server/LobbyService").start(lobbyRemotes)
+		local lobbyFiles = { ["Menu.luau"] = true, ["PartyUi.luau"] = true }
 		local missing = {}
 		local ignore = { PlayerGui = true, Remotes = true, ThreatState = true }
 		for _, file in fs.readDir("src/client") do
+			local folder = if lobbyFiles[file] then lobbyRemotes else remotes
 			for name in string.gmatch(fs.readFile("src/client/" .. file), 'WaitForChild%("([%w_]+)"%)') do
-				if not ignore[name] and remotes and not remotes:FindFirstChild(name) then
+				if not ignore[name] and folder and not folder:FindFirstChild(name) then
 					table.insert(missing, `{file}:{name}`)
 				end
 			end

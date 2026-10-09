@@ -127,10 +127,9 @@ function RoundService.start()
 				end
 			end
 		end
-		-- With one or two players in Studio the rules would end the night at once (one crew against one saboteur), so a
-		-- phantom saboteur is added and only a wiped-out crew loses: that lets you test alone or with a second client.
-		local sandbox = RunService:IsStudio() and #Players:GetPlayers() < 3
-		if sandbox then
+		-- Co-op (too few players for a saboteur): a phantom saboteur is counted, so only a wiped-out crew loses
+		local coop = #Players:GetPlayers() < Roles.COOP_BELOW
+		if coop then
 			saboteurs += 1
 		end
 		local done, total = TaskService.counts()
@@ -139,7 +138,7 @@ function RoundService.start()
 			saboteursAlive = saboteurs,
 			tasksDone = done,
 			tasksTotal = total,
-			sandbox = sandbox,
+			coop = coop,
 		}
 	end
 

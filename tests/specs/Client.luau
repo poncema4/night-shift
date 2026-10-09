@@ -18,8 +18,7 @@ end
 local function boot(seed: number, untilNight: boolean)
 	math.randomseed(seed)
 	local world = Fake.world()
-	local server = world.load("src/server/RoundService")
-	server.start()
+	world.load("src/server/main.server") -- the real entry point: picks the mode, then starts the round
 	local me = world.addPlayer("Marco", 1)
 	local others = {}
 	for i, name in { "Ana", "Ben", "Cy" } do
