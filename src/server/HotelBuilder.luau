@@ -3,6 +3,7 @@
 -- Blender meshes replace the part-built props once they are imported (see art/README.md).
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Dressing = require(ReplicatedStorage.Shared.Game.Dressing)
@@ -82,7 +83,38 @@ local function atmosphere()
 	bloom.Parent = effects
 end
 
+-- A fresh Studio place ships a Baseplate whose top is at y = 0 (the same plane as our floor tiles, so the
+-- floor shimmers) and a large SpawnLocation. The hotel owns the floor and the spawn, so remove both.
+local function clearTemplate()
+	for _, child in workspace:GetChildren() do
+		local isBaseplate = child.Name == "Baseplate" and child:IsA("BasePart")
+		if isBaseplate or child:IsA("SpawnLocation") then
+			print(`[Hotel] removed template {child.ClassName} "{child.Name}"`)
+			child:Destroy()
+		end
+	end
+end
+
+-- Anything else loose in the workspace can overlap the hotel and flicker; name it in the log so it is easy to find.
+local function reportStrays(hotel: Instance)
+	local strays = {}
+	for _, child in workspace:GetChildren() do
+		local known = child == hotel
+			or child:IsA("Terrain")
+			or child:IsA("Camera")
+			or child.Name == "NightManager"
+			or Players:GetPlayerFromCharacter(child) ~= nil
+		if not known and (child:IsA("BasePart") or child:IsA("Model")) then
+			table.insert(strays, child.Name)
+		end
+	end
+	if #strays > 0 then
+		print(`[Hotel] other things in the workspace that may overlap the hotel: {table.concat(strays, ", ")}`)
+	end
+end
+
 function HotelBuilder.build(): Result
+	clearTemplate()
 	local folder = Instance.new("Folder")
 	folder.Name = "Hotel"
 	folder.Parent = workspace
@@ -264,7 +296,7 @@ function HotelBuilder.build(): Result
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
-	spawn.Size = Vector3.new(6, 0.2, 6)
+	spawn.Size = Vector3.new(4, 0.2, 4)
 	spawn.Position = Vector3.new(lx, 0.1, -14)
 	spawn.Transparency = 1
 	spawn.CanCollide = false
@@ -285,6 +317,7 @@ function HotelBuilder.build(): Result
 	end
 
 	atmosphere()
+	reportStrays(folder)
 	return { spawn = spawn, stations = stations }
 end
 
