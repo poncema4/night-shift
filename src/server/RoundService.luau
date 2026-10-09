@@ -10,6 +10,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Roles = require(ReplicatedStorage.Shared.Game.Roles)
 local Round = require(ReplicatedStorage.Shared.Game.Round)
 local AbilityService = require(script.Parent.AbilityService)
+local CameraService = require(script.Parent.CameraService)
 local HotelBuilder = require(script.Parent.HotelBuilder)
 local MeetingService = require(script.Parent.MeetingService)
 local ProfileService = require(script.Parent.ProfileService)
@@ -61,6 +62,12 @@ function RoundService.start()
 	ScareDirector.start(remotes)
 	TaskService.start(hotel.stations, roleOf)
 	AbilityService.start(remotes, roleOf, isNight)
+	CameraService.start(remotes, roleOf, isNight)
+	TaskService.onDone(function(id)
+		if id == "cameras" and round.phase == "Night" then
+			CameraService.unlock()
+		end
+	end)
 	MeetingService.start(remotes, {
 		request = function(caller: Player, reason: string, victim: Player?): boolean
 			if round.phase ~= "Night" or not isAlive(caller) then
@@ -149,6 +156,7 @@ function RoundService.start()
 		roles = Roles.assign(ids, math.random)
 		MeetingService.resetNight()
 		AbilityService.reset()
+		CameraService.reset()
 		for _, player in Players:GetPlayers() do
 			local allies = {}
 			if roles[player.UserId] == "Saboteur" then
@@ -221,6 +229,7 @@ function RoundService.start()
 			StealthService.setActive(false)
 			ScareDirector.setActive(false, 0)
 			ThreatService.deactivate()
+			CameraService.reset()
 			dawnReport(event.winner)
 		elseif event.to == "Lobby" then
 			TaskService.setActive(false)

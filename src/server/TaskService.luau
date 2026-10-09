@@ -16,6 +16,7 @@ local prompts: { [string]: ProximityPrompt } = {}
 local board = TaskBoard.new({})
 local active = false
 local finished: { [number]: number } = {}
+local listeners: { (id: string, player: Player) -> () } = {}
 local roleOf: (number) -> string? = function(_userId: number)
 	return nil
 end
@@ -28,6 +29,11 @@ end
 
 function TaskService.counts(): (number, number)
 	return board:count()
+end
+
+-- Call `fn(taskId, player)` whenever a task is completed (used to unlock the cameras).
+function TaskService.onDone(fn: (id: string, player: Player) -> ())
+	table.insert(listeners, fn)
 end
 
 -- How many tasks this player finished this round.
@@ -77,6 +83,9 @@ local function onTriggered(id: string, player: Player)
 		stations[id].Color = DONE
 		prompts[id].Enabled = false
 		publish()
+		for _, fn in listeners do
+			fn(id, player)
+		end
 	end
 end
 
