@@ -19,7 +19,13 @@ Players are staff on a night shift in one location. They split up to do tasks. S
 - Data saving: wrapped in pcall with retry, and a session lock. Never block a round on a failed save.
 - Monetisation later, cosmetics only. No pay-to-win.
 
-## Open decisions (owner)
+## Decided by default (owner said "your call", 2026-10-09; change any time)
+- Setting: an empty hotel at night.
+- 6-10 players per round (Studio test: 1).
+- Saboteurs: 1 for 2-8 players, 2 for 9-10.
+- Night ends when tasks are done (crew), crew <= saboteurs (saboteurs), or the timer runs out (saboteurs).
+
+## Still open (owner)
 - Setting (office? hospital? diner? hotel?).
 - Number of players per round (suggest 6-10).
 - Saboteur count and win conditions.
