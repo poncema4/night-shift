@@ -2,6 +2,7 @@
 -- When you are out (caught or ejected) you watch the people still alive: Left / Right arrows (or the on-screen
 -- buttons) switch between them. When you are alive again your own camera comes back.
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -31,6 +32,21 @@ function Spectate.start()
 	label.TextScaled = true
 	label.Visible = false
 	label.Parent = gui
+
+	local caught = Instance.new("TextLabel")
+	caught.AnchorPoint = Vector2.new(0.5, 0.5)
+	caught.Position = UDim2.fromScale(0.5, 0.4)
+	caught.Size = UDim2.fromScale(0.6, 0.14)
+	caught.BackgroundTransparency = 1
+	caught.TextColor3 = Color3.fromRGB(255, 70, 80)
+	caught.TextStrokeTransparency = 0.3
+	caught.Font = Enum.Font.GothamBlack
+	caught.TextScaled = true
+	caught.Text = ""
+	caught.Visible = false
+	caught.Parent = gui
+	local wasAlive = false
+	local caughtUntil = 0
 
 	local index = 1
 	local function others(): { Player }
@@ -81,6 +97,14 @@ function Spectate.start()
 		local camera = workspace.CurrentCamera
 		local own = aliveHumanoid(me)
 		local out = own == nil and me.Character ~= nil
+		if wasAlive and out and ReplicatedStorage:GetAttribute("Phase") ~= "Lobby" then
+			caught.Text = if ReplicatedStorage:GetAttribute("Phase") == "Meeting"
+				then "YOU WERE VOTED OUT"
+				else "YOU WERE CAUGHT"
+			caughtUntil = os.clock() + 3.5
+		end
+		wasAlive = own ~= nil
+		caught.Visible = os.clock() < caughtUntil
 		local list = if out then others() else {}
 		for _, child in gui:GetChildren() do
 			if child:IsA("TextButton") then
