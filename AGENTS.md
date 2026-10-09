@@ -1,6 +1,6 @@
-# AGENTS.md - Nexus Hollow (Roblox, Rojo)
+# AGENTS.md - NIGHT SHIFT (Roblox, Rojo)
 
-Roblox game by Nexus Hollow Studios (Swag_Boy435 / V1RTU4L). Claude Code works on Linux (no Roblox Studio there); the owner playtests on a Windows PC through Rojo.
+NIGHT SHIFT, a Roblox game by Nexus Hollow Studios (Swag_Boy435 / V1RTU4L). Claude Code works on Linux (no Roblox Studio there); the owner playtests on a Windows PC through Rojo.
 
 ## What Claude can and cannot check
 - CAN: Luau logic in `src/shared` (Lune tests), lint (Selene), format (StyLua), build (`rojo build`), CI.
