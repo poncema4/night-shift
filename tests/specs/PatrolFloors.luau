@@ -37,7 +37,7 @@ return function(t)
 	local usedStairs = false
 	for _ = 1, 4000 do
 		up:tick(0.1, 10, 14, target)
-		if up.from == "WA3" or up.to == "WA3" then
+		if up.from == "WA6" or up.to == "WA6" then
 			usedStairs = true
 		end
 	end

@@ -8,7 +8,7 @@ Pure data lives in `src/shared/Game/` (Hotel, Floors, Dressing, Building, Furnis
 | Ground | y = 0 | Kitchen, Boiler Room, Laundry, Storage, Security, Pantry, Lobby, Office, Ballroom, Pool Room |
 | Basement | y = -16 | Wine Cellar, Furnace Room, Generator Room, Meat Locker, Dry Storage, Mop Closet, Parking Garage, Maintenance, Flooded Hall, Locker Room |
 
-**Stairs.** The West stairwell (x -80..-60) climbs from the ground corridor to upstairs; the East stairwell (x 60..80) descends to the basement. Each is a switchback: flight, landing, flight, 1 stud per step. The floor above each flight has an opening with guard rails.
+**Stairs.** Both stairwells are square spirals around an open 8x8 well (West x -76..-60 climbs ground to upstairs; East x 60..76 descends to the basement). Three flights of five 1-stud steps with a landing at each corner; you can look down the well. The floor above has an opening with guard rails. **Basement dressing:** rusted pipe runs overhead and green sludge pools in the damp rooms, under the darker, greener basement lights.
 
 **Tasks (12).** Ground: breaker, minibar, linens, cameras, grand clock, pool chlorine. Upstairs: elevator panel, turn down the bed in Room 204, drain the rooftop spa. Basement: generator, steam valve, fuse box.
 

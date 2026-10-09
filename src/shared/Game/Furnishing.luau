@@ -29,13 +29,15 @@ Furnishing.foot = {
 	pool = { w = 10, d = 14, h = 0.35 },
 	water = { w = 20, d = 10, h = 0.3 },
 	chandelier = { w = 1, d = 1, h = 0 },
+	pipe = { w = 16, d = 1.4, h = 0 },
+	sludge = { w = 6, d = 14, h = 0.2 },
 } :: { [string]: Foot }
 
 -- Where a player can hide (the server adds a Hide prompt; the Night Manager has to search them).
 Furnishing.hideable = { locker = true, wardrobe = true }
 
 -- Things you can walk through or that hang from the ceiling: they do not block routes.
-Furnishing.soft = { water = true, chandelier = true }
+Furnishing.soft = { water = true, chandelier = true, pipe = true, sludge = true }
 Furnishing.ceiling = Hotel.CEILING -- hanging pieces are measured from the floor up to here
 
 local MARGIN = 0.8 -- gap between a wall face and the furniture (the wall dressing sticks out 0.45)
@@ -151,6 +153,16 @@ against(-1, "Mop Closet", "N", "crate", 5)
 at(-1, "Parking Garage", "car", -10.2, 0, 0)
 at(-1, "Parking Garage", "car", 10.2, 0, 0)
 at(-1, "Flooded Hall", "water", 0, 0, 0)
+-- sewer feel: rusted pipe runs overhead, and green sludge pools in the damp rooms
+at(-1, "Flooded Hall", "pipe", 0, -4, 0)
+at(-1, "Flooded Hall", "pipe", 0, 4, 0)
+at(-1, "Furnace Room", "pipe", 0, -3, 0)
+at(-1, "Maintenance", "pipe", 0, 0, 0)
+at(-1, "Dry Storage", "pipe", 0, 0, 0)
+at(-1, "Wine Cellar", "pipe", 0, 0, 0)
+at(-1, "Meat Locker", "pipe", 0, 3, 0)
+at(-1, "Locker Room", "sludge", 0, 0, 0)
+at(-1, "Mop Closet", "sludge", 0, 0, 0)
 against(-1, "Flooded Hall", "N", "crate", -8)
 against(-1, "Flooded Hall", "N", "crate", 8)
 against(-1, "Maintenance", "W", "locker", -4.4)
