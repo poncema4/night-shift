@@ -27,6 +27,9 @@ local specs = {
 	require("./specs/LogBuffer"),
 	require("./specs/Roles"),
 	require("./specs/Round"),
+	require("./specs/Hotel"),
+	require("./specs/Patrol"),
+	require("./specs/TaskBoard"),
 }
 for _, spec in specs do
 	spec(t)
