@@ -14,6 +14,32 @@ art          Blender scripts, models, renders (docs/ART.md)
 docs         HANDOFF, GAMEPLAY, MAP, ART, PLAYTEST, IDEAS, ROADMAP, marketing
 ```
 
+## What the game is
+
+Four to ten staff are locked in a hotel on the night shift. **The Night Manager** hunts them across three floors. The **crew** finish tasks, **one of them is a saboteur** helping him. Run (loud), light your flashlight (he notices), hide in lockers and wardrobes (he searches), report bodies, ring the lobby bell, vote someone out. More in `docs/GAMEPLAY.md`.
+
+| Key | Action |
+|---|---|
+| WASD / thumbstick | move |
+| Shift | run (stamina) |
+| F | flashlight (battery) |
+| E (hold) | do a task, hide, report a body, ring the bell |
+| C | security cameras (crew, after fixing them) |
+| Q / R | saboteur: lure / lights out |
+| L | your Locker (cosmetics) |
+| Left / Right | spectate (when you are out) |
+
+## Where everything is
+
+| Doc | What |
+|---|---|
+| `docs/HANDOFF.md` | what exists, what is unverified, what to do next |
+| `docs/PLAYTEST.md` | the checklist for the first Studio session |
+| `docs/TESTING.md` | the four test layers and the simulated server and client |
+| `docs/GAMEPLAY.md`, `docs/MAP.md` | the rules; the three floors |
+| `docs/ART.md` | Blender models and how to import them |
+| `docs/PERF.md`, `docs/IDEAS.md`, `docs/ROADMAP.md` | performance, ideas by section, roadmap |
+
 ## Every day (Linux laptop: write code, check it)
 
 ```bash
