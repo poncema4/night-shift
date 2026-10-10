@@ -15,6 +15,10 @@ return function(t)
 	end
 	t.check("the cells are spread out with a walkway between each pair", clear)
 	t.check("the row is centred", math.abs(pods[1].x + pods[#pods].x) < 1e-9)
+	t.check(
+		"seen from the spawn (looking +z, +x is on your left) the pods read 1 to 6 from left to right",
+		pods[1].x > pods[2].x and pods[5].x > pods[6].x
+	)
 	t.check("pods are named by number, not by a fixed size", pods[1].label == "POD 1" and pods[6].label == "POD 6")
 	t.equal("the middle of a cell finds it", Pods.at(pods, pods[3].x, pods[3].z) == pods[3], true)
 	t.check(

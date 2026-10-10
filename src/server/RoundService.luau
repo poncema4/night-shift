@@ -49,6 +49,7 @@ function RoundService.start()
 	local leaveMatch = makeRemote(remotes, "LeaveMatch")
 
 	-- A real match server sends everyone back to the public lobby when the night is over (a Studio test just keeps looping).
+	local matchOver = false -- set once the night is over on a real match server: nothing restarts after this
 	local function returnsToLobby(): boolean
 		return ReplicatedStorage:GetAttribute("ServerMode") == "Match" and not RunService:IsStudio()
 	end
@@ -114,6 +115,9 @@ function RoundService.start()
 		end)
 	end
 	local function loadEveryone()
+		if matchOver then
+			return
+		end
 		for _, player in Players:GetPlayers() do
 			if not isAlive(player) then
 				load(player)
@@ -159,6 +163,7 @@ function RoundService.start()
 		ReplicatedStorage:SetAttribute("PhaseEndsAt", workspace:GetServerTimeNow() + round.timeLeft)
 		ReplicatedStorage:SetAttribute("RoundNumber", round.roundNumber)
 		ReplicatedStorage:SetAttribute("MinPlayers", settings.MinPlayers)
+		ReplicatedStorage:SetAttribute("ReturnsToLobby", returnsToLobby())
 	end
 
 	local function startNight()
@@ -255,8 +260,16 @@ function RoundService.start()
 			dawnReport(event.winner)
 		elseif event.to == "Lobby" then
 			if returnsToLobby() then
+				-- the countdown (the Dawn phase) has run: send everyone to the lobby and STOP. Nobody is respawned and no new
+				-- night starts here, so there is no flash of the hotel between the results screen and the lobby.
+				matchOver = true
 				print("[Round] the night is over: sending everyone back to the lobby")
 				task.spawn(Teleport.toLobby, Players:GetPlayers())
+				TaskService.setActive(false)
+				StealthService.setActive(false)
+				ScareDirector.setActive(false, 0)
+				ThreatService.deactivate()
+				return
 			end
 			TaskService.setActive(false)
 			StealthService.setActive(false)
@@ -281,7 +294,7 @@ function RoundService.start()
 				MeetingService.tick(round.timeLeft)
 			end
 			local current = if round.phase == "Night" then stats() else nil
-			local event = round:tick(dt, #Players:GetPlayers(), current)
+			local event = if matchOver then nil else round:tick(dt, #Players:GetPlayers(), current)
 			if event then
 				onChange(event)
 			end

@@ -83,10 +83,12 @@ function Jail.start()
 	local banner =
 		Ui.label(gui, "", Enum.Font.GothamBlack, Ui.AMBER, UDim2.fromScale(0.2, 0.235), UDim2.fromScale(0.6, 0.05))
 	banner.Name = "Banner"
+	banner.TextXAlignment = Enum.TextXAlignment.Center
 	banner.TextStrokeTransparency = 0.5
 	local sub =
 		Ui.label(gui, "", Enum.Font.GothamMedium, Ui.TEXT, UDim2.fromScale(0.25, 0.292), UDim2.fromScale(0.5, 0.03))
 	sub.Name = "Sub"
+	sub.TextXAlignment = Enum.TextXAlignment.Center
 	sub.TextStrokeTransparency = 0.6
 
 	local was = 0

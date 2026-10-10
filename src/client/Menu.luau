@@ -45,6 +45,13 @@ end
 
 function Menu.start()
 	local me = Players.LocalPlayer
+	-- a quiet, uneasy hum under the lobby so even the waiting room feels like the hotel
+	local ambience = Instance.new("Sound")
+	ambience.SoundId = Config.Sounds.lobbyAmbience
+	ambience.Volume = 0.25
+	ambience.Looped = true
+	ambience.Parent = game:GetService("SoundService")
+	ambience:Play()
 	local playerGui = me:WaitForChild("PlayerGui")
 	local remotes = ReplicatedStorage:WaitForChild("Remotes")
 	local action = remotes:WaitForChild("PartyAction") :: RemoteEvent

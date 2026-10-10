@@ -134,6 +134,45 @@ return function(t)
 		end
 		t.check("the HUD and the cage banner never overlap", #hits == 0, table.concat(hits, ", "))
 		t.check("the elements being compared exist", #names >= 6, table.concat(names, ","))
+
+		-- centred means centred: these sit on the vertical midline and align their text to the centre
+		local offCentre = {}
+		for _, name in { "Status", "Tasks", "Role", "Tip", "HidingText", "Leave", "CageBanner", "CageSub" } do
+			local inst = named[name]
+			if inst then
+				local r = rect(inst)
+				local middle = (r[1] + r[3]) / 2
+				local alignment = inst.TextXAlignment
+				local centred = alignment == nil or alignment == world.enum.TextXAlignment.Center
+				if math.abs(middle - 0.5) > 0.01 or not centred then
+					table.insert(offCentre, name)
+				end
+			end
+		end
+		t.check(
+			"the main HUD text sits on the vertical midline with centred alignment",
+			#offCentre == 0,
+			table.concat(offCentre, ", ")
+		)
+
+		-- text never gets huge: every scaled label or button on a match screen has a size cap
+		local uncapped, checked = {}, 0
+		for _, screen in me.PlayerGui:GetChildren() do
+			for _, item in screen:GetDescendants() do
+				if (item:IsA("TextLabel") or item:IsA("TextButton")) and item.TextScaled then
+					checked += 1
+					local limit = item:FindFirstChildOfClass("UITextSizeConstraint")
+					if not limit or limit.MaxTextSize > 48 then
+						table.insert(uncapped, item.Name)
+					end
+				end
+			end
+		end
+		t.check(
+			"every scaled text element has a size cap of 48 or less",
+			#uncapped == 0 and checked > 10,
+			`{checked} checked, uncapped: {table.concat(uncapped, ",")}`
+		)
 	end
 
 	-- he starts locked up: the crew sees a countdown, then "HE IS LOOSE"
@@ -239,6 +278,34 @@ return function(t)
 	end
 	t.check("the flashlight click plays", heard(Config.Sounds.flashlight))
 
+	-- the scary layers: silent when he is far, rising as he nears, a sting when he starts hunting
+	local threatState = storage:FindFirstChild("ThreatState")
+	local myPos = world.root(me).Position
+	threatState:SetAttribute("Active", true)
+	threatState:SetAttribute("Mode", "Patrol")
+	threatState:SetAttribute("X", myPos.X + 300)
+	threatState:SetAttribute("Y", myPos.Y - 3)
+	threatState:SetAttribute("Z", myPos.Z)
+	play(world, 0.3)
+	t.check(
+		"far away his footsteps and breathing are silent",
+		not heard(Config.Sounds.steps) and not heard(Config.Sounds.breath)
+	)
+	threatState:SetAttribute("X", myPos.X + 10)
+	play(world, 0.3)
+	t.check("near him the dread drone plays", heard(Config.Sounds.dread))
+	t.check("near him his footsteps play", heard(Config.Sounds.steps))
+	t.check("close to him his breathing plays", heard(Config.Sounds.breath))
+	t.check("his heartbeat plays", heard(Config.Sounds.heartbeat))
+	threatState:SetAttribute("Mode", "Chase")
+	play(world, 0.1)
+	t.check("when he starts hunting you a sting plays", heard(Config.Sounds.chaseSting))
+	threatState:SetAttribute("Stunned", true)
+	play(world, 0.1)
+	t.check("blinding him makes him shriek", heard(Config.Sounds.blindShriek))
+	threatState:SetAttribute("Stunned", false)
+	threatState:SetAttribute("Active", false)
+
 	-- hiding: the screen shows
 	local hide
 	for _, prompt in world.prompts(world.workspace, "Hide") do
@@ -252,7 +319,31 @@ return function(t)
 	hide.Triggered:Fire(me)
 	play(world, 0.3)
 	t.check("the hiding screen appears", find(hud, "Hiding").Visible)
+	do
+		-- you can SEE out of the locker: the overlay is transparent and the slats leave most of the screen clear
+		local overlay = find(hud, "Hiding")
+		local covered = 0
+		for _, child in overlay:GetChildren() do
+			if child.Name == "Slat" then
+				covered += child.Size.Y.Scale
+			end
+		end
+		t.equal("the locker overlay does not black out the screen", overlay.BackgroundTransparency, 1)
+		t.check("the slats cover less than 40% of the height", covered > 0.2 and covered < 0.4, `{covered}`)
+	end
 	local camera = world.workspace.CurrentCamera
+	do
+		local lockerBody = hide.Parent
+		local part = lockerBody
+		t.check(
+			"the locker fades for the person inside (they can see out)",
+			part.LocalTransparencyModifier >= 0.5,
+			`{part.LocalTransparencyModifier}`
+		)
+		local out = (lockerBody.CFrame * world.CFrame.new(0, 0, 1)).Position - lockerBody.Position
+		local reach = (camera.CFrame.Position - lockerBody.Position):Dot(out)
+		t.check("and the eye is outside the door face, not buried in the box", reach > lockerBody.Size.Z / 2, `{reach}`)
+	end
 	t.equal("the locker is marked as occupied by you", hide.Parent.Parent:GetAttribute("Occupant"), me.UserId)
 	t.equal(
 		"the camera looks out through the door instead of sitting blind inside",
@@ -271,6 +362,7 @@ return function(t)
 	t.check("LEAVE on screen gets you out", not find(hud, "Hiding").Visible and me:GetAttribute("Hidden") == false)
 	t.equal("and the normal camera comes back", camera.CameraType, world.enum.CameraType.Custom)
 	t.equal("and the locker is free again", hide.Parent.Parent:GetAttribute("Occupant"), nil)
+	t.equal("and it is solid to look at again", hide.Parent.LocalTransparencyModifier, 0)
 
 	-- a task and the cameras
 	local function station(name: string)
@@ -369,7 +461,13 @@ return function(t)
 	t.equal("dawn", storage:GetAttribute("Phase"), "Dawn")
 	local results = gui(me, "NightShiftResults")
 	t.check("the dawn screen opens", results.Enabled)
-	t.check("dawn plays its sound", heard(Config.Sounds.dawn))
+	t.check("dawn plays its sound", heard(Config.Sounds.dawn) or heard(Config.Sounds.deathSting))
+	-- whichever side wins, the matching cue plays: relief for the crew, the sting when the crew goes down
+	local crewWon = string.find(find(results, "Headline").Text, "CREW") ~= nil
+	t.check(
+		"the dawn cue matches the result",
+		if crewWon then heard(Config.Sounds.dawn) else heard(Config.Sounds.deathSting)
+	)
 	t.check(
 		"it names the winner",
 		string.find(find(results, "Headline").Text, "SABOTEUR") ~= nil

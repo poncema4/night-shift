@@ -23,6 +23,8 @@ while ReplicatedStorage:GetAttribute("ServerMode") == nil do
 end
 local mode = ReplicatedStorage:GetAttribute("ServerMode")
 
+local Ui = require(script.Parent.Ui)
+
 print(`{Config.GameName} client v{Config.Version} started in {mode}`)
 if mode == "Lobby" then
 	Menu.start()
@@ -40,4 +42,10 @@ else
 	CameraUi.start()
 	Spectate.start()
 	Audio.start()
+	-- one pass over every match screen (and any that appear later): text never grows past its cap
+	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	for _, screen in playerGui:GetChildren() do
+		Ui.tidy(screen)
+	end
+	playerGui.ChildAdded:Connect(Ui.tidy)
 end
