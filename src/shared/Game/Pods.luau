@@ -16,7 +16,9 @@ function Pods.layout(centerX: number, z: number, spacing: number): { Pod }
 		table.insert(list, {
 			id = i,
 			label = `POD {i}`,
-			x = centerX + (i - (Pods.COUNT + 1) / 2) * spacing,
+			-- the player faces +z toward the cells, so +x is on their LEFT: pod 1 sits at the largest x and the numbers
+			-- read 1 to 6 from left to right
+			x = centerX - (i - (Pods.COUNT + 1) / 2) * spacing,
 			z = z,
 			half = Pods.HALF,
 		})

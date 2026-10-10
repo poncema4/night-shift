@@ -6,6 +6,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
+local Ui = require(script.Parent.Ui)
+
 local Spectate = {}
 
 local function aliveHumanoid(player: Player): Humanoid?
@@ -47,6 +49,13 @@ function Spectate.start()
 	caught.Parent = gui
 	local wasAlive = false
 	local caughtUntil = 0
+
+	-- out of the night while others play on: you can wait and watch, or go back to the lobby now
+	local leave = Ui.button(gui, "RETURN TO LOBBY", UDim2.fromScale(0.82, 0.5), UDim2.fromScale(0.16, 0.06), function()
+		ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("LeaveMatch"):FireServer()
+	end)
+	leave.Name = "ReturnToLobby"
+	leave.Visible = false
 
 	local index = 1
 	local function others(): { Player }
@@ -104,10 +113,11 @@ function Spectate.start()
 			caughtUntil = os.clock() + 3.5
 		end
 		wasAlive = own ~= nil
+		leave.Visible = out and ReplicatedStorage:GetAttribute("ReturnsToLobby") == true
 		caught.Visible = os.clock() < caughtUntil
 		local list = if out then others() else {}
 		for _, child in gui:GetChildren() do
-			if child:IsA("TextButton") then
+			if child:IsA("TextButton") and child.Name ~= "ReturnToLobby" then
 				child.Visible = out and #list > 1
 			end
 		end

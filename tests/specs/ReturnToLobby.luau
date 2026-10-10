@@ -27,12 +27,50 @@ return function(t)
 	for _, p in players do
 		world.humanoid(p).Health = 0
 	end
+	-- the results screen and a 15 second countdown: nobody is respawned and nothing teleports yet
+	guard = 0
+	while storage:GetAttribute("Phase") ~= "Dawn" and guard < 100 do
+		world.advance(0.5)
+		guard += 1
+	end
+	t.equal("the night ends in the results phase", storage:GetAttribute("Phase"), "Dawn")
+	t.equal(
+		"the server tells the clients they are going back to the lobby",
+		storage:GetAttribute("ReturnsToLobby"),
+		true
+	)
+	world.advance(10)
+	t.equal("ten seconds in, they are still on the results screen", storage:GetAttribute("Phase"), "Dawn")
+	t.equal("and nobody has been sent yet", #world.teleports, 0)
+	local stillDead = true
+	for _, p in players do
+		if world.humanoid(p).Health > 0 then
+			stillDead = false
+		end
+	end
+	t.check("and nobody was respawned underneath the results screen", stillDead)
 	guard = 0
 	while #world.teleports == 0 and guard < 200 do
 		world.advance(0.5)
 		guard += 1
 	end
 	world.advance(1)
+	t.check("after the countdown the whole party goes together", guard < 200)
+	world.advance(25)
+	t.equal(
+		"no new night starts on that server",
+		storage:GetAttribute("Phase") == "Night" or storage:GetAttribute("Phase") == "Intermission",
+		false
+	)
+	local stillDeadAfter = true
+	for _, p in players do
+		local char = p.Character
+		local h = char and char:FindFirstChildOfClass("Humanoid")
+		if h and h.Health > 0 then
+			stillDeadAfter = false
+		end
+	end
+	t.check("and nobody is respawned after the teleport either", stillDeadAfter)
 	t.check("the night ended and the players were sent away", guard < 200)
 	t.equal("everyone is sent back once", #world.teleports, 1)
 	t.equal("all three of them", world.teleports[1] and #world.teleports[1].players or 0, 3)

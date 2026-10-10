@@ -14,7 +14,7 @@ return table.freeze({
 		MaxPlayers = 8,
 		IntermissionSeconds = 15,
 		NightSeconds = 240,
-		DawnSeconds = 12,
+		DawnSeconds = 15, -- the results screen and the "returning to lobby" countdown
 		MeetingSeconds = 50,
 	}),
 	-- The lobby: parties of any size up to MaxParty queue for QueueSeconds; a full party only waits FullSeconds.
@@ -86,8 +86,19 @@ return table.freeze({
 		taskDone = "rbxasset://sounds/electronicpingshort.wav",
 		meeting = "rbxasset://sounds/electronicpingshort.wav",
 		thud = "rbxasset://sounds/collide.wav",
-		heartbeat = "rbxasset://sounds/bass.wav",
+		heartbeat = "rbxassetid://90529069951911",
 		dawn = "rbxasset://sounds/victory.wav",
+		-- original horror sounds made by scripts/audio/make_game_sfx.py, uploaded to the Nexus Hollow Studios audio library
+		dread = "rbxassetid://85597735407641", -- low drone bed: swells as he nears
+		steps = "rbxassetid://108922385340239", -- his footsteps, looped
+		breath = "rbxassetid://107290080427700", -- his breathing, only when he is close
+		jumpscare = "rbxassetid://132915986816732",
+		deathSting = "rbxassetid://106951167965099", -- everyone is down
+		heLoose = "rbxassetid://130621317458953", -- the cage opens
+		blindShriek = "rbxassetid://100233823430925", -- a flashlight burns him
+		chaseSting = "rbxassetid://72786843722539", -- he starts hunting you
+		lockerCreak = "rbxassetid://126521124030974",
+		lobbyAmbience = "rbxassetid://126200971262401",
 	}),
 	Move = table.freeze({
 		Walk = 16,

@@ -74,6 +74,23 @@ function Results.start()
 	)
 	leave.ZIndex = 5
 
+	-- the countdown to the lobby (or the next night) and the fade to black that ends it
+	local countdown =
+		Ui.label(gui, "", Enum.Font.GothamBlack, Ui.AMBER, UDim2.fromScale(0.2, 0.02), UDim2.fromScale(0.6, 0.05))
+	countdown.Name = "Countdown"
+	countdown.TextXAlignment = Enum.TextXAlignment.Center
+	countdown.TextStrokeTransparency = 0.5
+	countdown.ZIndex = 6
+	local fade = Instance.new("Frame")
+	fade.Name = "Fade"
+	fade.Size = UDim2.fromScale(1, 1)
+	fade.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	fade.BackgroundTransparency = 1
+	fade.BorderSizePixel = 0
+	fade.ZIndex = 20
+	fade.Active = false
+	fade.Parent = gui
+
 	local shownAt = -100 -- the phase attribute can arrive a moment after the result message
 	local awardEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Award") :: RemoteEvent
 	awardEvent.OnClientEvent:Connect(function(info: { xp: number, tips: number, levelUp: boolean })
@@ -141,6 +158,15 @@ function Results.start()
 	end)
 
 	RunService.RenderStepped:Connect(function()
+		if ReplicatedStorage:GetAttribute("Phase") == "Dawn" then
+			local left =
+				math.max(0, (ReplicatedStorage:GetAttribute("PhaseEndsAt") or 0) - workspace:GetServerTimeNow())
+			local leaving = ReplicatedStorage:GetAttribute("ReturnsToLobby") == true
+			countdown.Text = `{if leaving then "RETURNING TO LOBBY IN" else "NEXT NIGHT IN"} {math.ceil(left)}`
+			fade.BackgroundTransparency = if leaving then math.clamp(left / 1.5, 0, 1) else 1
+		else
+			fade.BackgroundTransparency = 1
+		end
 		if gui.Enabled and ReplicatedStorage:GetAttribute("Phase") ~= "Dawn" and os.clock() - shownAt > 3 then
 			gui.Enabled = false
 			earned.Text = "" -- ready for the next round

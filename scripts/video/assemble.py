@@ -17,10 +17,10 @@ W, H = 1080, 1920
 work = os.path.dirname(os.path.abspath(out))
 
 SHOTS = [("hall", 6), ("cage", 6), ("chase", 6), ("flash", 4)]
-VOICE = [(1, 0.5), (2, 2.6), (3, 6.2), (4, 12.3), (5, 18.5), (6, 22.5)]
+VOICE = [(1, 0.4), (2, 2.6), (3, 6.2), (4, 12.3), (5, 18.6), (6, 21.9)]
 CAPTIONS = [
     ("HE HEARS EVERYTHING.", 0.5, 2.3),
-    ("EVERY NIGHT, LOCKED IN A\\nHOTEL WITH HIM.", 2.6, 5.5),
+    ("LOCKED IN A HOTEL.\\nWITH HIM.", 2.6, 5.5),
     ("HE STARTS IN A CAGE.", 6.2, 8.4),
     ("THEN HE IS LOOSE.", 8.6, 11.8),
     ("RUN. HIDE.\\nDON'T MAKE A SOUND.", 12.3, 16.0),
@@ -58,8 +58,8 @@ def end_card(path):
 
     centered("THE", 1340, mid, (190, 186, 196))
     centered("NIGHT MANAGER", 1385, big, (240, 234, 226))
-    centered("COMING SOON TO ROBLOX", 1560, mid, (222, 38, 50))
-    centered("Follow for updates", 1650, small, (200, 196, 210))
+    centered("OUT NOW ON ROBLOX", 1560, mid, (222, 38, 50))
+    centered("Search: THE NIGHT MANAGER", 1650, small, (200, 196, 210))
     card.save(path)
 
 

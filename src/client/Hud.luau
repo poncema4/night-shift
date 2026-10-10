@@ -73,22 +73,35 @@ function Hud.start()
 	local staminaFill = bar("STAMINA", 0.95, Color3.fromRGB(90, 200, 120))
 	local batteryFill = bar("BATTERY", 0.92, Color3.fromRGB(240, 200, 80))
 
+	-- The locker view: you look OUT through the door's slits. The frame itself is fully transparent; the dark slats leave
+	-- real gaps (about 60% of the screen is clear), with a soft shadow at the left and right edges.
 	local hiding = Instance.new("Frame")
 	hiding.Name = "Hiding"
 	hiding.Size = UDim2.fromScale(1, 1)
-	hiding.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	hiding.BackgroundTransparency = 0.05
+	hiding.BackgroundTransparency = 1
 	hiding.BorderSizePixel = 0
 	hiding.Visible = false
-	hiding.Active = true
+	hiding.Active = false
 	hiding.Parent = gui
-	for i = 1, 9 do
+	for i = 0, 9 do
 		local slat = Instance.new("Frame")
-		slat.Position = UDim2.fromScale(0.25, 0.32 + i * 0.045)
-		slat.Size = UDim2.fromScale(0.5, 0.012)
-		slat.BackgroundColor3 = Color3.fromRGB(34, 30, 28)
+		slat.Name = "Slat"
+		slat.Position = UDim2.fromScale(0, 0.04 + i * 0.096)
+		slat.Size = UDim2.fromScale(1, 0.034)
+		slat.BackgroundColor3 = Color3.fromRGB(14, 12, 12)
+		slat.BackgroundTransparency = 0.04
 		slat.BorderSizePixel = 0
 		slat.Parent = hiding
+	end
+	for _, edge in { 0, 0.92 } do
+		local shade = Instance.new("Frame")
+		shade.Name = "Shade"
+		shade.Position = UDim2.fromScale(edge, 0)
+		shade.Size = UDim2.fromScale(0.08, 1)
+		shade.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		shade.BackgroundTransparency = 0.45
+		shade.BorderSizePixel = 0
+		shade.Parent = hiding
 	end
 	local hidingText = Instance.new("TextLabel")
 	hidingText.Name = "HidingText"

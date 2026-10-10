@@ -305,6 +305,8 @@ function Fake.world()
 		PromptGamePassPurchaseFinished = true,
 		Equipped = true,
 		Unequipped = true,
+		DescendantAdded = true,
+		ChildAdded = true,
 		MouseEnter = true,
 		MouseLeave = true,
 		InputBegan = true,

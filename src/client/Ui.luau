@@ -114,4 +114,29 @@ function Ui.button(
 	return b
 end
 
+-- Text that scales to its box has no upper limit in Roblox, so on a big screen a short label becomes enormous. This gives every
+-- scaled label and button (now and any added later) a size cap, so no screen can shout. Headline-style labels get a bigger cap.
+local BIG = { Headline = true, Title = true, GuideTitle = true, Caught = true, Banner = true }
+
+local function cap(item: Instance)
+	if not (item:IsA("TextLabel") or item:IsA("TextButton")) then
+		return
+	end
+	local label = item :: TextLabel
+	if not label.TextScaled or label:FindFirstChildOfClass("UITextSizeConstraint") then
+		return
+	end
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = if BIG[item.Name] then 44 else 26
+	limit.MinTextSize = 8
+	limit.Parent = label
+end
+
+function Ui.tidy(root: Instance)
+	for _, item in root:GetDescendants() do
+		cap(item)
+	end
+	root.DescendantAdded:Connect(cap)
+end
+
 return Ui

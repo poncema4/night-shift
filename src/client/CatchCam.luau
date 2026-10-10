@@ -15,6 +15,7 @@ local CatchCam = {}
 local NEAR = 14 -- studs: how close he must be for the catch to be "his"
 local HEAD = 11.2 -- height of his face above his feet
 local HOLD = 1.7 -- seconds on his face
+local SNAP = 0.12 -- seconds for the zoom into his face: fast enough to be a jumpscare
 
 function CatchCam.start()
 	local me = Players.LocalPlayer
@@ -44,9 +45,8 @@ function CatchCam.start()
 		started = os.clock()
 		until_ = started + HOLD
 		local sound = Instance.new("Sound")
-		sound.SoundId = Config.Sounds.thud
-		sound.Volume = 0.9 * Options.volume()
-		sound.PlaybackSpeed = 0.55
+		sound.SoundId = Config.Sounds.jumpscare
+		sound.Volume = 1 * Options.volume()
 		sound.Parent = SoundService
 		sound:Play()
 		task.delay(3, function()
@@ -79,9 +79,13 @@ function CatchCam.start()
 			local shake = Options.get("calm") == true and 0.05 or 0.35
 			local jitter = Vector3.new(math.noise(now * 40, 1), math.noise(now * 40, 5), 0) * shake * (1 - t)
 			camera.CameraType = Enum.CameraType.Scriptable
-			camera.CFrame = CFrame.lookAt(face + forward * (5.2 - 1.6 * t) + jitter, face)
-			camera.FieldOfView = 70 - 32 * t
-			flash.BackgroundTransparency = math.clamp(0.25 + 0.75 * t, 0, 1)
+			local snap = math.clamp((now - started) / SNAP, 0, 1)
+			camera.CFrame = CFrame.lookAt(face + forward * (8 - 5.5 * snap - 1.3 * t) + jitter, face)
+			-- the zoom lands almost instantly, then creeps closer; the screen strobes white-red for the first moments
+			camera.FieldOfView = 70 - 40 * snap - 6 * t
+			local strobe = (now - started) < 0.3 and math.floor((now - started) * 30) % 2 == 0
+			flash.BackgroundColor3 = if strobe then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(200, 0, 18)
+			flash.BackgroundTransparency = if strobe then 0.1 else math.clamp(0.25 + 0.75 * t, 0, 1)
 		elseif was and camera then
 			camera.CameraType = Enum.CameraType.Custom
 			camera.FieldOfView = 70
