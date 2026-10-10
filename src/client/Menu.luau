@@ -1,14 +1,17 @@
 --!strict
--- The lobby's title screen: the game's name (the sign flickers like a dying hotel sign), the studio's logo, and
--- PLAY / OPTIONS / INFO. PLAY opens the party screen. Only shown on the lobby server.
+-- The lobby's interface. First a full-screen title ("click anywhere to continue"); then the lobby itself with NOTHING open:
+-- just a small dock (PARTIES / SHOP / OPTIONS / INFO) whose windows open only when you ask. Standing in a queue pod shows a
+-- size picker (first player in decides the party size) and, once queued, a LEAVE QUEUE button and a status chip.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local LobbyFx = require(script.Parent.LobbyFx)
 local Options = require(script.Parent.Options)
 local PartyUi = require(script.Parent.PartyUi)
+local Pods = require(ReplicatedStorage.Shared.Game.Pods)
 local StoreUi = require(script.Parent.StoreUi)
 local Ui = require(script.Parent.Ui)
 
@@ -22,152 +25,94 @@ local INFO = {
 	"Four or more: one of you is a saboteur. Call a meeting and vote.",
 }
 
+type View = { id: number, members: { number }, count: number, size: number, timeLeft: number }
+
+local function windowFrame(parent: Instance): Frame
+	local window = Instance.new("Frame")
+	window.Name = "Window"
+	window.AnchorPoint = Vector2.new(0.5, 0.5)
+	window.Position = UDim2.fromScale(0.5, 0.46)
+	window.Size = UDim2.fromScale(0.5, 0.72)
+	window.BackgroundTransparency = 1
+	window.Visible = false
+	window.Parent = parent
+	local limits = Instance.new("UISizeConstraint")
+	limits.MinSize = Vector2.new(420, 380)
+	limits.MaxSize = Vector2.new(780, 640)
+	limits.Parent = window
+	return window
+end
+
 function Menu.start()
 	local me = Players.LocalPlayer
+	local playerGui = me:WaitForChild("PlayerGui")
+	local remotes = ReplicatedStorage:WaitForChild("Remotes")
+	local action = remotes:WaitForChild("PartyAction") :: RemoteEvent
+	local partyState = remotes:WaitForChild("PartyState") :: RemoteEvent
+	local podPrompt = remotes:WaitForChild("PodPrompt") :: RemoteEvent
 	LobbyFx.start()
-	local gui = Ui.screen(me:WaitForChild("PlayerGui"), "NightShiftMenu", 30)
 
-	local backdrop = Instance.new("Frame")
-	backdrop.Size = UDim2.fromScale(1, 1)
-	backdrop.BackgroundColor3 = Ui.INK
-	backdrop.BackgroundTransparency = 0.25
-	backdrop.BorderSizePixel = 0
-	backdrop.Parent = gui
-
-	-- the studio's logo, used as given
-	local logo = Instance.new("ImageLabel")
-	logo.BackgroundTransparency = 1
-	logo.Image = `rbxthumb://type=GroupIcon&id={Config.Brand.GroupId}&w=420&h=420`
-	logo.Position = UDim2.fromScale(0.03, 0.04)
-	logo.Size = UDim2.fromOffset(64, 64)
-	logo.Parent = backdrop
-	Ui.label(
-		backdrop,
-		Config.StudioName:upper(),
-		Enum.Font.GothamMedium,
-		Ui.MUTED,
-		UDim2.new(0.03, 72, 0.04, 14),
-		UDim2.fromOffset(260, 36)
-	)
-
+	-- ===== 1. the title screen =====
+	local titleGui = Ui.screen(playerGui, "NightShiftTitle", 50)
+	local cover = Instance.new("Frame")
+	cover.Size = UDim2.fromScale(1, 1)
+	cover.BackgroundColor3 = Ui.INK
+	cover.BorderSizePixel = 0
+	cover.Parent = titleGui
 	local title = Ui.label(
-		backdrop,
+		cover,
 		Config.GameName,
 		Enum.Font.GothamBlack,
 		Ui.TEXT,
-		UDim2.fromScale(0.05, 0.2),
-		UDim2.fromScale(0.42, 0.14)
+		UDim2.fromScale(0.1, 0.3),
+		UDim2.fromScale(0.8, 0.2)
 	)
-	title.TextXAlignment = Enum.TextXAlignment.Left
-	Ui.label(
-		backdrop,
-		"The hotel never sleeps. He hears everything.",
+	title.TextXAlignment = Enum.TextXAlignment.Center
+	title.Name = "Title"
+	local limit = title:FindFirstChildOfClass("UITextSizeConstraint")
+	if limit then
+		limit.MaxTextSize = 120
+	end
+	local tagline = Ui.label(
+		cover,
+		"He hears everything.",
 		Enum.Font.GothamMedium,
 		Ui.AMBER,
-		UDim2.fromScale(0.05, 0.35),
-		UDim2.fromScale(0.42, 0.04)
-	).TextXAlignment =
-		Enum.TextXAlignment.Left
+		UDim2.fromScale(0.2, 0.5),
+		UDim2.fromScale(0.6, 0.05)
+	)
+	tagline.TextXAlignment = Enum.TextXAlignment.Center
+	local click = Ui.label(
+		cover,
+		"CLICK ANYWHERE TO CONTINUE",
+		Enum.Font.GothamBold,
+		Ui.MUTED,
+		UDim2.fromScale(0.2, 0.82),
+		UDim2.fromScale(0.6, 0.04)
+	)
+	click.TextXAlignment = Enum.TextXAlignment.Center
+	click.Name = "Prompt"
+	local credit = Ui.label(
+		cover,
+		Config.StudioName:upper(),
+		Enum.Font.GothamMedium,
+		Ui.MUTED,
+		UDim2.fromScale(0.3, 0.93),
+		UDim2.fromScale(0.4, 0.03)
+	)
+	credit.TextXAlignment = Enum.TextXAlignment.Center
+	local anywhere = Instance.new("TextButton")
+	anywhere.Name = "Anywhere"
+	anywhere.BackgroundTransparency = 1
+	anywhere.Text = ""
+	anywhere.Size = UDim2.fromScale(1, 1)
+	anywhere.Parent = cover
 
-	local main = Instance.new("Frame")
-	main.BackgroundTransparency = 1
-	main.Position = UDim2.fromScale(0.05, 0.45)
-	main.Size = UDim2.fromScale(0.28, 0.4)
-	main.Parent = backdrop
-
-	local remotes = ReplicatedStorage:WaitForChild("Remotes")
-	local party = PartyUi.build(backdrop, remotes)
-	party.Visible = false
-	local shop = StoreUi.build(backdrop, remotes)
-	shop.Visible = false
-
-	local side = Ui.panel(backdrop, UDim2.fromScale(0.52, 0.18), UDim2.fromScale(0.44, 0.66))
-	side.Visible = false
-	local sideTitle =
-		Ui.label(side, "", Enum.Font.GothamBlack, Ui.AMBER, UDim2.fromScale(0.05, 0.03), UDim2.fromScale(0.9, 0.08))
-	local body = Ui.label(side, "", Enum.Font.Gotham, Ui.TEXT, UDim2.fromScale(0.05, 0.14), UDim2.fromScale(0.9, 0.5))
-	body.TextScaled = false
-	body.TextSize = 20
-	body.TextWrapped = true
-	body.TextXAlignment = Enum.TextXAlignment.Left
-	body.TextYAlignment = Enum.TextYAlignment.Top
-
-	local function show(which: string)
-		party.Visible = which == "play"
-		shop.Visible = which == "shop"
-		side.Visible = which == "options" or which == "info"
-		sideTitle.Text = if which == "options" then "OPTIONS" elseif which == "info" then "HOW IT WORKS" else ""
-		body.Text = if which == "info" then table.concat(INFO, "\n\n") else ""
-	end
-
-	-- options live in the side panel as three rows
-	local volume =
-		Ui.label(side, "", Enum.Font.GothamBold, Ui.TEXT, UDim2.fromScale(0.05, 0.16), UDim2.fromScale(0.5, 0.07))
-	local function refreshOptions()
-		volume.Text = `VOLUME  {math.floor(Options.volume() * 100)}%`
-	end
-	local optionRows: { GuiObject } = { volume }
-	local function addOption(
-		text: string,
-		position: UDim2,
-		size: UDim2,
-		onClick: () -> (),
-		accent: boolean?
-	): TextButton
-		local b = Ui.button(side, text, position, size, onClick, accent)
-		table.insert(optionRows, b)
-		return b
-	end
-	addOption("-", UDim2.fromScale(0.6, 0.16), UDim2.fromScale(0.15, 0.07), function()
-		Options.nudgeVolume(-0.1)
-	end)
-	addOption("+", UDim2.fromScale(0.8, 0.16), UDim2.fromScale(0.15, 0.07), function()
-		Options.nudgeVolume(0.1)
-	end)
-	local subs: TextButton
-	subs = addOption("", UDim2.fromScale(0.05, 0.28), UDim2.fromScale(0.9, 0.08), function()
-		Options.set("subtitles", not Options.get("subtitles"))
-	end)
-	local calm: TextButton
-	calm = addOption("", UDim2.fromScale(0.05, 0.4), UDim2.fromScale(0.9, 0.08), function()
-		Options.set("calm", not Options.get("calm"))
-	end)
-	local function refreshAll()
-		refreshOptions()
-		subs.Text = `SUBTITLES: {if Options.get("subtitles") then "ON" else "OFF"}`
-		calm.Text = `REDUCED FLASHING: {if Options.get("calm") then "ON" else "OFF"}`
-	end
-	Options.onChange(refreshAll)
-	refreshAll()
-	local function setOptionsVisible(on: boolean)
-		for _, row in optionRows do
-			row.Visible = on
-		end
-	end
-	setOptionsVisible(false)
-
-	local function open(which: string)
-		show(which)
-		setOptionsVisible(which == "options")
-	end
-	Ui.button(main, "PLAY", UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.22), function()
-		open("play")
-	end, true)
-	Ui.button(main, "OPTIONS", UDim2.fromScale(0, 0.28), UDim2.fromScale(1, 0.16), function()
-		open("options")
-	end)
-	Ui.button(main, "SHOP", UDim2.fromScale(0, 0.48), UDim2.fromScale(1, 0.16), function()
-		open("shop")
-	end)
-	Ui.button(main, "INFO", UDim2.fromScale(0, 0.68), UDim2.fromScale(1, 0.16), function()
-		open("info")
-	end)
-	open("play")
-
-	-- the sign: THE NIGHT MANAGER flickers now and then
+	-- the sign flickers and the prompt breathes
+	local titleOpen = true
 	task.spawn(function()
-		while gui.Parent do
-			task.wait(2 + math.random() * 5)
+		while titleOpen do
+			task.wait(2 + math.random() * 4)
 			for _ = 1, 3 do
 				title.TextTransparency = 0.7
 				task.wait(0.06)
@@ -176,30 +121,231 @@ function Menu.start()
 			end
 		end
 	end)
+	local pulse = RunService.Heartbeat:Connect(function()
+		click.TextTransparency = 0.25 + 0.4 * (0.5 + 0.5 * math.sin(os.clock() * 3))
+	end)
+	anywhere.Activated:Connect(function()
+		if not titleOpen then
+			return
+		end
+		titleOpen = false
+		pulse:Disconnect()
+		task.spawn(function()
+			for step = 1, 10 do
+				cover.BackgroundTransparency = step / 10
+				for _, child in cover:GetChildren() do
+					if child:IsA("TextLabel") then
+						child.TextTransparency = math.max(child.TextTransparency, step / 10)
+					end
+				end
+				task.wait(0.04)
+			end
+			titleGui.Enabled = false
+		end)
+	end)
 
-	-- the hand-off: when the party launches, show our own loading screen through the teleport
-	local launching = remotes:WaitForChild("PartyLaunching") :: RemoteEvent
-	local transit = Ui.screen(me.PlayerGui, "NightShiftTransit", 100)
-	transit.Enabled = false
-	local cover = Instance.new("Frame")
-	cover.Size = UDim2.fromScale(1, 1)
-	cover.BackgroundColor3 = Ui.INK
-	cover.BorderSizePixel = 0
-	cover.Parent = transit
+	-- ===== 2. the dock and its windows =====
+	local windowGui = Ui.screen(playerGui, "NightShiftMenu", 30)
+	local window = windowFrame(windowGui)
+	local panels: { [string]: Frame } = {}
+	panels.parties = PartyUi.build(window, remotes)
+	panels.shop = StoreUi.build(window, remotes)
+
+	local function simplePanel(name: string, heading: string): Frame
+		local panel = Ui.panel(window, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
+		Ui.label(
+			panel,
+			heading,
+			Enum.Font.GothamBlack,
+			Ui.AMBER,
+			UDim2.fromScale(0.05, 0.03),
+			UDim2.fromScale(0.9, 0.08)
+		)
+		panels[name] = panel
+		return panel
+	end
+
+	local info = simplePanel("info", "HOW IT WORKS")
+	local body = Ui.label(
+		info,
+		table.concat(INFO, "\n\n"),
+		Enum.Font.Gotham,
+		Ui.TEXT,
+		UDim2.fromScale(0.05, 0.14),
+		UDim2.fromScale(0.9, 0.8)
+	)
+	body.TextYAlignment = Enum.TextYAlignment.Top
+
+	local options = simplePanel("options", "OPTIONS")
+	local volume =
+		Ui.label(options, "", Enum.Font.GothamBold, Ui.TEXT, UDim2.fromScale(0.05, 0.16), UDim2.fromScale(0.5, 0.07))
+	Ui.button(options, "-", UDim2.fromScale(0.6, 0.15), UDim2.fromScale(0.15, 0.09), function()
+		Options.nudgeVolume(-0.1)
+	end)
+	Ui.button(options, "+", UDim2.fromScale(0.8, 0.15), UDim2.fromScale(0.15, 0.09), function()
+		Options.nudgeVolume(0.1)
+	end)
+	local subs = Ui.button(options, "", UDim2.fromScale(0.05, 0.28), UDim2.fromScale(0.9, 0.1), function()
+		Options.set("subtitles", not Options.get("subtitles"))
+	end)
+	local calm = Ui.button(options, "", UDim2.fromScale(0.05, 0.42), UDim2.fromScale(0.9, 0.1), function()
+		Options.set("calm", not Options.get("calm"))
+	end)
+	local function refreshOptions()
+		volume.Text = `VOLUME  {math.floor(Options.volume() * 100)}%`
+		subs.Text = `SUBTITLES: {if Options.get("subtitles") then "ON" else "OFF"}`
+		calm.Text = `REDUCED FLASHING: {if Options.get("calm") then "ON" else "OFF"}`
+	end
+	Options.onChange(refreshOptions)
+	refreshOptions()
+
+	local current: string? = nil
+	local function show(which: string?)
+		current = which
+		window.Visible = which ~= nil
+		for name, panel in panels do
+			panel.Visible = name == which
+		end
+	end
+	show(nil)
+	local close = Ui.button(window, "X", UDim2.new(1, -44, 0, 6), UDim2.fromOffset(38, 34), function()
+		show(nil)
+	end)
+	close.ZIndex = 10
+	close.Name = "Close"
+
+	local dock = Instance.new("Frame")
+	dock.Name = "Dock"
+	dock.AnchorPoint = Vector2.new(0, 1)
+	dock.Position = UDim2.new(0, 16, 1, -16)
+	dock.Size = UDim2.fromOffset(560, 46)
+	dock.BackgroundTransparency = 1
+	dock.Parent = windowGui
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.Padding = UDim.new(0, 8)
+	layout.Parent = dock
+	for _, entry in { { "PARTIES", "parties" }, { "SHOP", "shop" }, { "OPTIONS", "options" }, { "INFO", "info" } } do
+		local button = Ui.button(dock, entry[1], UDim2.new(), UDim2.fromOffset(132, 46), function()
+			show(if current == entry[2] then nil else entry[2])
+		end)
+		button.Name = entry[1]
+	end
+
+	-- ===== 3. the size picker (first player into an empty pod chooses the party size) =====
+	local pickGui = Ui.screen(playerGui, "NightShiftSizePicker", 40)
+	local picker = Ui.panel(pickGui, UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(440, 330))
+	picker.AnchorPoint = Vector2.new(0.5, 0.5)
+	picker.Visible = false
 	Ui.label(
-		cover,
+		picker,
+		"HOW MANY PLAYERS?",
+		Enum.Font.GothamBlack,
+		Ui.AMBER,
+		UDim2.fromOffset(20, 14),
+		UDim2.new(1, -40, 0, 40)
+	)
+	Ui.label(
+		picker,
+		"You choose the party size. Friends can join until it is full. Pick 1 to play alone.",
+		Enum.Font.Gotham,
+		Ui.MUTED,
+		UDim2.fromOffset(20, 58),
+		UDim2.new(1, -40, 0, 44)
+	)
+	local grid = Instance.new("Frame")
+	grid.BackgroundTransparency = 1
+	grid.Position = UDim2.fromOffset(20, 112)
+	grid.Size = UDim2.new(1, -40, 0, 136)
+	grid.Parent = picker
+	local cells = Instance.new("UIGridLayout")
+	cells.CellSize = UDim2.fromOffset(90, 60)
+	cells.CellPadding = UDim2.fromOffset(10, 14)
+	cells.SortOrder = Enum.SortOrder.LayoutOrder
+	cells.Parent = grid
+	local pending = 0
+	for n = 1, Config.Lobby.MaxParty do
+		local b = Ui.button(grid, tostring(n), UDim2.new(), UDim2.fromOffset(90, 60), function()
+			action:FireServer("podsize", pending, n)
+		end, n == Config.Lobby.DefaultParty)
+		b.LayoutOrder = n
+		b.Name = `Size{n}`
+	end
+	local backOut = Ui.button(picker, "CANCEL", UDim2.new(0.5, -90, 1, -58), UDim2.fromOffset(180, 44), function()
+		action:FireServer("leave")
+	end)
+	backOut.Name = "Cancel"
+	podPrompt.OnClientEvent:Connect(function(podId: number)
+		pending = podId
+		picker.Visible = podId > 0
+	end)
+
+	-- ===== 4. queued: status chip + LEAVE QUEUE =====
+	local queueGui = Ui.screen(playerGui, "NightShiftQueue", 35)
+	local chip = Ui.panel(queueGui, UDim2.new(0.5, -230, 0, 16), UDim2.fromOffset(460, 56))
+	chip.Visible = false
+	local chipText =
+		Ui.label(chip, "", Enum.Font.GothamBold, Ui.TEXT, UDim2.fromOffset(16, 8), UDim2.new(1, -32, 1, -16))
+	chipText.Name = "Status"
+	chipText.TextXAlignment = Enum.TextXAlignment.Center
+	local leaveButton = Ui.button(
+		queueGui,
+		"LEAVE QUEUE",
+		UDim2.new(0.5, -120, 1, -78),
+		UDim2.fromOffset(240, 52),
+		function()
+			action:FireServer("leave")
+		end
+	)
+	leaveButton.Visible = false
+	leaveButton.Name = "LeaveQueue"
+	partyState.OnClientEvent:Connect(function(parties: { View })
+		local mine: View? = nil
+		for _, party in parties do
+			if table.find(party.members, me.UserId) then
+				mine = party
+			end
+		end
+		chip.Visible = mine ~= nil
+		leaveButton.Visible = mine ~= nil
+		if mine then
+			chipText.Text = `YOUR PARTY  {Pods.status(mine.count, mine.size)}  -  starts in {math.ceil(mine.timeLeft)}s`
+		end
+	end)
+
+	-- ===== 5. the hand-off: our own loading screen through the teleport =====
+	local launching = remotes:WaitForChild("PartyLaunching") :: RemoteEvent
+	local transit = Ui.screen(playerGui, "NightShiftTransit", 100)
+	transit.Enabled = false
+	local transitCover = Instance.new("Frame")
+	transitCover.Size = UDim2.fromScale(1, 1)
+	transitCover.BackgroundColor3 = Ui.INK
+	transitCover.BorderSizePixel = 0
+	transitCover.Parent = transit
+	local entering = Ui.label(
+		transitCover,
 		"ENTERING THE HOTEL",
 		Enum.Font.GothamBlack,
 		Ui.TEXT,
 		UDim2.fromScale(0.2, 0.4),
 		UDim2.fromScale(0.6, 0.1)
 	)
-	local tip =
-		Ui.label(cover, "", Enum.Font.GothamMedium, Ui.AMBER, UDim2.fromScale(0.15, 0.55), UDim2.fromScale(0.7, 0.05))
+	entering.TextXAlignment = Enum.TextXAlignment.Center
+	local tip = Ui.label(
+		transitCover,
+		"",
+		Enum.Font.GothamMedium,
+		Ui.AMBER,
+		UDim2.fromScale(0.15, 0.55),
+		UDim2.fromScale(0.7, 0.06)
+	)
+	tip.TextXAlignment = Enum.TextXAlignment.Center
 	launching.OnClientEvent:Connect(function(count: number)
 		tip.Text = `Party of {count}. ` .. Config.Tips[math.random(#Config.Tips)]
 		transit.Enabled = true
-		TeleportService:SetTeleportGui(cover)
+		picker.Visible = false
+		show(nil)
+		TeleportService:SetTeleportGui(transitCover)
 	end)
 end
 

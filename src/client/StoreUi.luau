@@ -23,7 +23,7 @@ function StoreUi.build(parent: Instance, remotes: Instance): Frame
 	local buy = remotes:WaitForChild("Buy") :: RemoteEvent
 	local noticeEvent = remotes:WaitForChild("ShopNotice") :: RemoteEvent
 
-	local panel = Ui.panel(parent, UDim2.fromScale(0.52, 0.18), UDim2.fromScale(0.44, 0.66))
+	local panel = Ui.panel(parent, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
 	Ui.label(panel, "SHOP", Enum.Font.GothamBlack, Ui.AMBER, UDim2.fromScale(0.05, 0.03), UDim2.fromScale(0.9, 0.08))
 	Ui.label(
 		panel,

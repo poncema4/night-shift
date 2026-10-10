@@ -94,6 +94,48 @@ return function(t)
 	local remotes = storage:FindFirstChild("Remotes")
 	t.equal("the local player is on the crew", role, "Crew")
 
+	-- nothing on the main screen sits on top of anything else (the overlapping-text bug)
+	do
+		local function rect(inst: any): { number }
+			local p, z, a = inst.Position, inst.Size, inst.AnchorPoint
+			local ax = if a then a.X else 0
+			local ay = if a then a.Y else 0
+			local x = p.X.Scale - ax * z.X.Scale
+			local y = p.Y.Scale - ay * z.Y.Scale
+			return { x, y, x + z.X.Scale, y + z.Y.Scale }
+		end
+		local hudGui = gui(me, "NightShiftHud")
+		local jailGui = gui(me, "NightShiftJail")
+		local named = {
+			Status = find(hudGui, "Status"),
+			Tasks = find(hudGui, "Tasks"),
+			Role = find(hudGui, "Role"),
+			Floor = find(hudGui, "Floor"),
+			Tip = find(hudGui, "Tip"),
+			HidingText = find(hudGui, "HidingText"),
+			Leave = find(hudGui, "Leave"),
+			CageBanner = find(jailGui, "Banner"),
+			CageSub = find(jailGui, "Sub"),
+		}
+		local names, hits = {}, {}
+		for name, inst in named do
+			if inst then
+				table.insert(names, name)
+			end
+		end
+		table.sort(names)
+		for i = 1, #names do
+			for k = i + 1, #names do
+				local a, b = rect(named[names[i]]), rect(named[names[k]])
+				if a[1] < b[3] and b[1] < a[3] and a[2] < b[4] and b[2] < a[4] then
+					table.insert(hits, `{names[i]} x {names[k]}`)
+				end
+			end
+		end
+		t.check("the HUD and the cage banner never overlap", #hits == 0, table.concat(hits, ", "))
+		t.check("the elements being compared exist", #names >= 6, table.concat(names, ","))
+	end
+
 	-- he starts locked up: the crew sees a countdown, then "HE IS LOOSE"
 	local jail = gui(me, "NightShiftJail")
 	local function jailText(): string

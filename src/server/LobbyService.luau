@@ -10,7 +10,7 @@ local Party = require(ReplicatedStorage.Shared.Game.Party)
 local Pods = require(ReplicatedStorage.Shared.Game.Pods)
 local Teleport = require(script.Parent.Teleport)
 
-type PodView = { status: TextLabel, ring: Part }
+type PodView = { status: TextLabel, ring: Part, gate: Part }
 
 local LobbyService = {}
 
@@ -36,60 +36,130 @@ function LobbyService.start(remotes: Folder, podViews: { [number]: PodView }?)
 
 	local lastAction: { [Player]: number } = {}
 
-	-- Queue pods: stepping onto a pad puts you in that pad's party (the first one makes it), stepping off takes you out.
+	-- Queue pods: square cells. The first player to step into an EMPTY cell is asked how big the party is (1 to 8) and
+	-- the cell follows that answer; later players step in until it is full. Once queued you cannot walk out: you are put
+	-- back until you press LEAVE QUEUE, so a party is never half-wandered-off.
 	local pods = Pods.layout(0, Config.Lobby.PodZ, Config.Lobby.PodSpacing)
-	local podParty: { [number]: number } = {} -- pod id -> the party that pad is currently queueing
-	local memberPod: { [number]: number } = {} -- userId -> the pod that put them in their party
+	local podParty: { [number]: number } = {} -- pod id -> the party that cell is currently queueing
+	local memberPod: { [number]: number } = {} -- userId -> the pod they are queued in
+	local choosing: { [number]: number } = {} -- userId -> the pod they are choosing a size for
+	local prompt = makeRemote(remotes, "PodPrompt") -- server -> one player: pod id to choose a size for (0 closes it)
+
+	local function rootOf(player: Player): BasePart?
+		return player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	end
+	local function placeAt(player: Player, x: number, z: number)
+		local root = rootOf(player)
+		if root then
+			root.CFrame = CFrame.new(x, root.Position.Y, z)
+		end
+	end
+	local function putBack(player: Player, pod: Pods.Pod) -- into the middle of the cell
+		placeAt(player, pod.x, pod.z)
+	end
+	local function putOut(player: Player, pod: Pods.Pod) -- just outside the doorway
+		placeAt(player, pod.x, pod.z - pod.half - 4)
+	end
+	local function podById(id: number): Pods.Pod
+		return pods[id]
+	end
+
+	local function partyInPod(podId: number): Party.Party?
+		local id = podParty[podId]
+		local party = if id then lobby.parties[id] else nil
+		if not party then
+			podParty[podId] = nil
+		end
+		return party
+	end
 
 	local function syncPods()
 		for _, player in Players:GetPlayers() do
 			local userId = player.UserId
-			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			local pod = if root then Pods.at(pods, root.Position.X, root.Position.Z) else nil
-			local was: number? = memberPod[userId]
-			if was and lobby:partyOf(userId) == nil then
+			local root = rootOf(player)
+			if not root then
+				continue
+			end
+			local x, z = root.Position.X, root.Position.Z
+			local mine: number? = memberPod[userId]
+			if mine and lobby:partyOf(userId) == nil then
 				memberPod[userId] = nil -- their party launched or was disbanded
-				was = nil
+				mine = nil
 			end
-			if was and (not pod or pod.id ~= was) then
-				lobby:leave(userId)
-				memberPod[userId] = nil
-			end
-			if pod and not memberPod[userId] and lobby:partyOf(userId) == nil then
-				local existing = podParty[pod.id]
-				local joined = false
-				if existing and lobby.parties[existing] then
-					joined = lobby:join(userId, existing)
+			if mine then
+				local pod = podById(mine)
+				if not Pods.inside(pod, x, z, 1) then
+					putBack(player, pod)
+					notice:FireClient(player, "You are queued. Press LEAVE QUEUE to go back out.")
 				end
-				if not joined then
-					local created = lobby:create(userId, pod.size)
-					if created then
-						podParty[pod.id] = created.id
-						joined = true
+				continue
+			end
+			local inPod = Pods.at(pods, x, z)
+			local picking: number? = choosing[userId]
+			if picking and (not inPod or inPod.id ~= picking) then
+				choosing[userId] = nil -- walked out before choosing
+				prompt:FireClient(player, 0)
+				picking = nil
+			end
+			if inPod and not picking and lobby:partyOf(userId) == nil then
+				local party = partyInPod(inPod.id)
+				if party then
+					if lobby:join(userId, party.id) then
+						memberPod[userId] = inPod.id
+					else
+						putOut(player, inPod)
+						notice:FireClient(player, "That pod is full.")
 					end
-				end
-				if joined then
-					memberPod[userId] = pod.id
+				else
+					choosing[userId] = inPod.id
+					prompt:FireClient(player, inPod.id)
 				end
 			end
 		end
-		if podViews then
-			for _, pod in pods do
-				local view = podViews[pod.id]
-				local party = lobby.parties[podParty[pod.id] or -1]
-				if view then
-					if party then
-						local line = Pods.status(#party.members, party.size)
-						view.status.Text = `{line}  {math.ceil(party.timeLeft)}s`
-						view.ring.Color = if party.timeLeft <= Config.Lobby.FullSeconds
-							then Color3.fromRGB(210, 40, 50)
-							else Color3.fromRGB(110, 220, 130)
-					else
-						view.status.Text = Pods.status(0, pod.size)
-						view.ring.Color = Color3.fromRGB(255, 190, 90)
-					end
+		for _, pod in pods do
+			local party = partyInPod(pod.id)
+			local anyChoosing = false
+			for _, podId in choosing do
+				if podId == pod.id then
+					anyChoosing = true
 				end
 			end
+			local view = if podViews then podViews[pod.id] else nil
+			if view then
+				if party then
+					local full = #party.members >= party.size
+					view.status.Text = `{Pods.status(#party.members, party.size)}  {math.ceil(party.timeLeft)}s`
+					view.ring.Color = if party.timeLeft <= Config.Lobby.FullSeconds
+						then Color3.fromRGB(210, 40, 50)
+						else Color3.fromRGB(110, 220, 130)
+					view.gate.CanCollide = full
+					view.gate.Transparency = if full then 0.5 else 1
+				else
+					view.status.Text = if anyChoosing then "CHOOSING PARTY SIZE..." else "STEP IN TO START A PARTY"
+					view.ring.Color = Color3.fromRGB(255, 190, 90)
+					view.gate.CanCollide = false
+					view.gate.Transparency = 1
+				end
+			end
+		end
+	end
+
+	-- Leaving a queue (or backing out of the size question) puts you outside the doorway.
+	local function leaveQueue(player: Player)
+		local userId = player.UserId
+		local podId = memberPod[userId] or choosing[userId]
+		if memberPod[userId] then
+			lobby:leave(userId)
+			memberPod[userId] = nil
+		end
+		if choosing[userId] then
+			choosing[userId] = nil
+			prompt:FireClient(player, 0)
+		end
+		if podId then
+			putOut(player, podById(podId))
+		else
+			lobby:leave(userId)
 		end
 	end
 
@@ -97,7 +167,7 @@ function LobbyService.start(remotes: Folder, podViews: { [number]: PodView }?)
 		state:FireAllClients(lobby:view())
 	end
 
-	action.OnServerEvent:Connect(function(player: Player, kind: any, value: any)
+	action.OnServerEvent:Connect(function(player: Player, kind: any, value: any, extra: any)
 		local now = os.clock()
 		if now - (lastAction[player] or 0) < Config.Lobby.ActionCooldown then
 			return
@@ -119,8 +189,19 @@ function LobbyService.start(remotes: Folder, podViews: { [number]: PodView }?)
 			if not ok and why then
 				notice:FireClient(player, why)
 			end
+		elseif kind == "podsize" and type(value) == "number" and type(extra) == "number" then
+			-- the answer to the size question: only the player who was asked, only for an empty cell
+			if choosing[userId] == value and not partyInPod(value) and extra == math.floor(extra) then
+				local party = lobby:create(userId, extra)
+				if party then
+					podParty[value] = party.id
+					memberPod[userId] = value
+					choosing[userId] = nil
+					prompt:FireClient(player, 0)
+				end
+			end
 		elseif kind == "leave" then
-			lobby:leave(userId)
+			leaveQueue(player)
 		else
 			return
 		end
@@ -129,6 +210,8 @@ function LobbyService.start(remotes: Folder, podViews: { [number]: PodView }?)
 
 	Players.PlayerRemoving:Connect(function(player)
 		lobby:leave(player.UserId)
+		memberPod[player.UserId] = nil
+		choosing[player.UserId] = nil
 		lastAction[player] = nil
 		broadcast()
 	end)

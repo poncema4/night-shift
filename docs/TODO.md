@@ -2,6 +2,8 @@
 
 Legend: [x] done and merged, [~] built, needs your eyes in Studio, [ ] to do, [YOU] only you can do it.
 
+## 0. Rule: the studio (group) logo appears ONLY on the group icon. Never on game thumbnails, banners, the icon or in-game screens.
+
 ## 1. Make sure it works (this week)
 - [YOU] Run `docs/PLAYTEST.md` in Studio and send screenshots (spiral stairs, lockers, holding cell countdown, flashlight in hotbar, darkness, lobby menu).
 - [YOU] Publish the place, then test a party teleport with two accounts (Studio cannot teleport). See `docs/LOBBY.md`.

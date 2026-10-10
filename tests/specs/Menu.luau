@@ -43,17 +43,32 @@ return function(t)
 	end
 	step(0.5)
 
+	-- first the title screen: the game's name and "click anywhere", with nothing else open
+	local titleGui = me.PlayerGui:FindFirstChild("NightShiftTitle")
+	t.check("the title screen is up first", titleGui ~= nil and titleGui.Enabled)
+	if not titleGui then
+		return
+	end
+	t.check("it shows the game's name", buttonText(titleGui, Config.GameName) ~= nil)
+	t.check("and tells you to click anywhere", buttonText(titleGui, "CLICK ANYWHERE TO CONTINUE") ~= nil)
 	local menu = me.PlayerGui:FindFirstChild("NightShiftMenu")
-	t.check("the title menu is on screen", menu ~= nil)
+	t.check("the lobby interface exists", menu ~= nil)
 	if not menu then
 		return
 	end
-	t.check("it shows the game's name", buttonText(menu, Config.GameName) ~= nil)
+	local window = menu:FindFirstChild("Window")
+	t.check("no menu is open on the title screen", window ~= nil and not window.Visible)
+	titleGui:FindFirstChild("Anywhere", true).Activated:Fire()
+	step(1)
+	t.check("clicking anywhere dismisses the title", not titleGui.Enabled)
+	t.check("the lobby shows with no window open", not window.Visible)
 	t.check(
-		"PLAY, OPTIONS and INFO are there",
-		buttonText(menu, "PLAY") and buttonText(menu, "OPTIONS") and buttonText(menu, "INFO")
+		"just a small dock: PARTIES, SHOP, OPTIONS and INFO",
+		buttonText(menu, "PARTIES")
+			and buttonText(menu, "SHOP")
+			and buttonText(menu, "OPTIONS")
+			and buttonText(menu, "INFO")
 	)
-	t.check("SHOP is there too", buttonText(menu, "SHOP") ~= nil)
 	t.check("the match HUD is not started in the lobby", me.PlayerGui:FindFirstChild("NightShiftHud") == nil)
 
 	-- the lobby lamps flicker: they dip to nearly dark at times and are back to full between bursts
@@ -74,11 +89,14 @@ return function(t)
 	t.check("and shines at full between bursts", highest > 0.65, `{highest}`)
 
 	-- play: quick play puts you in a party and the status follows the clock
-	buttonText(menu, "PLAY").Activated:Fire()
+	buttonText(menu, "PARTIES").Activated:Fire()
 	step(0.5)
 	buttonText(menu, "QUICK PLAY").Activated:Fire()
 	step(1)
 	t.check("quick play joined a party", labelContaining(menu, "need 3 more. Starting in") ~= nil)
+	local queue = me.PlayerGui:FindFirstChild("NightShiftQueue")
+	t.check("a LEAVE QUEUE button appears while queued", queue ~= nil and buttonText(queue, "LEAVE QUEUE").Visible)
+	t.check("with a status chip", labelContaining(queue, "YOUR PARTY") ~= nil)
 	step(10)
 	local before = labelContaining(menu, "Starting in")
 	t.check("the countdown is running", before ~= nil and not string.find(before.Text, "in 30s", 1, true))
@@ -87,6 +105,7 @@ return function(t)
 	buttonText(menu, "LEAVE PARTY").Activated:Fire()
 	step(1)
 	t.check("leaving clears the party status", labelContaining(menu, "Not in a party") ~= nil)
+	t.check("and the queue button goes away", not buttonText(queue, "LEAVE QUEUE").Visible)
 
 	-- the shop: cosmetics only, ids not set yet so it says coming soon
 	buttonText(menu, "SHOP").Activated:Fire()
@@ -107,7 +126,7 @@ return function(t)
 	t.check("volume starts at 100%", labelContaining(menu, "VOLUME  100%") ~= nil)
 	local minus = nil
 	for _, d in menu:GetDescendants() do
-		if d:IsA("TextButton") and d.Text == "-" and d.Parent and d.Parent.Visible then
+		if d:IsA("TextButton") and d.Text == "-" and d.Parent and labelContaining(d.Parent, "VOLUME") then
 			minus = d
 		end
 	end
@@ -122,7 +141,7 @@ return function(t)
 	t.check("subtitles can be turned off", buttonText(menu, "SUBTITLES: OFF") ~= nil)
 
 	-- a launch: a party of one is full at once, so it goes after 5 s with the loading screen up
-	buttonText(menu, "PLAY").Activated:Fire()
+	buttonText(menu, "PARTIES").Activated:Fire()
 	step(0.5)
 	local transit = me.PlayerGui:FindFirstChild("NightShiftTransit")
 	t.check("the transit screen starts hidden", transit ~= nil and not transit.Enabled)
