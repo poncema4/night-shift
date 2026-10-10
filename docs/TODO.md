@@ -17,7 +17,7 @@ Legend: [x] done and merged, [~] built, needs your eyes in Studio, [ ] to do, [Y
 - [~] Lobby pods, flickering lobby, return-to-lobby, animated cage (bars rise, lamp pulses). See `docs/LOBBY.md`.
 - [ ] Real sound (full plan in `docs/AUDIO.md`): replace the placeholder ids in `Config.Sounds` (heartbeat, his footsteps, the cage alarm, locker creak, lights buzz). Sound sells horror more than anything.
 - [~] Store art generated from real renders with the group logo unchanged: `brand/store_icon_512.png`, `brand/store_thumb_corridor.png`, `brand/store_thumb_face.png` (re-run `python3 brand/make_store_art.py`). UPLOADED 2026-10-09 to the experience (icon + 2 home-page thumbnails, active, pending Roblox moderation). Still wanted: a spiral-well and a sewer render, and a gameplay video.
-- [ ] A 30 s trailer clip captured from a real match (this is also your first TikTok).
+- [x] First TikTok posted 2026-10-10 (26 s Blender teaser with voice-over; see `docs/VIDEO.md` for the pipeline and the pre-flight checklist). Next: a clip captured from a real match once playtests exist.
 
 ## 3. Store page (Creator Hub, before publishing)
 - DONE in Creator Hub (2026-10-09): name `THE NIGHT MANAGER 🛎️ [HORROR]` and the description. Not changed by Claude: visibility (check it before you share the link), genre, max players (8).
