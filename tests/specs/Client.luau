@@ -382,4 +382,26 @@ return function(t)
 	play(world, 10)
 	t.check("the dawn screen closes in the lobby", not results.Enabled)
 	t.equal("no client or server warnings", #world.warnings, 0)
+	-- he catches you: the camera snaps to his face, then hands back (own world, so the night's timeline above is untouched)
+	do
+		local cw, cme, _, cstorage = boot(seed, true)
+		local catchCamera = cw.workspace.CurrentCamera
+		local cthreat = cw.load("src/server/ThreatService")
+		local nm = cthreat.current()
+		cthreat.release(false)
+		cstorage:FindFirstChild("Remotes"):FindFirstChild("Intent"):FireServer({ light = false }) -- a lit flashlight would blind him
+		play(cw, 0.5)
+		local mine = cw.root(cme).Position
+		nm.x, nm.z, nm.y = mine.X + 3, mine.Z, 0
+		nm.from, nm.to, nm.level = "C10", "C10", 0 -- on this floor
+		play(cw, 0.5)
+		t.check("he caught you", cw.humanoid(cme).Health <= 0)
+		t.equal("the camera is on his face", catchCamera.CameraType, cw.enum.CameraType.Scriptable)
+		local catchGui = gui(cme, "NightShiftCatch")
+		t.check("with a red flash over the screen", find(catchGui, "Frame").BackgroundTransparency < 0.9)
+		cthreat.pause()
+		play(cw, 2.2)
+		t.equal("then the normal camera comes back for spectating", catchCamera.CameraType, cw.enum.CameraType.Custom)
+		t.check("and the flash is gone", find(catchGui, "Frame").BackgroundTransparency >= 1)
+	end
 end
