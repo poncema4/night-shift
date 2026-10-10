@@ -14,11 +14,17 @@ One published place runs in two jobs (`Shared/Game/ServerMode`):
 - Players see their own loading screen ("ENTERING THE HOTEL" + a tip) through the teleport (`SetTeleportGui`),
   after the studio-logo loading screen on first join (`src/first/Loading.client.luau`).
 
-## Pods (walk onto a pad)
-The back of the lobby has six queue pads (SOLO, DUO, TRIO, SQUAD 4, SIX, FULL HOUSE). Step on one and you join that pad's
-party (the first person starts it), step off and you leave. Each pad's sign shows how many more are needed and the clock;
-the ring goes green when someone is queued and red for the last 5 s. Rules are the same 30 s / 5 s queue. Layout in
-`Shared/Game/Pods`, behaviour in `LobbyService`, tests in `tests/specs/LobbyPods.luau`.
+## Pods (square queue cells)
+The back of the lobby has six square glass cells ("POD 1" to "POD 6"), spread out with a walkway between each. They are all the
+same: the FIRST player to step into an empty cell is asked "How many players?" (1 to 8) and the cell follows that answer
+(1 = solo). Anyone else can step in until it is full; a full cell shuts its gate. Once queued you cannot walk out: you are put back
+until you press LEAVE QUEUE (or CANCEL on the size question). The sign over each cell shows the party and the clock; the ring goes
+green when someone is queued and red for the last 5 s. Layout in `Shared/Game/Pods`, behaviour in `LobbyService`, tests in
+`tests/specs/LobbyPods.luau`.
+
+## First screen
+You see the game title first ("CLICK ANYWHERE TO CONTINUE"), then the lobby with nothing open. A small dock (PARTIES / SHOP /
+OPTIONS / INFO) opens windows only when clicked. The studio logo appears only on the group icon, never in the game or on its art.
 
 ## Quick Play
 Quick Play fills from THIS lobby server only: it joins the fullest open party, or starts one of 4. The screens say how many

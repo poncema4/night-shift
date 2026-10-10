@@ -1,5 +1,5 @@
 --!strict
--- Runs from ReplicatedFirst, before the world arrives: a dark loading screen with the studio logo, a progress bar and a
+-- Runs from ReplicatedFirst, before the world arrives: a dark loading screen with the studio name, a progress bar and a
 -- tip, removed once the game has loaded. Deliberately self-contained (the shared modules may not have replicated yet).
 local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
@@ -9,7 +9,6 @@ local TweenService = game:GetService("TweenService")
 
 ReplicatedFirst:RemoveDefaultLoadingScreen()
 
-local GROUP_ID = 749648777
 local me = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Name = "NightShiftLoading"
@@ -24,14 +23,6 @@ cover.BackgroundColor3 = Color3.fromRGB(8, 7, 12)
 cover.BorderSizePixel = 0
 cover.Parent = gui
 
-local logo = Instance.new("ImageLabel")
-logo.BackgroundTransparency = 1
-logo.Image = `rbxthumb://type=GroupIcon&id={GROUP_ID}&w=420&h=420`
-logo.AnchorPoint = Vector2.new(0.5, 0.5)
-logo.Position = UDim2.fromScale(0.5, 0.38)
-logo.Size = UDim2.fromOffset(120, 120)
-logo.Parent = cover
-
 local function text(value: string, y: number, font: Enum.Font, color: Color3, height: number): TextLabel
 	local l = Instance.new("TextLabel")
 	l.BackgroundTransparency = 1
@@ -45,8 +36,8 @@ local function text(value: string, y: number, font: Enum.Font, color: Color3, he
 	l.Parent = cover
 	return l
 end
-text("NEXUS HOLLOW STUDIOS", 0.54, Enum.Font.GothamMedium, Color3.fromRGB(150, 144, 164), 0.03)
-text("THE NIGHT MANAGER", 0.62, Enum.Font.GothamBlack, Color3.fromRGB(236, 232, 242), 0.07)
+text("NEXUS HOLLOW STUDIOS", 0.46, Enum.Font.GothamMedium, Color3.fromRGB(150, 144, 164), 0.03)
+text("THE NIGHT MANAGER", 0.54, Enum.Font.GothamBlack, Color3.fromRGB(236, 232, 242), 0.07)
 local tip = text("", 0.84, Enum.Font.GothamMedium, Color3.fromRGB(255, 190, 90), 0.035)
 
 local track = Instance.new("Frame")

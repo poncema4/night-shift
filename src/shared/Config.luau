@@ -3,8 +3,8 @@
 
 return table.freeze({
 	GameName = "THE NIGHT MANAGER",
-	-- The Roblox experience title: hook first, one emoji, genre tag (searchable, no money words).
-	StoreTitle = "THE NIGHT MANAGER 🛎️ [HORROR]",
+	-- The Roblox experience title, in the pattern the top games use: NAME + one emoji (DOORS, 99 Nights in the Forest). The genre lives in the Genre field.
+	StoreTitle = "THE NIGHT MANAGER 🔔",
 	StudioName = "Nexus Hollow Studios",
 	Version = "0.4.0",
 
@@ -24,8 +24,8 @@ return table.freeze({
 		QueueSeconds = 30,
 		FullSeconds = 5,
 		ActionCooldown = 0.25, -- seconds between party actions from one player
-		PodZ = 14, -- the row of queue pads along the back of the lobby
-		PodSpacing = 10,
+		PodZ = 16, -- the row of queue pads along the back of the lobby
+		PodSpacing = 18, -- cells are 10 wide: an 8 stud walkway between them
 	}),
 	-- Studio is not a real server: pick which job it plays ("Match" = the round, "Lobby" = the party screen).
 	Server = table.freeze({ StudioMode = "Match" }),

@@ -28,7 +28,7 @@ function PartyUi.build(parent: Instance, remotes: Instance): Frame
 	local stateEvent = remotes:WaitForChild("PartyState") :: RemoteEvent
 	local noticeEvent = remotes:WaitForChild("PartyNotice") :: RemoteEvent
 
-	local panel = Ui.panel(parent, UDim2.fromScale(0.52, 0.18), UDim2.fromScale(0.44, 0.66))
+	local panel = Ui.panel(parent, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
 	Ui.label(
 		panel,
 		"FIND YOUR CREW",

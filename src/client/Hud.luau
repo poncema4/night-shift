@@ -35,7 +35,7 @@ function Hud.start()
 
 	local status = label(gui, "Status", UDim2.fromScale(0.5, 0.02), UDim2.fromScale(0.4, 0.07))
 	local tasks = label(gui, "Tasks", UDim2.fromScale(0.5, 0.1), UDim2.fromScale(0.25, 0.05))
-	local tip = label(gui, "Tip", UDim2.fromScale(0.5, 0.82), UDim2.fromScale(0.6, 0.06))
+	local tip = label(gui, "Tip", UDim2.fromScale(0.5, 0.74), UDim2.fromScale(0.6, 0.06)) -- above the LEAVE button (0.82)
 	tip.Visible = false
 	local tipFor = -1
 	local floorLabel = label(gui, "Floor", UDim2.fromScale(0.12, 0.02), UDim2.fromScale(0.17, 0.05))
@@ -91,9 +91,10 @@ function Hud.start()
 		slat.Parent = hiding
 	end
 	local hidingText = Instance.new("TextLabel")
+	hidingText.Name = "HidingText"
 	hidingText.BackgroundTransparency = 1
 	hidingText.AnchorPoint = Vector2.new(0.5, 0)
-	hidingText.Position = UDim2.fromScale(0.5, 0.12)
+	hidingText.Position = UDim2.fromScale(0.5, 0.64) -- below the slats, clear of the Status/Tasks/Role stack
 	hidingText.Size = UDim2.fromScale(0.5, 0.08)
 	hidingText.Text = "HIDING... stay quiet"
 	hidingText.TextColor3 = Color3.fromRGB(190, 190, 200)
@@ -101,6 +102,7 @@ function Hud.start()
 	hidingText.TextScaled = true
 	hidingText.Parent = hiding
 	local leaveButton = Instance.new("TextButton")
+	leaveButton.Name = "Leave"
 	leaveButton.AnchorPoint = Vector2.new(0.5, 0)
 	leaveButton.Position = UDim2.fromScale(0.5, 0.82)
 	leaveButton.Size = UDim2.fromScale(0.22, 0.07)

@@ -37,9 +37,17 @@ function Ui.label(
 	l.Size = size
 	l.Font = font
 	l.TextScaled = true
+	l.TextWrapped = true
+	l.TextTransparency = 0
+	l.TextXAlignment = Enum.TextXAlignment.Left
 	l.TextColor3 = color
 	l.Text = text
 	l.Parent = parent
+	-- text that scales to its box but never gets huge (or tiny), so neighbouring labels cannot run into each other
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = 30
+	limit.MinTextSize = 8
+	limit.Parent = l
 	return l
 end
 
@@ -87,9 +95,15 @@ function Ui.button(
 	corner.CornerRadius = UDim.new(0, 10)
 	corner.Parent = b
 	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = UDim.new(0.2, 0)
-	pad.PaddingBottom = UDim.new(0.2, 0)
+	pad.PaddingTop = UDim.new(0.18, 0)
+	pad.PaddingBottom = UDim.new(0.18, 0)
+	pad.PaddingLeft = UDim.new(0.04, 0)
+	pad.PaddingRight = UDim.new(0.04, 0)
 	pad.Parent = b
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = 26
+	limit.MinTextSize = 8
+	limit.Parent = b
 	b.MouseEnter:Connect(function()
 		TweenService:Create(b, TweenInfo.new(0.12), { BackgroundColor3 = hover }):Play()
 	end)

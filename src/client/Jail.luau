@@ -81,10 +81,12 @@ function Jail.start()
 	animateCage(state)
 	local gui = Ui.screen(me:WaitForChild("PlayerGui"), "NightShiftJail", 6)
 	local banner =
-		Ui.label(gui, "", Enum.Font.GothamBlack, Ui.AMBER, UDim2.fromScale(0.25, 0.12), UDim2.fromScale(0.5, 0.05))
+		Ui.label(gui, "", Enum.Font.GothamBlack, Ui.AMBER, UDim2.fromScale(0.2, 0.235), UDim2.fromScale(0.6, 0.05))
+	banner.Name = "Banner"
 	banner.TextStrokeTransparency = 0.5
 	local sub =
-		Ui.label(gui, "", Enum.Font.GothamMedium, Ui.TEXT, UDim2.fromScale(0.3, 0.175), UDim2.fromScale(0.4, 0.03))
+		Ui.label(gui, "", Enum.Font.GothamMedium, Ui.TEXT, UDim2.fromScale(0.25, 0.292), UDim2.fromScale(0.5, 0.03))
+	sub.Name = "Sub"
 	sub.TextStrokeTransparency = 0.6
 
 	local was = 0
